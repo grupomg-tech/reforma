@@ -67,21 +67,29 @@
             </div>
         </div>
 
-        <!-- Reforma Tributária -->
+<!-- Reforma Tributária -->
         <div class="menu-item">
             <a href="#" class="menu-link" data-toggle="reforma">
-                <i class="bi bi-calculator menu-icon"></i>
+                <i class="bi bi-shield-fill-check menu-icon"></i>
                 <span class="menu-text">Reforma Tributária</span>
                 <i class="bi bi-chevron-down menu-arrow"></i>
             </a>
             <div class="submenu" id="reforma-submenu">
                 <a href="{% url 'reforma_tributaria:consulta_gtin' %}" class="submenu-link">
-                    <i class="bi bi-upc-scan submenu-icon"></i>
-                    Consulta GTIN
+                    <i class="bi bi-clipboard2-check-fill submenu-icon"></i>
+                    GTIN X NCM
+                </a>
+                <a href="/em-desenvolvimento/" class="submenu-link">
+                    <i class="bi bi-robot submenu-icon"></i>
+                    NCM Inteligente
                 </a>
                 <a href="{% url 'reforma_tributaria:consulta' %}" class="submenu-link">
-                    <i class="bi bi-search submenu-icon"></i>
-                    Consulta
+                    <i class="bi bi-card-checklist submenu-icon"></i>
+                    NCM X cClassTrib
+                </a>
+                <a href="{% url 'dashboards:relatorio_fiscal' %}" class="submenu-link">
+                    <i class="bi bi-speedometer2 submenu-icon"></i>
+                    Relatórios
                 </a>
             </div>
         </div>
