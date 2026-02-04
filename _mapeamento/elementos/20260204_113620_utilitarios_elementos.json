@@ -1,0 +1,2293 @@
+[
+  {
+    "tag": "html",
+    "texto": "v1.0.0\nDashboards\nSPEDs\nNotas Fiscais\nReforma Tributária\nConfigurações\nSuporte\nP\nPlanejamento\nplanejamentotributario@grupomgbr.com\nLogs do Sistema\nLimpar Filtros\nExportar Excel\nID\nData\nUsuário\nEmpresa",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "head",
+    "habilitado": true
+  },
+  {
+    "tag": "meta",
+    "habilitado": true
+  },
+  {
+    "tag": "meta",
+    "name": "viewport",
+    "habilitado": true
+  },
+  {
+    "tag": "meta",
+    "name": "csrf-token",
+    "habilitado": true
+  },
+  {
+    "tag": "link",
+    "type": "image/x-icon",
+    "href": "https://eagle.contpro.app.br/static/images/favicon.ico",
+    "habilitado": true
+  },
+  {
+    "tag": "link",
+    "href": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+    "habilitado": true
+  },
+  {
+    "tag": "link",
+    "href": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css",
+    "habilitado": true
+  },
+  {
+    "tag": "link",
+    "href": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css",
+    "habilitado": true
+  },
+  {
+    "tag": "style",
+    "habilitado": true
+  },
+  {
+    "tag": "body",
+    "texto": "v1.0.0\nDashboards\nSPEDs\nNotas Fiscais\nReforma Tributária\nConfigurações\nSuporte\nP\nPlanejamento\nplanejamentotributario@grupomgbr.com\nLogs do Sistema\nLimpar Filtros\nExportar Excel\nID\nData\nUsuário\nEmpresa",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "mobileOverlay",
+    "class": "mobile-overlay",
+    "habilitado": true
+  },
+  {
+    "tag": "nav",
+    "id": "sidebar",
+    "class": "sidebar",
+    "texto": "v1.0.0\nDashboards\nSPEDs\nNotas Fiscais\nReforma Tributária\nConfigurações\nSuporte\nP\nPlanejamento\nplanejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "sidebar-header",
+    "texto": "v1.0.0",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "d-flex align-items-center",
+    "texto": "v1.0.0",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "img",
+    "class": "logo-full",
+    "src": "https://eagle.contpro.app.br/static/images/logo_completa.png",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "img",
+    "class": "logo-mini",
+    "src": "https://eagle.contpro.app.br/static/images/logo.png",
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "app-version ms-2",
+    "texto": "v1.0.0",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "id": "toggleSidebar",
+    "class": "toggle-btn",
+    "type": "submit",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "id": "toggleIcon",
+    "class": "bi bi-chevron-left",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "sidebar-menu",
+    "texto": "Dashboards\nSPEDs\nNotas Fiscais\nReforma Tributária\nConfigurações\nSuporte",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "menu-item",
+    "texto": "Dashboards",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "menu-link active",
+    "href": "https://eagle.contpro.app.br/utilitarios/#",
+    "data_toggle": "dashboards",
+    "texto": "Dashboards",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-toggle": "dashboards"
+    }
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-speedometer2 menu-icon",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "menu-text",
+    "texto": "Dashboards",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-chevron-down menu-arrow",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "dashboards-submenu",
+    "class": "submenu",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/dashboards/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-house submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "menu-item",
+    "texto": "SPEDs",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "menu-link",
+    "href": "https://eagle.contpro.app.br/utilitarios/#",
+    "data_toggle": "speds",
+    "texto": "SPEDs",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-toggle": "speds"
+    }
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-file-earmark-code menu-icon",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "menu-text",
+    "texto": "SPEDs",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-chevron-down menu-arrow",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "speds-submenu",
+    "class": "submenu",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/importar-sped/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-upload submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/exportar-sped/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-download submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/excluir-sped/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-trash submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/importar-xmls/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-filetype-xml submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "menu-item",
+    "texto": "Notas Fiscais",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "menu-link",
+    "href": "https://eagle.contpro.app.br/utilitarios/#",
+    "data_toggle": "notas",
+    "texto": "Notas Fiscais",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-toggle": "notas"
+    }
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-receipt menu-icon",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "menu-text",
+    "texto": "Notas Fiscais",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-chevron-down menu-arrow",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "notas-submenu",
+    "class": "submenu",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/api/documentos-fiscais/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-search submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "menu-item",
+    "texto": "Reforma Tributária",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "menu-link",
+    "href": "https://eagle.contpro.app.br/utilitarios/#",
+    "data_toggle": "reforma",
+    "texto": "Reforma Tributária",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-toggle": "reforma"
+    }
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-shield-fill-check menu-icon",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "menu-text",
+    "texto": "Reforma Tributária",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-chevron-down menu-arrow",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "reforma-submenu",
+    "class": "submenu",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/reforma-tributaria/consulta-gtin/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-clipboard2-check-fill submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/em-desenvolvimento/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-robot submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/reforma-tributaria/consulta/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-card-checklist submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/dashboards/relatorio-fiscal/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-speedometer2 submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "menu-item",
+    "texto": "Configurações",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "menu-link",
+    "href": "https://eagle.contpro.app.br/utilitarios/#",
+    "data_toggle": "config",
+    "texto": "Configurações",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-toggle": "config"
+    }
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-gear menu-icon",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "menu-text",
+    "texto": "Configurações",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-chevron-down menu-arrow",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "config-submenu",
+    "class": "submenu",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/empresa/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-building submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/accounts/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-people submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://eagle.contpro.app.br/utilitarios/",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-sliders submenu-icon",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "menu-item",
+    "texto": "Suporte\nWhatsApp",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "menu-link active",
+    "href": "https://eagle.contpro.app.br/utilitarios/#",
+    "data_toggle": "suporte",
+    "texto": "Suporte",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-toggle": "suporte"
+    }
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-headset menu-icon",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "menu-text",
+    "texto": "Suporte",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-chevron-down menu-arrow rotated",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "suporte-submenu",
+    "class": "submenu show",
+    "texto": "WhatsApp",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "submenu-link",
+    "href": "https://wa.link/6bqejl",
+    "texto": "WhatsApp",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-telephone submenu-icon",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "user-section",
+    "texto": "P\nPlanejamento\nplanejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "userMenu",
+    "class": "user-menu",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "user-menu-item",
+    "type": "submit",
+    "habilitado": true,
+    "data_attributes": {
+      "data-bs-target": "#profileModal",
+      "data-bs-toggle": "modal"
+    }
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-person-gear",
+    "habilitado": true
+  },
+  {
+    "tag": "form",
+    "action": "https://eagle.contpro.app.br/accounts/logout/",
+    "method": "post",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "name": "csrfmiddlewaretoken",
+    "type": "hidden",
+    "value": "5NK6MG6lwWVaPlCN2hzXeZrzuXt4nfwDOtaTmPrlNw6fIMuTf3NL5pPk4kApOFce",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "user-menu-item danger",
+    "type": "submit",
+    "onclick": "return confirm('Tem certeza que deseja sair?')",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-box-arrow-right",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "userProfile",
+    "class": "user-profile",
+    "texto": "P\nPlanejamento\nplanejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "user-initial",
+    "texto": "P",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "user-info",
+    "texto": "Planejamento\nplanejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "p",
+    "class": "user-name",
+    "texto": "Planejamento",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "p",
+    "class": "user-email",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-three-dots-vertical text-muted",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "main",
+    "id": "mainContent",
+    "class": "main-content",
+    "texto": "Logs do Sistema\nLimpar Filtros\nExportar Excel\nID\nData\nUsuário\nEmpresa\nTipo\nDescrição\n#12 22/01/2026 18:26:58 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 12 com da",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "content-wrapper",
+    "texto": "Logs do Sistema\nLimpar Filtros\nExportar Excel\nID\nData\nUsuário\nEmpresa\nTipo\nDescrição\n#12 22/01/2026 18:26:58 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 12 com da",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "toast-container position-fixed top-0 end-0 p-3",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "meta",
+    "habilitado": true
+  },
+  {
+    "tag": "meta",
+    "name": "viewport",
+    "habilitado": true
+  },
+  {
+    "tag": "title",
+    "habilitado": true
+  },
+  {
+    "tag": "script",
+    "src": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
+    "habilitado": true
+  },
+  {
+    "tag": "style",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "logSystem",
+    "class": "container",
+    "texto": "Logs do Sistema\nLimpar Filtros\nExportar Excel\nID\nData\nUsuário\nEmpresa\nTipo\nDescrição\n#12 22/01/2026 18:26:58 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 12 com da",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "header",
+    "texto": "Logs do Sistema",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "h4",
+    "texto": "Logs do Sistema",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "fas fa-clipboard-list",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "actions-bar",
+    "texto": "Limpar Filtros\nExportar Excel",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "texto": "Limpar Filtros",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary",
+    "type": "submit",
+    "onclick": "app.clearAllFilters()",
+    "texto": "Limpar Filtros",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "fas fa-filter-circle-xmark",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "a",
+    "class": "btn btn-success",
+    "href": "https://eagle.contpro.app.br/utilitarios/export/excel/?",
+    "texto": "Exportar Excel",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "fas fa-file-excel",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "table-container",
+    "texto": "ID\nData\nUsuário\nEmpresa\nTipo\nDescrição\n#12 22/01/2026 18:26:58 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 12 com data de iníci…\n#11 22/01/2026 18:26:48 planejame",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "table",
+    "texto": "ID\nData\nUsuário\nEmpresa\nTipo\nDescrição\n#12 22/01/2026 18:26:58 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 12 com data de iníci…\n#11 22/01/2026 18:26:48 planejame",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "thead",
+    "texto": "ID\nData\nUsuário\nEmpresa\nTipo\nDescrição",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "ID\nData\nUsuário\nEmpresa\nTipo\nDescrição",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "th",
+    "texto": "ID",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "th-content",
+    "texto": "ID",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "texto": "ID",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "th",
+    "texto": "Data",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "th-content",
+    "texto": "Data",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "texto": "Data",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "id": "filterIconData",
+    "class": "fas fa-filter filter-icon",
+    "onclick": "app.toggleFilter('data')",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "filterData",
+    "class": "filter-dropdown",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "dataInicio",
+    "class": "filter-input",
+    "type": "datetime-local",
+    "placeholder": "Data início",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "dataFim",
+    "class": "filter-input",
+    "type": "datetime-local",
+    "placeholder": "Data fim",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "filter-buttons",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-danger btn-sm",
+    "type": "submit",
+    "onclick": "app.clearFilter('data')",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary btn-sm",
+    "type": "submit",
+    "onclick": "app.applyFilter()",
+    "habilitado": true
+  },
+  {
+    "tag": "th",
+    "texto": "Usuário",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "th-content",
+    "texto": "Usuário",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "texto": "Usuário",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "id": "filterIconUsuario",
+    "class": "fas fa-filter filter-icon",
+    "onclick": "app.toggleFilter('usuario')",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "filterUsuario",
+    "class": "filter-dropdown",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "inputUsuario",
+    "class": "filter-input",
+    "type": "text",
+    "placeholder": "Filtrar usuário...",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "filter-buttons",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-danger btn-sm",
+    "type": "submit",
+    "onclick": "app.clearFilter('usuario')",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary btn-sm",
+    "type": "submit",
+    "onclick": "app.applyFilter()",
+    "habilitado": true
+  },
+  {
+    "tag": "th",
+    "texto": "Empresa",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "th-content",
+    "texto": "Empresa",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "texto": "Empresa",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "id": "filterIconEmpresa",
+    "class": "fas fa-filter filter-icon",
+    "onclick": "app.toggleFilter('empresa')",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "filterEmpresa",
+    "class": "filter-dropdown",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "inputEmpresa",
+    "class": "filter-input",
+    "type": "text",
+    "placeholder": "Filtrar empresa...",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "filter-buttons",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-danger btn-sm",
+    "type": "submit",
+    "onclick": "app.clearFilter('empresa')",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary btn-sm",
+    "type": "submit",
+    "onclick": "app.applyFilter()",
+    "habilitado": true
+  },
+  {
+    "tag": "th",
+    "texto": "Tipo",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "th-content",
+    "texto": "Tipo",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "texto": "Tipo",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "id": "filterIconTipo",
+    "class": "fas fa-filter filter-icon",
+    "onclick": "app.toggleFilter('tipo')",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "filterTipo",
+    "class": "filter-dropdown",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "inputTipo",
+    "class": "filter-input",
+    "type": "text",
+    "placeholder": "Filtrar tipo...",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "filter-buttons",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-danger btn-sm",
+    "type": "submit",
+    "onclick": "app.clearFilter('tipo')",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary btn-sm",
+    "type": "submit",
+    "onclick": "app.applyFilter()",
+    "habilitado": true
+  },
+  {
+    "tag": "th",
+    "texto": "Descrição",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "th-content",
+    "texto": "Descrição",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "texto": "Descrição",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "id": "filterIconDescricao",
+    "class": "fas fa-filter filter-icon",
+    "onclick": "app.toggleFilter('descricao')",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "filterDescricao",
+    "class": "filter-dropdown",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "inputDescricao",
+    "class": "filter-input",
+    "type": "text",
+    "placeholder": "Filtrar descrição...",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "filter-buttons",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-danger btn-sm",
+    "type": "submit",
+    "onclick": "app.clearFilter('descricao')",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary btn-sm",
+    "type": "submit",
+    "onclick": "app.applyFilter()",
+    "habilitado": true
+  },
+  {
+    "tag": "tbody",
+    "texto": "#12 22/01/2026 18:26:58 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 12 com data de iníci…\n#11 22/01/2026 18:26:48 planejamentotributario@grupomgbr.com 00749616000",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#12 22/01/2026 18:26:58 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 12 com data de iníci…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "12"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#12",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#12",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:26:58",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 12 com data de início 2025-12-01 e data de fim 2025-12-31.",
+    "texto": "Foi criado o SPED 12 com data de iníci…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#11 22/01/2026 18:26:48 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 11 com data de iníci…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "11"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#11",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#11",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:26:48",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 11 com data de início 2025-11-01 e data de fim 2025-11-30.",
+    "texto": "Foi criado o SPED 11 com data de iníci…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#10 22/01/2026 18:26:38 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 10 com data de iníci…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "10"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#10",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#10",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:26:38",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 10 com data de início 2025-10-01 e data de fim 2025-10-31.",
+    "texto": "Foi criado o SPED 10 com data de iníci…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#9 22/01/2026 18:26:27 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 9 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "9"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#9",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#9",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:26:27",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 9 com data de início 2025-09-01 e data de fim 2025-09-30.",
+    "texto": "Foi criado o SPED 9 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#8 22/01/2026 18:26:16 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 8 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "8"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#8",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#8",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:26:16",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 8 com data de início 2025-08-01 e data de fim 2025-08-31.",
+    "texto": "Foi criado o SPED 8 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#7 22/01/2026 18:26:06 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 7 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "7"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#7",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#7",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:26:06",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 7 com data de início 2025-07-01 e data de fim 2025-07-31.",
+    "texto": "Foi criado o SPED 7 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#6 22/01/2026 18:25:55 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 6 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "6"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#6",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#6",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:25:55",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 6 com data de início 2025-06-01 e data de fim 2025-06-30.",
+    "texto": "Foi criado o SPED 6 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#5 22/01/2026 18:25:46 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 5 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "5"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#5",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#5",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:25:46",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 5 com data de início 2025-05-01 e data de fim 2025-05-31.",
+    "texto": "Foi criado o SPED 5 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#4 22/01/2026 18:25:36 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 4 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "4"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#4",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#4",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:25:36",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 4 com data de início 2025-04-01 e data de fim 2025-04-30.",
+    "texto": "Foi criado o SPED 4 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#3 22/01/2026 18:25:28 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 3 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "3"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#3",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#3",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:25:28",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 3 com data de início 2025-03-01 e data de fim 2025-03-31.",
+    "texto": "Foi criado o SPED 3 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#2 22/01/2026 18:25:18 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 2 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "2"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#2",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#2",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:25:18",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 2 com data de início 2025-02-01 e data de fim 2025-02-28.",
+    "texto": "Foi criado o SPED 2 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "tr",
+    "texto": "#1 22/01/2026 18:25:06 planejamentotributario@grupomgbr.com 00749616000160 3 - Criação Foi criado o SPED 1 com data de início…",
+    "visivel": true,
+    "habilitado": true,
+    "data_attributes": {
+      "data-log-id": "1"
+    }
+  },
+  {
+    "tag": "td",
+    "texto": "#1",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "texto": "#1",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "22/01/2026 18:25:06",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "planejamentotributario@grupomgbr.com",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "00749616000160",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "class": "badge badge-info",
+    "texto": "3 - Criação",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "td",
+    "class": "td-descricao",
+    "title": "Foi criado o SPED 1 com data de início 2025-01-01 e data de fim 2025-01-31.",
+    "texto": "Foi criado o SPED 1 com data de início…",
+    "visivel": true,
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "deleteModal",
+    "class": "modal fade",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-dialog modal-dialog-centered",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-content",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-header",
+    "habilitado": true
+  },
+  {
+    "tag": "h5",
+    "id": "deleteModalLabel",
+    "class": "modal-title",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "fas fa-exclamation-triangle",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn-close btn-close-white",
+    "type": "button",
+    "aria_label": "Close",
+    "habilitado": true,
+    "data_attributes": {
+      "data-bs-dismiss": "modal"
+    }
+  },
+  {
+    "tag": "div",
+    "class": "modal-body",
+    "habilitado": true
+  },
+  {
+    "tag": "p",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-footer",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary",
+    "type": "button",
+    "habilitado": true,
+    "data_attributes": {
+      "data-bs-dismiss": "modal"
+    }
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-danger",
+    "type": "button",
+    "onclick": "app.deleteLog()",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "fas fa-trash",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "bulkDeleteModal",
+    "class": "modal fade",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-dialog modal-dialog-centered",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-content",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-header",
+    "habilitado": true
+  },
+  {
+    "tag": "h5",
+    "id": "bulkDeleteModalLabel",
+    "class": "modal-title",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "fas fa-exclamation-triangle",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn-close btn-close-white",
+    "type": "button",
+    "aria_label": "Close",
+    "habilitado": true,
+    "data_attributes": {
+      "data-bs-dismiss": "modal"
+    }
+  },
+  {
+    "tag": "div",
+    "class": "modal-body",
+    "habilitado": true
+  },
+  {
+    "tag": "p",
+    "habilitado": true
+  },
+  {
+    "tag": "strong",
+    "id": "bulkDeleteCount",
+    "habilitado": true
+  },
+  {
+    "tag": "p",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "confirmation-box",
+    "habilitado": true
+  },
+  {
+    "tag": "label",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "bulkDeleteConfirm",
+    "type": "checkbox",
+    "value": "on",
+    "habilitado": true
+  },
+  {
+    "tag": "span",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-footer",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary",
+    "type": "button",
+    "habilitado": true,
+    "data_attributes": {
+      "data-bs-dismiss": "modal"
+    }
+  },
+  {
+    "tag": "button",
+    "id": "btnConfirmBulkDelete",
+    "class": "btn btn-danger",
+    "type": "button",
+    "onclick": "app.deleteBulkLogs()"
+  },
+  {
+    "tag": "i",
+    "class": "fas fa-trash",
+    "habilitado": true
+  },
+  {
+    "tag": "script",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "id": "profileModal",
+    "class": "modal fade",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-dialog modal-dialog-centered",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-content",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-header",
+    "habilitado": true
+  },
+  {
+    "tag": "h5",
+    "id": "profileModalLabel",
+    "class": "modal-title",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-person-gear me-2",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn-close",
+    "type": "button",
+    "habilitado": true,
+    "data_attributes": {
+      "data-bs-dismiss": "modal"
+    }
+  },
+  {
+    "tag": "div",
+    "class": "modal-body",
+    "habilitado": true
+  },
+  {
+    "tag": "form",
+    "id": "profileForm",
+    "action": "https://eagle.contpro.app.br/accounts/update-profile/",
+    "method": "post",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "name": "csrfmiddlewaretoken",
+    "type": "hidden",
+    "value": "5NK6MG6lwWVaPlCN2hzXeZrzuXt4nfwDOtaTmPrlNw6fIMuTf3NL5pPk4kApOFce",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "text-center mb-4",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "user-initial mx-auto",
+    "habilitado": true
+  },
+  {
+    "tag": "p",
+    "class": "text-muted mt-2",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "row g-2",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "col-md-6",
+    "habilitado": true
+  },
+  {
+    "tag": "label",
+    "class": "form-label",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "first_name",
+    "class": "form-control",
+    "name": "first_name",
+    "type": "text",
+    "value": "Planejamento",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "col-md-6",
+    "habilitado": true
+  },
+  {
+    "tag": "label",
+    "class": "form-label",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "last_name",
+    "class": "form-control",
+    "name": "last_name",
+    "type": "text",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "mb-3",
+    "habilitado": true
+  },
+  {
+    "tag": "label",
+    "class": "form-label",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "email",
+    "class": "form-control",
+    "type": "email",
+    "value": "planejamentotributario@grupomgbr.com"
+  },
+  {
+    "tag": "hr",
+    "class": "my-4",
+    "habilitado": true
+  },
+  {
+    "tag": "h6",
+    "class": "mb-3",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "fakeusernameremembered",
+    "name": "fakeusernameremembered",
+    "type": "text",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "fakepasswordremembered",
+    "name": "fakepasswordremembered",
+    "type": "password",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "row g-2",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "col-md-6",
+    "habilitado": true
+  },
+  {
+    "tag": "label",
+    "class": "form-label",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "password-field",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "new_password",
+    "class": "form-control",
+    "name": "new_password",
+    "type": "password",
+    "placeholder": "Digite a nova senha",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "password-toggle",
+    "type": "button",
+    "onclick": "togglePassword('new_password')",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "id": "new_password_icon",
+    "class": "bi bi-eye",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "col-md-6",
+    "habilitado": true
+  },
+  {
+    "tag": "label",
+    "class": "form-label",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "password-field",
+    "habilitado": true
+  },
+  {
+    "tag": "input",
+    "id": "confirm_password",
+    "class": "form-control",
+    "name": "confirm_password",
+    "type": "password",
+    "placeholder": "Confirme a nova senha",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "password-toggle",
+    "type": "button",
+    "onclick": "togglePassword('confirm_password')",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "id": "confirm_password_icon",
+    "class": "bi bi-eye",
+    "habilitado": true
+  },
+  {
+    "tag": "small",
+    "class": "text-muted",
+    "habilitado": true
+  },
+  {
+    "tag": "div",
+    "class": "modal-footer",
+    "habilitado": true
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-secondary",
+    "type": "button",
+    "habilitado": true,
+    "data_attributes": {
+      "data-bs-dismiss": "modal"
+    }
+  },
+  {
+    "tag": "button",
+    "class": "btn btn-primary",
+    "type": "submit",
+    "habilitado": true
+  },
+  {
+    "tag": "i",
+    "class": "bi bi-check-lg me-1",
+    "habilitado": true
+  },
+  {
+    "tag": "script",
+    "habilitado": true
+  }
+]

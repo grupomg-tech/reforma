@@ -1,0 +1,2373 @@
+<html lang="pt-br"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="6E2EkewPRi1DqxK8wVSdodiGT5cQ8I8VaKpTE4YCAzAco8MXOf5633OCa43Q4pV8">
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #8C40F0;
+            --secondary-color: #FF8C40;
+            --dark-color: #000000;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 1050;
+            width: 250px;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .sidebar-header .app-version {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .sidebar.collapsed .app-version {
+            display: none;
+        }
+        .sidebar:not(.collapsed) .app-version {
+            display: inline;
+        }
+
+        .logo-full {
+            height: 75px;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo-mini {
+            width: 30px;
+            height: 30px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .logo-full {
+            display: none;
+        }
+
+        .sidebar.collapsed .logo-mini {
+            display: flex;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 18px;
+            padding: 2px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .menu-link:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .menu-link.active {
+            background-color: rgba(140, 64, 240, 0.1);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .menu-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .menu-text {
+            margin-left: 12px;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-arrow.rotated {
+            transform: rotate(180deg);
+        }
+
+        .sidebar.collapsed .menu-text,
+        .sidebar.collapsed .menu-arrow {
+            opacity: 0;
+            width: 0;
+            margin: 0;
+        }
+
+        .submenu {
+            background-color: #f8f9fa;
+            border-left: 2px solid var(--primary-color);
+            margin-left: 20px;
+            display: none;
+        }
+
+        .submenu.show {
+            display: block;
+        }
+
+        .sidebar.collapsed .submenu {
+            display: none !important;
+        }
+
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 8px 24px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .submenu-link:hover {
+            background-color: white;
+            color: #374151;
+        }
+
+        .submenu-icon {
+            font-size: 14px;
+            width: 16px;
+            margin-right: 8px;
+        }
+
+        .user-section {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-initial {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            border: 1px solid var(--primary-color);
+        }
+
+        .user-info {
+            margin-left: 12px;
+            flex: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .user-email {
+            color: #6b7280;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .sidebar.collapsed .user-info {
+            display: none;
+        }
+
+        .user-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .user-menu.show {
+            display: block;
+        }
+
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .user-menu-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-menu-item.danger {
+            color: #dc3545;
+        }
+
+        .user-menu-item i {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            min-height: 50vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 70px;
+        }
+
+        .content-wrapper {
+            padding: 0.5rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-card.purple {
+            background: linear-gradient(135deg, var(--primary-color), #7C3AED);
+            color: white;
+        }
+
+        .stats-card.orange {
+            background: linear-gradient(135deg, var(--secondary-color), #F97316);
+            color: white;
+        }
+
+        .stats-card.dark {
+            background: linear-gradient(135deg, #374151, var(--dark-color));
+            color: white;
+        }
+
+        .stats-icon {
+            font-size: 48px;
+            opacity: 0.8;
+        }
+
+        .stats-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .stats-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .btn-secondary-custom {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: #F97316;
+            border-color: #F97316;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(140, 64, 240, 0.25);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+                display: none;
+            }
+            
+            .mobile-overlay.show {
+                display: block;
+            }
+        }
+
+        /* Scrollbar customization */
+        .sidebar-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+    </style>
+    
+</head>
+<body class="bg-light">
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <!-- Header -->
+        <div class="sidebar-header">
+            <div class="d-flex align-items-center">
+                <img src="/static/images/logo_completa.png" class="logo-full">
+                <img src="/static/images/logo.png" class="logo-mini">
+                <span class="app-version ms-2">v1.0.0</span>
+            </div>
+            <button class="toggle-btn" id="toggleSidebar">
+                <i class="bi bi-chevron-left" id="toggleIcon"></i>
+            </button>
+        </div>
+
+        <!-- Menu -->
+        <div class="sidebar-menu">
+            <!-- Dashboards -->
+            <div class="menu-item">
+                <a href="#" class="menu-link active" data-toggle="dashboards">
+                    <i class="bi bi-speedometer2 menu-icon"></i>
+                    <span class="menu-text">Dashboards</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="dashboards-submenu">
+                    <a href="/dashboards/" class="submenu-link">
+                        <i class="bi bi-house submenu-icon"></i>
+                        Dashboard Principal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Arquivos SPEDs -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="speds">
+                    <i class="bi bi-file-earmark-code menu-icon"></i>
+                    <span class="menu-text">SPEDs</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="speds-submenu">
+                    <a href="/importar-sped/" class="submenu-link">
+                        <i class="bi bi-upload submenu-icon"></i>
+                        Importar SPED
+                    </a>
+                    <a href="/exportar-sped/" class="submenu-link">
+                        <i class="bi bi-download submenu-icon"></i>
+                        Gerar SPED
+                    </a>
+                    <a href="/excluir-sped/" class="submenu-link">
+                        <i class="bi bi-trash submenu-icon"></i>
+                        Excluir SPED
+                    </a>
+                    <a href="/importar-xmls/" class="submenu-link">
+                        <i class="bi bi-filetype-xml submenu-icon"></i>
+                        Importar XMLs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Notas Fiscais -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="notas">
+                    <i class="bi bi-receipt menu-icon"></i>
+                    <span class="menu-text">Notas Fiscais</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="notas-submenu">
+                    <a href="/api/documentos-fiscais/" class="submenu-link">
+                        <i class="bi bi-search submenu-icon"></i>
+                        Gerenciamento de Documentos
+                    </a>
+                </div>
+            </div>
+
+            <!-- Reforma Tributária -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="reforma">
+                    <i class="bi bi-shield-fill-check menu-icon"></i>
+                    <span class="menu-text">Reforma Tributária</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="reforma-submenu">
+                    <a href="/reforma-tributaria/consulta-gtin/" class="submenu-link">
+                        <i class="bi bi-clipboard2-check-fill submenu-icon"></i>
+                        GTIN X NCM
+                    </a>
+                    <a href="/em-desenvolvimento/" class="submenu-link">
+                        <i class="bi bi-robot submenu-icon"></i>
+                        NCM Inteligente
+                    </a>
+                    <a href="/reforma-tributaria/consulta/" class="submenu-link">
+                        <i class="bi bi-card-checklist submenu-icon"></i>
+                        NCM X cClassTrib
+                    </a>
+                    <a href="/dashboards/relatorio-fiscal/" class="submenu-link">
+                        <i class="bi bi-speedometer2 submenu-icon"></i>
+                        Relatórios
+                    </a>
+                </div>
+            </div>
+
+            <!-- Configurações -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="config">
+                    <i class="bi bi-gear menu-icon"></i>
+                    <span class="menu-text">Configurações</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="config-submenu">
+                    <a href="/empresa/" class="submenu-link">
+                        <i class="bi bi-building submenu-icon"></i>
+                        Empresas
+                    </a>
+                    <a href="/accounts/" class="submenu-link">
+                        <i class="bi bi-people submenu-icon"></i>
+                        Usuários
+                    </a>
+                    <a href="/utilitarios/" class="submenu-link">
+                        <i class="bi bi-sliders submenu-icon"></i>
+                        Logs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Suporte -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="suporte">
+                    <i class="bi bi-headset menu-icon"></i>
+                    <span class="menu-text">Suporte</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="suporte-submenu">
+                    <a href="https://wa.link/6bqejl" class="submenu-link" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-telephone submenu-icon"></i>
+                        WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Section -->
+        <div class="user-section">
+            <div class="user-menu" id="userMenu">
+                <button class="user-menu-item" data-bs-toggle="modal" data-bs-target="#profileModal">
+                    <i class="bi bi-person-gear"></i>
+                    Editar Perfil
+                </button>
+                <form method="POST" action="/accounts/logout/" style="margin: 0;">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="6E2EkewPRi1DqxK8wVSdodiGT5cQ8I8VaKpTE4YCAzAco8MXOf5633OCa43Q4pV8">
+                    <button type="submit" class="user-menu-item danger" onclick="return confirm('Tem certeza que deseja sair?')">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Sair
+                    </button>
+                </form>
+            </div>
+            <div class="user-profile" id="userProfile">
+                <div class="user-initial">P</div>
+                <div class="user-info">
+                    <p class="user-name">Planejamento </p>
+                    <p class="user-email">planejamentotributario@grupomgbr.com</p>
+                </div>
+                <i class="bi bi-three-dots-vertical text-muted"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="content-wrapper">
+            <!-- Messages -->
+            <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+                
+            </div>
+
+            <!-- Content Block -->
+            
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContPRO - Dashboard</title>
+
+
+<style>
+    .card-header {
+        background: linear-gradient(135deg, #8C40F0 0%, #FF8C40 100%);
+        color: white;
+    }
+    .nav-tabs .nav-link {
+        background-color: #ffffff;
+        color: #b9b9b9;
+        border-color: #ebebeb;
+    }
+
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(150deg, #8C40F0 0%, #FF8C40 100%);
+        color: #ffffff;
+        border-color: #ebebeb;
+    }
+
+        .nav-tabs .nav-link:disabled {
+        background-color: #ffffff;
+        color: #b9b9b9;
+        border-color: #ebebeb;
+    }
+
+    .card-metric { border-left-width: 4px; }
+    .border-success-subtle { border-color: #d1e7dd !important; }
+    .border-danger-subtle { border-color: #f8d7da !important; }
+    .border-primary-subtle { border-color: #cfe2ff !important; }
+    .border-warning-subtle { border-color: #fff3cd !important; }
+    
+    .tab-content > .tab-pane {
+        display: none;
+    }
+    .tab-content > .active {
+        display: block;
+    }
+</style>
+
+
+    <div class="container-fluid py-0">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <!-- Cabeçalho -->
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="mb-0">
+                                    <i class="bi bi-shield-check me-2"></i>
+                                    Dashboard Compliance &amp; Auditoria
+                                </h4>
+                            </div>
+                            <!--
+                            <div class="col-auto">
+                                <button class="btn btn-light btn-sm" title="Atualizar">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                                <button class="btn btn-light btn-sm" title="Configurações">
+                                    <i class="bi bi-gear"></i>
+                                </button>
+                                <button class="btn btn-light btn-sm" title="Ajuda">
+                                    <i class="bi bi-info-circle"></i>
+                                </button>
+                            </div>
+                            -->
+                        </div>
+                    </div>
+
+                    <!-- Corpo -->
+                    <div class="card-body p-0">
+                        <!-- Abas -->
+                        <div class="px-0 pt-1">
+                            <ul class="nav nav-tabs px-0" id="dashboardTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="principal-tab" data-bs-toggle="tab" data-bs-target="#principal" type="button" role="tab" aria-controls="principal" aria-selected="true">
+                                        <i class="bi bi-house-door-fill me-1"></i> Principal
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="operacional-tab" data-bs-toggle="tab" data-bs-target="#operacional" type="button" role="tab" aria-controls="operacional" aria-selected="false" tabindex="-1">
+                                        <i class="bi bi-bar-chart-line-fill me-1"></i> Operacional
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="tab-content p-4" id="dashboardTabContent">
+                            <!-- Aba Principal -->
+                            <div class="tab-pane fade active show" id="principal" role="tabpanel" aria-labelledby="principal-tab">
+                                <div class="row g-4">
+                                    <div class="col-md-6 col-xl-4">
+                                        <div class="card card-metric h-100 border-primary-subtle shadow-sm">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-secondary text-uppercase fw-semibold mb-2">
+                                                    <i class="bi bi-building me-1"></i> Total de Empresas Ativas
+                                                </h6>
+                                                <div class="d-flex align-items-baseline">
+                                                    <p class="display-5 fw-bold mb-0">10</p>
+                                                    <p class="fw-semibold mb-0 ms-2 text-muted">/ 10</p>
+                                                </div>
+                                                <small class="text-muted">Empresas ativas na plataforma</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 col-xl-4">
+                                        <div class="card card-metric h-100 border-primary-subtle shadow-sm">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-secondary text-uppercase fw-semibold mb-2">
+                                                    <i class="bi bi-people me-1"></i> Total de Usuários Ativos
+                                                </h6>
+                                                <div class="d-flex align-items-baseline">
+                                                    <p class="display-5 fw-bold mb-0">6</p>
+                                                    <p class="fw-semibold mb-0 ms-2 text-muted">/ 6</p>
+                                                </div>
+                                                <small class="text-muted">Usuários com acesso ao sistema</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Aba Operacional -->
+                            <div class="tab-pane fade" id="operacional" role="tabpanel" aria-labelledby="operacional-tab">
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-body">
+                                        <form id="filter-form">
+                                            <div class="row g-3 align-items-end">
+                                                <div class="col-md-3">
+                                                    <label for="id_fk_empresa">Empresa:</label>
+                                                    <select name="fk_empresa" class="form-control" id="id_fk_empresa">
+  <option value="" selected="">---------</option>
+
+  <option value="1">00.749.616/0001-60 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="2">00.749.616/0002-40 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="3">00.749.616/0004-02 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="4">00.749.616/0005-93 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="5">00.749.616/0006-74 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="6">00.749.616/0007-55 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="7">00.749.616/0008-36 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="8">00.749.616/0009-17 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="9">00.749.616/0010-50 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="10">00.749.616/0011-31 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+</select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label for="id_data_inicio">Data de Emissão (Início):</label>
+                                                    <input type="date" name="data_inicio" class="form-control" id="id_data_inicio">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label for="id_data_fim">Data de Emissão (Fim):</label>
+                                                    <input type="date" name="data_fim" class="form-control" id="id_data_fim">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label for="id_sit_nfe">Situação da NF-e:</label>
+                                                    <select name="sit_nfe" class="form-control" id="id_sit_nfe">
+  <option value="" selected="">Todos</option>
+
+  <option value="100">100 - Autorizado o uso da NF-e</option>
+
+  <option value="101">101 - Cancelamento de NF-e</option>
+
+  <option value="102">102 - Inutilização de número homologado</option>
+
+  <option value="103">103 - Lote recebido com sucesso</option>
+
+  <option value="104">104 - Lote processado</option>
+
+  <option value="105">105 - Lote em processamento</option>
+
+  <option value="106">106 - Lote não localizado</option>
+
+  <option value="107">107 - Serviço em Operação</option>
+
+  <option value="108">108 - Serviço Paralisado Momentaneamente (curto prazo)</option>
+
+  <option value="109">109 - Serviço Paralisado sem Previsão</option>
+
+  <option value="110">110 - Uso Denegado</option>
+
+  <option value="111">111 - Consulta cadastro com uma ocorrência</option>
+
+  <option value="112">112 - Consulta cadastro com mais de uma ocorrência</option>
+
+  <option value="114">114 - Rejeição: SVC desabilitada pelo SEFAZ origem</option>
+
+  <option value="128">128 - Lote de Evento Processado</option>
+
+  <option value="135">135 - Evento registrado e vinculado a NF-e</option>
+
+  <option value="136">136 - Evento registrado, mas não vinculado a NF-e</option>
+
+  <option value="155">155 - Cancelamento homologado fora de prazo</option>
+
+  <option value="201">201 - Rejeição: Rejeição: Número máximo de numeração a inutilizar ultrapassou o limite</option>
+
+  <option value="202">202 - Rejeição: Falha no reconhecimento da autoria ou integridade do arquivo digital</option>
+
+  <option value="203">203 - Rejeição: Emissor não habilitado para emissão de NF-e</option>
+
+  <option value="204">204 - Rejeição: Duplicidade de NF-e</option>
+
+  <option value="205">205 - Rejeição: NF-e está denegada na base de dados da SEFAZ</option>
+
+  <option value="206">206 - Rejeição: NF-e já está inutilizada na Base de dados da SEFAZ</option>
+
+  <option value="207">207 - Rejeição: CNPJ do emitente inválido</option>
+
+  <option value="208">208 - Rejeição: CNPJ do destinatário inválido</option>
+
+  <option value="209">209 - Rejeição: IE do emitente inválida</option>
+
+  <option value="210">210 - Rejeição: IE do destinatário inválida</option>
+
+  <option value="211">211 - Rejeição: IE do substituto inválida</option>
+
+  <option value="212">212 - Rejeição: Data de emissão NF-e posterior a data de recebimento</option>
+
+  <option value="213">213 - Rejeição: CNPJ-Base do Autor difere do CNPJ-Base do Certificado Digital</option>
+
+  <option value="214">214 - Rejeição: Tamanho da mensagem excedeu o limite estabelecido</option>
+
+  <option value="215">215 - Rejeição: Tamanho da mensagem excedeu o limite estabelecido</option>
+
+  <option value="216">216 - Rejeição: Chave de Acesso difere da cadastrada</option>
+
+  <option value="217">217 - Rejeição: NF-e não consta na base de dados da SEFAZ</option>
+
+  <option value="218">218 - NF-e já está cancelada na base de dados da SEFAZ</option>
+
+  <option value="219">219 - Rejeição: Circulação da NF-e verificada</option>
+
+  <option value="220">220 - Rejeição: Prazo de Cancelamento superior ao previsto na Legislação</option>
+
+  <option value="221">221 - Rejeição: Confirmado o recebimento da NF-e pelo destinatário</option>
+
+  <option value="222">222 - Rejeição: Protocolo de Autorização de Uso difere do cadastrado</option>
+
+  <option value="223">223 - Rejeição: CNPJ do transmissor do lote difere do CNPJ do transmissor da consulta</option>
+
+  <option value="224">224 - Rejeição: A faixa inicial é maior que a faixa final</option>
+
+  <option value="225">225 - Rejeição: Falha no Schema XML do lote de NFe</option>
+
+  <option value="226">226 - Rejeição: Código da UF do Emitente diverge da UF autorizadora</option>
+
+  <option value="227">227 - Rejeição: Erro na Chave de Acesso - Campo Id – falta a literal NFe</option>
+
+  <option value="228">228 - Rejeição: Data de Emissão muito atrasada</option>
+
+  <option value="229">229 - Rejeição: IE do emitente não informada</option>
+
+  <option value="230">230 - Rejeição: IE do emitente não cadastrada</option>
+
+  <option value="231">231 - Rejeição: IE do emitente não vinculada ao CNPJ</option>
+
+  <option value="232">232 - Rejeição: IE do destinatário não informada</option>
+
+  <option value="233">233 - Rejeição: IE do destinatário não cadastrada</option>
+
+  <option value="234">234 - Rejeição: IE do destinatário não vinculada ao CNPJ</option>
+
+  <option value="235">235 - Rejeição: Inscrição SUFRAMA inválida</option>
+
+  <option value="236">236 - Rejeição: Chave de Acesso com dígito verificador inválido</option>
+
+  <option value="237">237 - Rejeição: CPF do destinatário inválido</option>
+
+  <option value="238">238 - Rejeição: Cabeçalho - Versão do arquivo XML superior a Versão vigente</option>
+
+  <option value="239">239 - Rejeição: Cabeçalho - Versão do arquivo XML não suportada</option>
+
+  <option value="240">240 - Rejeição: Cancelamento/Inutilização - Irregularidade Fiscal do Emitente</option>
+
+  <option value="241">241 - Rejeição: Um número da faixa já foi utilizado</option>
+
+  <option value="242">242 - Rejeição: Cabeçalho - Falha no Schema XML</option>
+
+  <option value="243">243 - Rejeição: XML Mal Formado</option>
+
+  <option value="244">244 - Rejeição: CNPJ do Certificado Digital difere do CNPJ da Matriz e do CNPJ do Emitente</option>
+
+  <option value="245">245 - Rejeição: CNPJ Emitente não cadastrado</option>
+
+  <option value="246">246 - Rejeição: CNPJ Destinatário não cadastrado</option>
+
+  <option value="247">247 - Rejeição: Sigla da UF do Emitente diverge da UF autorizadora</option>
+
+  <option value="248">248 - Rejeição: UF do Recibo diverge da UF autorizadora</option>
+
+  <option value="249">249 - Rejeição: UF da Chave de Acesso diverge da UF autorizadora</option>
+
+  <option value="250">250 - Rejeição: UF diverge da UF autorizadora</option>
+
+  <option value="251">251 - Rejeição: UF/Município destinatário não pertence a SUFRAMA</option>
+
+  <option value="252">252 - Rejeição: Ambiente informado diverge do Ambiente de recebimento</option>
+
+  <option value="253">253 - Rejeição: Digito Verificador da chave de acesso composta inválida</option>
+
+  <option value="254">254 - Rejeição: NF-e complementar não possui NF referenciada</option>
+
+  <option value="255">255 - Rejeição: NF-e complementar possui mais de uma NF referenciada</option>
+
+  <option value="256">256 - Rejeição: Uma NF-e da faixa já está inutilizada na Base de dados da SEFAZ</option>
+
+  <option value="257">257 - Rejeição: Solicitante não habilitado para emissão da NF-e</option>
+
+  <option value="258">258 - Rejeição: CNPJ da consulta inválido</option>
+
+  <option value="259">259 - Rejeição: CNPJ da consulta não cadastrado como contribuinte na UF</option>
+
+  <option value="260">260 - Rejeição: IE da consulta inválida</option>
+
+  <option value="261">261 - Rejeição: IE da consulta não cadastrada como contribuinte na UF</option>
+
+  <option value="262">262 - Rejeição: CPF da consulta inválido</option>
+
+  <option value="263">263 - Rejeição: CPF da consulta não cadastrado como contribuinte na UF</option>
+
+  <option value="264">264 - Rejeição: Sigla da UF da consulta difere da UF do Web Service</option>
+
+  <option value="265">265 - Rejeição: Série utilizada não permitida no Web Service</option>
+
+  <option value="267">267 - Rejeição: Chave de Acesso referenciada inexistente</option>
+
+  <option value="268">268 - Rejeição: NF Complementar referencia outra NF-e Complementar</option>
+
+  <option value="269">269 - Rejeição: CNPJ Emitente da NF Complementar difere do CNPJ da NF Referenciada</option>
+
+  <option value="270">270 - Rejeição: Código Município do Fato Gerador de ICMS inexistente</option>
+
+  <option value="271">271 - Rejeição: Código Município do Fato Gerador: difere da UF do emitente</option>
+
+  <option value="272">272 - Rejeição: Código Município do Emitente inexistente</option>
+
+  <option value="273">273 - Rejeição: Código Município do Emitente: difere da UF do emitente</option>
+
+  <option value="274">274 - Rejeição: Código Município do Destinatário inexistente</option>
+
+  <option value="275">275 - Rejeição: Código Município do Destinatário: difere da UF do Destinatário</option>
+
+  <option value="276">276 - Rejeição: Código Município do Local de Retirada inexistente</option>
+
+  <option value="277">277 - Rejeição: Código Município do Local de Retirada: difere da UF do Local de Retirada</option>
+
+  <option value="278">278 - Rejeição: Código Município do Local de Retirada inexistente</option>
+
+  <option value="279">279 - Rejeição: Código Município do Local de Entrega: difere da UF do Local de Entrega</option>
+
+  <option value="280">280 - Rejeição: Certificado Transmissor inválido</option>
+
+  <option value="281">281 - Rejeição: Certificado Transmissor Data Validade</option>
+
+  <option value="282">282 - Rejeição: Certificado Transmissor sem CNPJ</option>
+
+  <option value="283">283 - Rejeição: Certificado Transmissor - erro Cadeia de Certificação</option>
+
+  <option value="284">284 - Rejeição: Certificado Transmissor revogado</option>
+
+  <option value="285">285 - Rejeição: Certificado Transmissor difere ICP-Brasil</option>
+
+  <option value="286">286 - Rejeição: Certificado Transmissor erro no acesso a LCR</option>
+
+  <option value="287">287 - Rejeição: Código Município do Fato Gerador de ISSQN inexistente</option>
+
+  <option value="288">288 - Rejeição: Código Município do Fato Gerador do Transporte inexistente</option>
+
+  <option value="289">289 - Rejeição: Código da UF informada diverge da UF solicitada</option>
+
+  <option value="290">290 - Rejeição: Certificado Assinatura inválido</option>
+
+  <option value="291">291 - Rejeição: Certificado Assinatura Data Validade</option>
+
+  <option value="292">292 - Rejeição: Certificado Assinatura sem CNPJ</option>
+
+  <option value="293">293 - Rejeição: Certificado Assinatura - erro Cadeia de Certificação</option>
+
+  <option value="294">294 - Rejeição: Certificado Assinatura revogado</option>
+
+  <option value="295">295 - Rejeição: Certificado Assinatura difere ICP-Brasil</option>
+
+  <option value="296">296 - Rejeição: Certificado Assinatura erro no acesso a LCR</option>
+
+  <option value="297">297 - Rejeição: Assinatura difere do calculado</option>
+
+  <option value="298">298 - Rejeição: Assinatura difere do padrão do Sistema</option>
+
+  <option value="299">299 - Rejeição: XML da área de cabeçalho com codificação diferente de UTF-8</option>
+
+  <option value="301">301 - Uso Denegado: Irregularidade fiscal do emitente</option>
+
+  <option value="302">302 - Rejeição: Irregularidade fiscal do destinatário</option>
+
+  <option value="303">303 - Uso Denegado: Destinatário não habilitado a operar na UF</option>
+
+  <option value="304">304 - Rejeição: Pedido de Cancelamento para NF-e com evento da Suframa</option>
+
+  <option value="305">305 - Rejeição: Destinatário bloqueado na UF</option>
+
+  <option value="306">306 - Rejeição: IE do destinatário não está ativa na UF</option>
+
+  <option value="307">307 - Rejeição: Emitente bloqueado pela UF de destino, em operação com consumidor final</option>
+
+  <option value="315">315 - Rejeição: Data de Emissão anterior ao início da autorização de Nota Fiscal na UF</option>
+
+  <option value="316">316 - Rejeição: Chave de Acesso referenciada com a mesma Chave de Acesso da Nota Fiscal atual</option>
+
+  <option value="317">317 - Rejeição: NF modelo 1 referenciada com data de emissão inválida</option>
+
+  <option value="318">318 - Rejeição: Contranota de Produtor sem Nota Fiscal referenciada</option>
+
+  <option value="319">319 - Rejeição: Contranota de Produtor não pode referenciar somente Nota Fiscal de entrada</option>
+
+  <option value="320">320 - Rejeição: Contranota de Produtor referencia somente NF de outro emitente</option>
+
+  <option value="321">321 - Rejeição: NF-e de devolução de mercadoria não possui documento fiscal referenciado</option>
+
+  <option value="322">322 - Rejeição: NF de produtor referenciada com data de emissão inválida</option>
+
+  <option value="323">323 - Rejeição: CNPJ autorizado para download inválido</option>
+
+  <option value="324">324 - Rejeição: CNPJ do destinatário já autorizado para download</option>
+
+  <option value="325">325 - Rejeição: CPF autorizado para download inválido</option>
+
+  <option value="326">326 - Rejeição: CPF do destinatário já autorizado para download</option>
+
+  <option value="327">327 - Rejeição: CFOP inválido para Nota Fiscal com finalidade de devolução de mercadoria</option>
+
+  <option value="328">328 - Rejeição: CFOP de devolução de mercadoria para NF e que não tem finalidade de devolução de mercadoria</option>
+
+  <option value="329">329 - Rejeição: Número da DI /DSI inválido</option>
+
+  <option value="330">330 - Rejeição: Informar o Valor da AFRMM na importação por via marítima</option>
+
+  <option value="331">331 - Rejeição: Informar o CNPJ do adquirente ou do encomendante nesta forma de importação</option>
+
+  <option value="332">332 - Rejeição: CNPJ do adquirente ou do encomendante da importação inválido</option>
+
+  <option value="333">333 - Rejeição: Informar a UF do adquirente ou do encomendante nesta forma de importação</option>
+
+  <option value="334">334 - Rejeição: Número do processo de drawback não informado na importação</option>
+
+  <option value="335">335 - Rejeição: Número do processo de drawback na importação inválido</option>
+
+  <option value="336">336 - Rejeição: Informado o grupo de exportação no item em operação que não é com exterior</option>
+
+  <option value="337">337 - Rejeição: Não informado o grupo de exportação no item</option>
+
+  <option value="338">338 - Rejeição: Número do processo de drawback não informado na exportação</option>
+
+  <option value="339">339 - Rejeição: Número do processo de drawback na exportação inválido</option>
+
+  <option value="340">340 - Rejeição: Não informado o grupo de exportação indireta no item</option>
+
+  <option value="341">341 - Rejeição: Número do registro de exportação inválido</option>
+
+  <option value="342">342 - Rejeição: Chave de Acesso informada na Exportação Indireta com DV inválido</option>
+
+  <option value="343">343 - Rejeição: Modelo da NF-e informada na Exportação Indireta diferente de 55</option>
+
+  <option value="344">344 - Rejeição: Duplicidade de NF-e informada na Exportação Indireta (Chave de Acesso informada mais de uma vez)</option>
+
+  <option value="345">345 - Rejeição: Chave de Acesso informada na Exportação Indireta não consta como NF-e referenciada</option>
+
+  <option value="346">346 - Rejeição: Somatório das quantidades informadas na Exportação Indireta não corresponde a quantidade total do item</option>
+
+  <option value="347">347 - Rejeição: Informada IE do substituto tributário em operação com Exterior</option>
+
+  <option value="349">349 - Rejeição: Número RECOPI não informado</option>
+
+  <option value="350">350 - Rejeição: Número RECOPI inválido</option>
+
+  <option value="351">351 - Rejeição: Valor do ICMS da Operação no CST=51 difere do produto BC e Alíquota</option>
+
+  <option value="352">352 - Rejeição: Valor do ICMS Diferido no CST=51 difere do produto Valor ICMS Operação e percentual diferimento</option>
+
+  <option value="353">353 - Rejeição: Valor do ICMS no CST=51 não corresponde a diferença do ICMS operação e ICMS diferido</option>
+
+  <option value="354">354 - Rejeição: Informado grupo de devolução de tributos para NF-e que não tem finalidade de devolução de mercadoria</option>
+
+  <option value="355">355 - Rejeição: Informar o local de saída do Pais no caso da exportação</option>
+
+  <option value="356">356 - Rejeição: Informar o local de saída do Pais somente no caso da exportação</option>
+
+  <option value="357">357 - Rejeição: Chave de Acesso do grupo de Exportação Indireta inexistente</option>
+
+  <option value="358">358 - Rejeição: Chave de Acesso do grupo de Exportação Indireta cancelada ou denegada</option>
+
+  <option value="359">359 - Rejeição: NF-e de venda a Órgão Público sem informar a Nota de Empenho</option>
+
+  <option value="360">360 - Rejeição: NF-e com Nota de Empenho inválida para a UF.</option>
+
+  <option value="361">361 - Rejeição: NF-e com Nota de Empenho inexistente na UF.</option>
+
+  <option value="362">362 - Rejeição: Venda de combustível sem informação do Transportador</option>
+
+  <option value="363">363 - Rejeição: IE do substituto tributário idêntica à IE do emitente ou do destinatário</option>
+
+  <option value="364">364 - Rejeição: Total do valor da dedução do ISS difere do somatório dos itens</option>
+
+  <option value="365">365 - Rejeição: Total de outras retenções difere do somatório dos itens</option>
+
+  <option value="366">366 - Rejeição: Total do desconto incondicionado ISS difere do somatório dos itens</option>
+
+  <option value="367">367 - Rejeição: Total do desconto condicionado ISS difere do somatório dos itens</option>
+
+  <option value="368">368 - Rejeição: Total de ISS retido difere do somatório dos itens</option>
+
+  <option value="369">369 - Rejeição: Não informado o grupo avulsa na emissão pelo Fisco</option>
+
+  <option value="370">370 - Rejeição: Nota Fiscal Avulsa com tipo de emissão inválido</option>
+
+  <option value="372">372 - Rejeição: Destinatário com identificação de estrangeiro com caracteres inválidos</option>
+
+  <option value="373">373 - Rejeição: Descrição do primeiro item diferente de NOTA FISCAL EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL</option>
+
+  <option value="375">375 - Rejeição: NF-e com lançamento relativo a Cupom Fiscal referencia uma NFC-e</option>
+
+  <option value="376">376 - Rejeição: Data do Desembaraço Aduaneiro inválida</option>
+
+  <option value="377">377 - Rejeição: Código de País do destinatário Inexistente</option>
+
+  <option value="379">379 - Rejeição: Grupo de Encerrante na NF-e (modelo 55) para CFOP diferente de venda de combustível para consumidor final</option>
+
+  <option value="380">380 - Rejeição: Valor do Encerrante final não é superior ao Encerrante inicial</option>
+
+  <option value="387">387 - Rejeição: Código de Enquadramento Legal do IPI inválido</option>
+
+  <option value="388">388 - Rejeição: Código de Situação Tributária do IPI incompatível com o Código de Enquadramento Legaldo IPI</option>
+
+  <option value="389">389 - Rejeição: Código Município ISSQN inexistente</option>
+
+  <option value="393">393 - Rejeição: NF-e com o grupo de Informações Suplementares</option>
+
+  <option value="401">401 - Rejeição: CPF do remetente inválido</option>
+
+  <option value="401">401 - Rejeição: CPF do emitente inválido</option>
+
+  <option value="402">402 - Rejeição: XML da área de dados com codificação diferente de UTF-8</option>
+
+  <option value="403">403 - Rejeição: O grupo de informações da NF-e avulsa é de uso exclusivo do Fisco</option>
+
+  <option value="404">404 - Rejeição: Uso de prefixo de namespace não permitido</option>
+
+  <option value="405">405 - Rejeição: Código do país do emitente: dígito inválido</option>
+
+  <option value="406">406 - Rejeição: Código do país do destinatário: dígito inválido</option>
+
+  <option value="407">407 - Rejeição: O CPF só pode ser informado no campo emitente para a NF-e avulsa</option>
+
+  <option value="408">408 - Rejeição: Evento não disponível para Autor pessoa física</option>
+
+  <option value="409">409 - Rejeição: Campo cUF inexistente no elemento nfeCabecMsg do SOAP Header</option>
+
+  <option value="410">410 - Rejeição: UF informada no campo cUF não é atendida pelo Web Service</option>
+
+  <option value="411">411 - Rejeição: Campo versaoDados inexistente no elemento nfeCabecMsg do SOAP Header</option>
+
+  <option value="416">416 - Rejeição: Falha na descompactação da área de dados</option>
+
+  <option value="417">417 - Rejeição: Total do ICMS superior ao valor limite estabelecido</option>
+
+  <option value="418">418 - Rejeição: Total do ICMS ST superior ao valor limite estabelecido</option>
+
+  <option value="420">420 - Rejeição: Cancelamento para NF-e já cancelada</option>
+
+  <option value="434">434 - Rejeição: NF-e nem indicativo intermediador</option>
+
+  <option value="435">435 - Rejeição: NF-e não pode ter o indicativo do intermediador</option>
+
+  <option value="436">436 - Rejeição: Código do meio de pagamento inexistente</option>
+
+  <option value="438">438 - Rejeição: Obrigatória as informações do intermediador da transação para operação por site de terceiros</option>
+
+  <option value="441">441 - Rejeição: Descrição do pagamento obrigatória para meio de pagamento 99 - outros</option>
+
+  <option value="442">442 - Rejeição: Descrição do pagamento não permitida</option>
+
+  <option value="446">446 - Rejeição: Informado CEST Inexistente</option>
+
+  <option value="450">450 - Rejeição: Modelo da NF-e diferente de 55</option>
+
+  <option value="451">451 - Rejeição: Processo de emissão informado inválido</option>
+
+  <option value="452">452 - Rejeição: Tipo Autorizador do Recibo diverge do Órgão Autorizador</option>
+
+  <option value="453">453 - Rejeição: Ano de inutilização não pode ser superior ao Ano atual</option>
+
+  <option value="454">454 - Rejeição: Ano de inutilização não pode ser inferior a 2006</option>
+
+  <option value="455">455 - Rejeição: Órgão Autor do evento diferente da UF da Chave de Acesso</option>
+
+  <option value="462">462 - Rejeição: Rejeição: Informado campos de percentual de GLP e/ou GLGNn e/ou GLGNi para produto diferente de GLP</option>
+
+  <option value="465">465 - Rejeição: Número de Controle da FCI inexistente</option>
+
+  <option value="466">466 - Rejeição: Evento com Tipo de Autor incompatível</option>
+
+  <option value="467">467 - Rejeição: Dados da NF-e divergentes do EPEC</option>
+
+  <option value="468">468 - Rejeição: NF-e com Tipo Emissão = 4, sem EPEC correspondente</option>
+
+  <option value="471">471 - Rejeição: Informado NCM=00 indevidamente</option>
+
+  <option value="476">476 - Rejeição: Código da UF diverge da UF da primeira NF-e do Lote</option>
+
+  <option value="477">477 - Rejeição: Código do órgão diverge do órgão do primeiro evento do Lote</option>
+
+  <option value="478">478 - Rejeição: Local da entrega não informado para faturamento direto de veículos novos</option>
+
+  <option value="479">479 - Rejeição: Data de Emissão anterior a data de credenciamento ou anterior a Data de Abertura do estabelecimento</option>
+
+  <option value="480">480 - Rejeição: Código Município do Emitente diverge do cadastrado na UF</option>
+
+  <option value="481">481 - Rejeição: Código Regime Tributário do emitente diverge do cadastro na SEFAZ</option>
+
+  <option value="482">482 - Rejeição: Código do Município do Destinatário diverge do cadastrado na UF</option>
+
+  <option value="483">483 - Rejeição: Valor do desconto maior que valor do produto</option>
+
+  <option value="484">484 - Rejeição: Chave de Acesso com tipo de emissão diferente de 4 (posição 35 da Chave de Acesso)</option>
+
+  <option value="485">485 - Rejeição: Duplicidade de numeração do EPEC (Modelo, CNPJ, Série e Número)</option>
+
+  <option value="486">486 - Rejeição: Não informado o Grupo de Autorização para UF que exige a identificação do Escritório de Contabilidade na Nota Fiscal</option>
+
+  <option value="487">487 - Rejeição: Escritório de Contabilidade não cadastrado na SEFAZ</option>
+
+  <option value="488">488 - Rejeição: Vendas do Emitente incompatíveis com o Porte da Empresa</option>
+
+  <option value="489">489 - Rejeição: CNPJ informado inválido (DV ou zeros)</option>
+
+  <option value="490">490 - Rejeição: CPF informado inválido (DV ou zeros)</option>
+
+  <option value="491">491 - Rejeição: O tpEvento informado inválido</option>
+
+  <option value="492">492 - Rejeição: O verEvento informado inválido</option>
+
+  <option value="493">493 - Rejeição: Evento não atende o Schema XML específico</option>
+
+  <option value="494">494 - Rejeição: Chave de Acesso inexistente</option>
+
+  <option value="501">501 - Rejeição: Pedido de Cancelamento intempestivo (NF-e autorizada a mais de 7 dias)</option>
+
+  <option value="502">502 - Rejeição: Erro na Chave de Acesso - Campo Id não corresponde à concatenação dos campos correspondentes</option>
+
+  <option value="503">503 - Rejeição: Série utilizada fora da faixa permitida no SCAN (900-999)</option>
+
+  <option value="504">504 - Rejeição: Data de Entrada/Saída posterior ao permitido</option>
+
+  <option value="505">505 - Rejeição: Data de Entrada/Saída anterior ao permitido</option>
+
+  <option value="506">506 - Rejeição: Data de Saída menor que a Data de Emissão</option>
+
+  <option value="507">507 - Rejeição: O CNPJ do destinatário/remetente não deve ser informado em operação com o exterior</option>
+
+  <option value="508">508 - Rejeição: CST incompatível na operação com Não Contribuinte</option>
+
+  <option value="509">509 - Rejeição: Informado código de município diferente de “9999999” para operação com o exterior</option>
+
+  <option value="510">510 - Rejeição: Operação com Exterior e Código País destinatário é 1058 (Brasil) ou não informado</option>
+
+  <option value="511">511 - Rejeição: Não é de Operação com Exterior e Código País destinatário difere de 1058 (Brasil)</option>
+
+  <option value="512">512 - Rejeição: CNPJ do Local de Retirada inválido</option>
+
+  <option value="513">513 - Rejeição: Código Município do Local de Retirada deve ser 9999999 para UF retirada = EX</option>
+
+  <option value="514">514 - Rejeição: CNPJ do Local de Entrega inválido</option>
+
+  <option value="515">515 - Rejeição: Código Município do Local de Entrega deve ser 9999999 para UF entrega = EX</option>
+
+  <option value="516">516 - Rejeição: Falha no schema XML – inexiste a tag raiz esperada para a mensagem</option>
+
+  <option value="517">517 - Rejeição: Falha no schema XML – inexiste atributo versao na tag raiz da mensagem</option>
+
+  <option value="518">518 - Rejeição: CFOP de entrada para NF-e de saída</option>
+
+  <option value="519">519 - Rejeição: CFOP de saída para NF-e de entrada</option>
+
+  <option value="520">520 - Rejeição: CFOP de Operação com Exterior e UF destinatário difere de EX</option>
+
+  <option value="521">521 - Rejeição: Operação Interna e UF do emitente difere da UF do destinatário/remetente contribuinte do ICMS</option>
+
+  <option value="522">522 - Rejeição: Chave de Acesso referenciada com UF inválida</option>
+
+  <option value="523">523 - Rejeição: CFOP não é de Operação Estadual e UF emitente igual a UF destinatário.</option>
+
+  <option value="524">524 - Rejeição: Chave de Acesso referenciada com Ano-Mês inválido</option>
+
+  <option value="525">525 - Rejeição: CFOP de Importação e não informado dados da DI</option>
+
+  <option value="526">526 - Rejeição: Ano-Mês da Chave de Acesso com atraso superior a 6 meses em relação ao Ano-Mês atual</option>
+
+  <option value="527">527 - Rejeição: Operação de Exportação com informação de ICMS incompatível</option>
+
+  <option value="528">528 - Rejeição: Valor do ICMS difere do produto BC e Alíquota</option>
+
+  <option value="529">529 - Rejeição: CST incompatível na operação com Contribuinte Isento de Inscrição Estadual</option>
+
+  <option value="530">530 - Rejeição: Operação com tributação de ISSQN sem informar a Inscrição Municipal</option>
+
+  <option value="531">531 - Rejeição 528: Valor do ICMS difere do produto BC e Alíquota</option>
+
+  <option value="532">532 - Rejeição: Total do ICMS difere do somatório dos itens</option>
+
+  <option value="533">533 - Rejeição: Total da BC ICMS-ST difere do somatório dos itens</option>
+
+  <option value="534">534 - Rejeição: Total do ICMS-ST difere do somatório dos itens</option>
+
+  <option value="535">535 - Rejeição: Total do Frete difere do somatório dos itens</option>
+
+  <option value="536">536 - Rejeição: Total do Seguro difere do somatório dos itens</option>
+
+  <option value="537">537 - Rejeição: Total do Desconto difere do somatório dos itens</option>
+
+  <option value="538">538 - Rejeição: Total do IPI difere do somatório dos itens</option>
+
+  <option value="539">539 - Duplicidade de NF-e com diferença na Chave de Acesso</option>
+
+  <option value="540">540 - Rejeição: CPF do Local de Retirada inválido</option>
+
+  <option value="541">541 - Rejeição: CPF do Local de Entrega inválido</option>
+
+  <option value="542">542 - Rejeição: CNPJ do Transportador inválido</option>
+
+  <option value="543">543 - Rejeição: CPF do Transportador inválido</option>
+
+  <option value="544">544 - Rejeição: IE do Transportador inválida</option>
+
+  <option value="545">545 - Rejeição: Falha no schema XML – versão informada na versaoDados do SOAPHeader diverge da versão da mensagem</option>
+
+  <option value="546">546 - Rejeição: NF-e de devolução com valor do ICMS superior a NF-e devolvida</option>
+
+  <option value="547">547 - Rejeição: Dígito Verificador da Chave de Acesso da NF-e Referenciada inválido</option>
+
+  <option value="548">548 - Rejeição: Chave de Acesso referenciada com Dígito Verificador inválido</option>
+
+  <option value="549">549 - Rejeição: CNPJ da NF referenciada inválido.</option>
+
+  <option value="550">550 - Rejeição: CNPJ da NF referenciada de produtor inválido.</option>
+
+  <option value="551">551 - Rejeição: CPF da NF referenciada de produtor inválido.</option>
+
+  <option value="552">552 - Rejeição: IE da NF referenciada de produtor inválido.</option>
+
+  <option value="553">553 - Rejeição: Dígito Verificador da Chave de Acesso do CT-e Referenciado inválido</option>
+
+  <option value="554">554 - Rejeição: Chave de Acesso referenciada com CNPJ inválido</option>
+
+  <option value="555">555 - Rejeição: Tipo autorizador do recibo diverge do Órgão Autorizador.</option>
+
+  <option value="556">556 - Rejeição: Justificativa de entrada em contingência não deve ser informada para tipo de emissão normal.</option>
+
+  <option value="557">557 - Rejeição: A Justificativa de entrada em contingência deve ser informada.</option>
+
+  <option value="558">558 - Rejeição: Data de entrada em contingência posterior a data de recebimento.</option>
+
+  <option value="559">559 - Rejeição: UF do Transportador não informada</option>
+
+  <option value="560">560 - Rejeição: CNPJ base do emitente difere do CNPJ base da primeira NF-e do lote recebido</option>
+
+  <option value="561">561 - Rejeição: Mês de Emissão informado na Chave de Acesso difere do Mês de Emissão da NF-e</option>
+
+  <option value="562">562 - Rejeição: Código Numérico informado na Chave de Acesso difere do Código Numérico da NF-e</option>
+
+  <option value="563">563 - Rejeição: Já existe pedido de Inutilização com a mesma faixa de inutilização</option>
+
+  <option value="564">564 - Rejeição: Total do Produto / Serviço difere do somatório dos itens</option>
+
+  <option value="565">565 - Rejeição: Falha no schema XML – inexiste a tag raiz esperada para o lote de NF-e</option>
+
+  <option value="567">567 - Rejeição: Falha no schema XML – versão informada na versaoDados do SOAPHeader diverge da versão do lote de NF-e</option>
+
+  <option value="568">568 - Rejeição: Falha no schema XML – inexiste atributo versao na tag raiz do lote de NF-e</option>
+
+  <option value="569">569 - Rejeição: Data de entrada em contingência muito atrasada</option>
+
+  <option value="570">570 - Rejeição: Tipo de Emissão 3, 6 ou 7 só é válido nas contingências SCAN/SVC</option>
+
+  <option value="571">571 - Rejeição: O tpEmis informado diferente de 3 para contingência SCAN</option>
+
+  <option value="572">572 - Rejeição: Erro Atributo ID do evento não corresponde a concatenação dos campos (“ID” + tpEvento + chNFe + nSeqEvento)</option>
+
+  <option value="573">573 - Rejeição: Duplicidade de Evento</option>
+
+  <option value="574">574 - Rejeição: O autor do evento diverge do emissor da NF-e</option>
+
+  <option value="575">575 - Rejeição: O autor do evento diverge do destinatário da NF-e</option>
+
+  <option value="576">576 - Rejeição: O autor do evento não é um órgão autorizado a gerar o evento</option>
+
+  <option value="577">577 - Rejeição: A data do evento não pode ser menor que a data de emissão da NF-e</option>
+
+  <option value="578">578 - Rejeição: A data do evento não pode ser maior que a data do processamento</option>
+
+  <option value="579">579 - Rejeição: A data do evento não pode ser menor que a data de autorização para NF-e não emitida em contingência</option>
+
+  <option value="580">580 - Rejeição: O evento exige uma NF-e autorizada</option>
+
+  <option value="587">587 - Rejeição: Usar somente o namespace padrão da NF-e</option>
+
+  <option value="588">588 - Rejeição: Não é permitida a presença de caracteres de edição no início/fim da mensagem ou entre as tags da mensagem</option>
+
+  <option value="589">589 - Rejeição: Número do NSU informado superior ao maior NSU da base de dados da SEFAZ</option>
+
+  <option value="590">590 - Rejeição: Informado CST para emissor do Simples Nacional (CRT=1)</option>
+
+  <option value="591">591 - Rejeição: Informado CSOSN para emissor que não é do Simples Nacional (CRT diferente de 1)</option>
+
+  <option value="592">592 - Rejeição: A NF-e deve ter pelo menos um item de produto sujeito ao ICMS</option>
+
+  <option value="593">593 - Rejeição: CNPJ-Base consultado difere do CNPJ-Base do Certificado Digital</option>
+
+  <option value="594">594 - Rejeição: O número de sequencia do evento informado é maior que o permitido</option>
+
+  <option value="595">595 - Rejeição: Obrigatória a informação da justificativa do evento.</option>
+
+  <option value="596">596 - Rejeição: Evento apresentado fora do prazo: [prazo vigente]</option>
+
+  <option value="597">597 - Rejeição: CFOP de Importação e não informado dados de IPI</option>
+
+  <option value="598">598 - Rejeição: NF-e emitida em ambiente de homologação com Razão Social do destinatário diferente de NF-E EMITIDA EM AMBIENTE DE HOMOLOGACAO - SEM VALOR FISCAL</option>
+
+  <option value="599">599 - Rejeição: CFOP de Importação e não informado dados de II</option>
+
+  <option value="600">600 - Rejeição: CSOSN incompatível na operação com Não Contribuinte</option>
+
+  <option value="601">601 - Rejeição: Total do II difere do somatório dos itens</option>
+
+  <option value="602">602 - Rejeição: Total do PIS difere do somatório dos itens sujeitos ao ICMS</option>
+
+  <option value="603">603 - Rejeição: Total do COFINS difere do somatório dos itens sujeitos ao ICMS</option>
+
+  <option value="604">604 - Rejeição: Total do vOutro difere do somatório dos itens</option>
+
+  <option value="605">605 - Rejeição: Total do vISS difere do somatório do vProd dos itens sujeitos ao ISSQN</option>
+
+  <option value="606">606 - Rejeição: Total do vBC do ISS difere do somatório dos itens</option>
+
+  <option value="607">607 - Rejeição: Total do ISS difere do somatório dos itens</option>
+
+  <option value="608">608 - Rejeição: Total do PIS difere do somatório dos itens sujeitos ao ISSQN</option>
+
+  <option value="609">609 - Rejeição: Total do COFINS difere do somatório dos itens sujeitos ao ISSQN</option>
+
+  <option value="610">610 - Rejeição: Total da NF difere do somatório dos Valores compõe o valor Total da NF.</option>
+
+  <option value="611">611 - Rejeição: cEAN inválido</option>
+
+  <option value="612">612 - Rejeição: GTIN da unidade tributável (cEANTrib) inválido</option>
+
+  <option value="613">613 - Rejeição: Chave de Acesso difere da existente em BD</option>
+
+  <option value="614">614 - Rejeição: Chave de Acesso inválida (Código UF inválido)</option>
+
+  <option value="615">615 - Rejeição: Chave de Acesso inválida (Ano menor que 06 ou Ano maior que Ano corrente)</option>
+
+  <option value="616">616 - Rejeição: Chave de Acesso inválida (Mês menor que 1 ou Mês maior que 12)</option>
+
+  <option value="617">617 - Rejeição: Chave de Acesso inválida (CNPJ zerado ou dígito inválido)</option>
+
+  <option value="618">618 - Rejeição: Chave de Acesso inválida (modelo diferente de 55 e 65)</option>
+
+  <option value="619">619 - Rejeição: Chave de Acesso inválida (número NF = 0)</option>
+
+  <option value="620">620 - Rejeição: Chave de Acesso difere da existente em BD</option>
+
+  <option value="621">621 - Rejeição: CPF Emitente não cadastrado</option>
+
+  <option value="622">622 - Rejeição: IE emitente não vinculada ao CPF</option>
+
+  <option value="623">623 - Rejeição: CPF Destinatário não cadastrado</option>
+
+  <option value="624">624 - Rejeição: IE Destinatário não vinculada ao CPF</option>
+
+  <option value="625">625 - Rejeição: Inscrição SUFRAMA deve ser informada na venda com isenção para ZFM</option>
+
+  <option value="626">626 - Rejeição: CFOP de operação isenta para ZFM diferente do previsto</option>
+
+  <option value="627">627 - Rejeição: O valor do ICMS desonerado deve ser informado</option>
+
+  <option value="628">628 - Rejeição: Total da NF superior ao valor limite estabelecido pela SEFAZ</option>
+
+  <option value="629">629 - Rejeição: Valor do Produto difere do produto Valor Unitário de Comercialização e Quantidade Comercial</option>
+
+  <option value="630">630 - Rejeição: Valor do Produto difere do produto Valor Unitário de Tributação e Quantidade Tributável</option>
+
+  <option value="631">631 - Rejeição: CNPJ-Base do Destinatário difere do CNPJ-Base do Certificado Digital</option>
+
+  <option value="632">632 - Rejeição: Solicitação fora de prazo, a NF-e não está mais disponível para download</option>
+
+  <option value="633">633 - Rejeição: NF-e indisponível para download devido a ausência de Manifestação do Destinatário</option>
+
+  <option value="634">634 - Rejeição: Destinatário da NF-e não tem o mesmo CNPJ raiz do solicitante do download</option>
+
+  <option value="635">635 - Rejeição: NF-e com mesmo número e série já transmitida e aguardando processamento</option>
+
+  <option value="650">650 - Rejeição: Evento de "Ciência da Emissão" para NF-e Cancelada ou Denegada</option>
+
+  <option value="651">651 - Rejeição: Evento de "Desconhecimento da Operação" para NF-e Cancelada ou Denegada</option>
+
+  <option value="652">652 - Rejeição: informado indicador de desoneração inválido para a ZFM [nItem:999]</option>
+
+  <option value="653">653 - Rejeição: NF-e Cancelada, arquivo indisponível para download</option>
+
+  <option value="654">654 - Rejeição: NF-e Denegada, arquivo indisponível para download</option>
+
+  <option value="655">655 - Rejeição: Evento de Ciência da Emissão informado após a manifestação final do destinatário</option>
+
+  <option value="656">656 - Rejeição: Consumo Indevido</option>
+
+  <option value="657">657 - Rejeição: Data de Pagamento inválida [nOcor:999 [nOcor:999]</option>
+
+  <option value="658">658 - Rejeição: UF do destinatário da Chave de Acesso diverge da UF autorizadora</option>
+
+  <option value="660">660 - Rejeição: CFOP de Combustível e não informado grupo de combustível</option>
+
+  <option value="661">661 - Rejeição: NF-e já existente para o número do EPEC informado</option>
+
+  <option value="662">662 - Rejeição: Numeração do EPEC está inutilizada na Base de Dados da SEFAZ</option>
+
+  <option value="663">663 - Rejeição: Alíquota do ICMS com valor superior a 4 por cento na operação de saída interestadual com produtos importados</option>
+
+  <option value="678">678 - Rejeição: NF referenciada com UF diferente da NF-e complementar</option>
+
+  <option value="679">679 - Rejeição: Modelo da NF-e referenciada diferente de 55/65</option>
+
+  <option value="680">680 - Rejeição: Chave de Acesso referenciada em duplicidade na NF-e</option>
+
+  <option value="681">681 - Rejeição: Duplicidade de NF Modelo 1 referenciada (CNPJ, Modelo, Série e Número)</option>
+
+  <option value="682">682 - Rejeição: Duplicidade de NF de Produtor referenciada (IE, Modelo, Série e Número)</option>
+
+  <option value="683">683 - Rejeição: Chave de Acesso referenciada com Número inválido</option>
+
+  <option value="684">684 - Rejeição: Duplicidade de Cupom Fiscal referenciado (Modelo, Número de Ordem e COO)</option>
+
+  <option value="685">685 - Rejeição: Total do Valor Aproximado dos Tributos difere do somatório dos itens</option>
+
+  <option value="686">686 - Rejeição: NF Complementar referencia uma NF-e cancelada</option>
+
+  <option value="687">687 - Rejeição: NF Complementar referencia uma NF-e denegada</option>
+
+  <option value="688">688 - Rejeição: NF referenciada de Produtor com IE inexistente</option>
+
+  <option value="689">689 - Rejeição: NF referenciada de Produtor com IE não vinculada ao CNPJ/CPF informado</option>
+
+  <option value="690">690 - Rejeição: Pedido de Cancelamento para NF-e com CT-e</option>
+
+  <option value="691">691 - Rejeição: Chave de Acesso da NF-e diverge da Chave de Acesso do EPEC</option>
+
+  <option value="693">693 - Rejeição: Alíquota de ICMS superior a definida para a operação interestadual</option>
+
+  <option value="694">694 - </option>
+
+  <option value="695">695 - Rejeição: Informado indevidamente o grupo de ICMS para a UF de destino</option>
+
+  <option value="696">696 - Rejeição: Operação com não contribuinte deve indicar operação com consumidor final</option>
+
+  <option value="697">697 - Rejeição: Alíquota interestadual do ICMS com origem diferente do previsto</option>
+
+  <option value="698">698 - Rejeição: Alíquota interestadual do ICMS incompatível com as UF envolvidas na operação</option>
+
+  <option value="699">699 - Rejeição: Percentual do ICMS Interestadual para a UF de destino difere do previsto para o ano da Data de Emissão</option>
+
+  <option value="700">700 - Rejeição: Total da quantidade tributada do ICMS monofásico próprio difere do somatório dos itens</option>
+
+  <option value="701">701 - Rejeição: Não informado Nota Fiscal referenciada (Lançamento relativo a Cupom Fiscal)</option>
+
+  <option value="703">703 - Rejeição: Data-Hora de Emissão posterior ao horário de recebimento</option>
+
+  <option value="710">710 - Rejeição: NF-e com formato de DANFE inválido</option>
+
+  <option value="711">711 - Rejeição: NF-e com contingência off-line</option>
+
+  <option value="713">713 - Rejeição: Tipo de Emissão diferente de 6 ou 7 para contingência da SVC acessada</option>
+
+  <option value="719">719 - Rejeição: NF-e sem a identificação do destinatário</option>
+
+  <option value="720">720 - Rejeição: Na operação com Exterior deve ser informada tag idEstrangeiro</option>
+
+  <option value="721">721 - Rejeição: Informado idEstrangeiro e Operação não é com consumidor final.</option>
+
+  <option value="722">722 - Rejeição: CFOP de Transporte Inexistente</option>
+
+  <option value="723">723 - Rejeição: Total da quantidade tributada do ICMS monofásico sujeito a retenção difere do somatório dos itens</option>
+
+  <option value="724">724 - Rejeição: NF-e sem o nome do destinatário</option>
+
+  <option value="726">726 - Rejeição: NF-e sem a informação de endereço do destinatário</option>
+
+  <option value="727">727 - Rejeição: Operação com Exterior e UF diferente de EX</option>
+
+  <option value="728">728 - Rejeição: NF-e sem informação da IE do destinatário</option>
+
+  <option value="731">731 - Rejeição: CFOP de operação com Exterior e idDest &lt;&gt; 3</option>
+
+  <option value="732">732 - Rejeição: CFOP de operação interestadual e idDest &lt;&gt; 2</option>
+
+  <option value="733">733 - Rejeição: CFOP de operação interna e idDest &lt;&gt; 1</option>
+
+  <option value="739">739 - Rejeição: Código de País do ISSQN Inexistente</option>
+
+  <option value="744">744 - Rejeição: Total da quantidade tributada do ICMS monofásico retido anteriormente difere do somatório dos itens</option>
+
+  <option value="745">745 - Rejeição: NF-e sem grupo do PIS</option>
+
+  <option value="747">747 - Rejeição: Não permitido o preenchimento do grupo de UF de origem do combustível</option>
+
+  <option value="748">748 - Rejeição: NF-e sem grupo da COFINS</option>
+
+  <option value="761">761 - Rejeição: Código de Produto ANP inexistente</option>
+
+  <option value="764">764 - Rejeição: Solicitada resposta síncrona para Lote com mais de uma NF-e (indSinc=1)</option>
+
+  <option value="765">765 - Rejeição: Lote só poderá conter NF-e ou NFC-e</option>
+
+  <option value="768">768 - Rejeição: NF-e não deve possuir o grupo de Formas de Pagamento</option>
+
+  <option value="769">769 - Rejeição: Obrigatório o preenchimento da Quantidade tributada retida anteriormente [nItem:999]</option>
+
+  <option value="770">770 - Rejeição: CFOP Inexistente</option>
+
+  <option value="771">771 - Rejeição: Informado idEstrangeiro em operação interestadual</option>
+
+  <option value="772">772 - Rejeição: Operação Interestadual e UF de destino igual à UF de origem</option>
+
+  <option value="773">773 - Rejeição: Operação Interna e UF de destino difere da UF do emitente</option>
+
+  <option value="776">776 - Rejeição: Solicitada resposta síncrona para UF que não disponibiliza este atendimento (indSinc=1)</option>
+
+  <option value="777">777 - Rejeição: Obrigatória a informação do NCM completo</option>
+
+  <option value="778">778 - Rejeição: Informado NCM inexistente</option>
+
+  <option value="790">790 - Rejeição: Operação com Exterior para destinatário Contribuinte de ICMS</option>
+
+  <option value="791">791 - Rejeição: NF-e com indicação de destinatário isento de IE, com a informação da IE do destinatário</option>
+
+  <option value="792">792 - Rejeição: Informada a IE do destinatário para operação com destinatário no Exterior</option>
+
+  <option value="793">793 - Rejeição: Valor do ICMS relativo ao Fundo de Combate à Pobreza na UF de destino difere do calculado</option>
+
+  <option value="794">794 - Rejeição: NF-e com indicativo de NFC-e com entrega a domicílio</option>
+
+  <option value="795">795 - Rejeição: Total do ICMS desonerado difere do somatório dos itens</option>
+
+  <option value="796">796 - Rejeição: CNPJ recebedor do pagamento inválido [nOcor:999]</option>
+
+  <option value="798">798 - Rejeição: Valor total do ICMS relativo Fundo de Combate à Pobreza (FCP) da UF de destino difere do somatório do valor dos itens</option>
+
+  <option value="799">799 - Rejeição: Valor total do ICMS Interestadual da UF de destino difere do somatório dos itens</option>
+
+  <option value="800">800 - Rejeição: Valor total do ICMS Interestadual da UF do remetente difere do somatório dos itens</option>
+
+  <option value="805">805 - Rejeição: A SEFAZ do destinatário não permite Contribuinte Isento de Inscrição Estadual em operações interestaduais.</option>
+
+  <option value="806">806 - Rejeição: Operação com ICMS-ST sem informação do CEST.</option>
+
+  <option value="812">812 - Rejeição: Regime Tributário SN, com excesso de sublimite não é permitido para Emitentes desta UF</option>
+
+  <option value="814">814 - Rejeição: Nota Fiscal com grupo de comércio exterior</option>
+
+  <option value="815">815 - Rejeição: Valor do ICMS Interestadual para UF de Destino difere do calculado [nItem:999] (Valor Informado: XXX, Valor Calculado:XXX)</option>
+
+  <option value="816">816 - Rejeição: Valor do ICMS Interestadual para UF do Remetente difere do calculado [nItem:999] (Valor Informado: XXX, Valor Calculado:XXX)</option>
+
+  <option value="817">817 - Rejeição: Unidade Tributável incompatível com o NCM informado na operação com Comércio Exterior [nItem:nnn]</option>
+
+  <option value="840">840 - Rejeição: NCM de medicamento e não informado o grupo de medicamento (med)</option>
+
+  <option value="841">841 - Rejeição: Código do tipo de veiculo inexistente</option>
+
+  <option value="842">842 - Rejeição: Código da espécie de Veículo inexistente</option>
+
+  <option value="843">843 - Rejeição: Código da espécie de veículo incompatível com o tempo do veículo</option>
+
+  <option value="844">844 - Rejeição: Código de Item da Lista de Serviços Inexistente</option>
+
+  <option value="845">845 - Rejeição: O Grupo transportador não pode ser preenchido para a modalidade do frete informada</option>
+
+  <option value="846">846 - Transporte próprio por conta do Remetente e CNPJ Base ou CPF do Transportador difere do CNPJ Base ou CPF do Remetente</option>
+
+  <option value="847">847 - Transporte não é próprio por conta do Remetente e CNPJ base ou CPF do Transportador igual ao CNPJ base ou CPF do Remetente</option>
+
+  <option value="848">848 - Transporte próprio por conta do Destinatário e CNPJ base ou CPF do transportador difere do CNPJ base ou CPF do Destinatário</option>
+
+  <option value="849">849 - ransporte não é próprio por conta do Destinatário e CNPJ base ou CPF do transportador igual ao CNPJ base ou CPF do Destinatário</option>
+
+  <option value="850">850 - Rejeição: Data de vencimento da parcela não informada ou menor que a Data de vencimento da parcela anterior</option>
+
+  <option value="851">851 - Rejeição: Soma do valor das parcelas difere do Valor Líquido da Fatura</option>
+
+  <option value="852">852 - Rejeição: Número da parcela inválido ou não informado</option>
+
+  <option value="853">853 - Dados de cobrança não devem ser informados para pagamento à vista</option>
+
+  <option value="854">854 - Rejeição Unidade Tributável (tag: uTrib) incompatível com produto informado</option>
+
+  <option value="855">855 - Rejeição: Somatório percentuais de GLP derivado do petróleo, GLGNn e GLGNi diferente de 100</option>
+
+  <option value="856">856 - Rejeição: Campo valor de partida não preenchido para produto GLP</option>
+
+  <option value="858">858 - Rejeição: Grupo de Tributação informado indevidamente [nItem: nnn]</option>
+
+  <option value="859">859 - Rejeição: Total do FCP retido anteriormente por Substituição Tributária difere do somatório dos itens</option>
+
+  <option value="860">860 - Rejeição: Valor do FCP informado difere de base de cálculo*alíquota [nItem: nnn]</option>
+
+  <option value="861">861 - Rejeição: Total do FCP difere do somatório dos itens</option>
+
+  <option value="862">862 - Rejeição: Total do FCP ST difere do somatório dos itens</option>
+
+  <option value="863">863 - Rejeição: Total do IPI devolvido difere do somatório dos itens</option>
+
+  <option value="864">864 - Rejeição: NF-e com indicativo de Operação presencial, fora do estabelecimento e não informada NF-e referenciada</option>
+
+  <option value="865">865 - Rejeição 865: Total dos pagamentos menor que o total da nota</option>
+
+  <option value="866">866 - Rejeição: Ausência de troco quando o valor dos pagamentos informados for maior que o total da nota</option>
+
+  <option value="868">868 - Rejeição: Grupos Transportador, Veículo Transporte e Reboque não devem ser informados</option>
+
+  <option value="869">869 - Rejeição: Valor do troco incorreto</option>
+
+  <option value="870">870 - Rejeição Data de validade incompatível com data de fabricação [nItem:nnn]</option>
+
+  <option value="871">871 - Rejeição: O campo Meio de Pagamento deve ser preenchido com a opção Sem Pagamento</option>
+
+  <option value="872">872 - Rejeição: A SEFAZ do destinatário não permite Contribuinte Isento de Inscrição Estadual em operações internas</option>
+
+  <option value="873">873 - Rejeição: Operação com medicamentos e não informado os campos de rastreabilidade [nItem:nnn]</option>
+
+  <option value="874">874 - Rejeição: Percentual de FCP inválido [nItem: nnn]</option>
+
+  <option value="875">875 - Rejeição: Percentual de FCPST inválido [nItem: nnn]</option>
+
+  <option value="876">876 - Rejeição: Operação interestadual para Consumidor Final e valor do FCP informado em campo diferente de vFCPUFDest (id:NA13) [nItem:nnn]</option>
+
+  <option value="877">877 - Rejeição: Data de fabricação maior que a data de processamento [nItem:nnn]</option>
+
+  <option value="879">879 - Rejeição: Informado item “Produzido em Escala NÃO Relevante” e não informado CNPJ do Fabricante [nItem:nnn]</option>
+
+  <option value="880">880 - Rejeição: Percentual de FCP igual a zero [nItem: nnn]</option>
+
+  <option value="881">881 - Rejeição: Percentual de FCP ST igual a zero [nItem: nnn]</option>
+
+  <option value="882">882 - Rejeição: GTIN (cEAN) com prefixo inválido [nItem:999]</option>
+
+  <option value="883">883 - Rejeição: GTIN (cEAN) sem informação [nItem:999]</option>
+
+  <option value="884">884 - Rejeição: GTIN da unidade tributável (cEANTrib) com prefixo inválido [nItem:999]</option>
+
+  <option value="885">885 - Rejeição: GTIN informado, mas não informado o GTIN da unidade tributável [nItem:999]</option>
+
+  <option value="886">886 - Rejeição: GTIN da unidade tributável informado, mas não informado o GTIN [nItem:999]</option>
+
+  <option value="887">887 - Rejeição: Informado GTIN de agrupamento de produtos homogêneos (GTIN-14) no GTIN da unidade tributável [nItem:999]</option>
+
+  <option value="888">888 - Rejeição: GTIN da unidade tributável (cEANTrib) sem informação [nItem:999]</option>
+
+  <option value="889">889 - Rejeição: Obrigatória a informação do GTIN para o produto [nItem:999]</option>
+
+  <option value="890">890 - Rejeição: GTIN inexistente no Cadastro Centralizado de GTIN (CCG) [nItem:999]</option>
+
+  <option value="891">891 - Rejeição: GTIN incompatível com a NCM [nItem:999; NCM esperada: 99999999]</option>
+
+  <option value="892">892 - Rejeição: GTIN incompatível com CEST [nItem:999; CEST esperado: 9999999]</option>
+
+  <option value="893">893 - Rejeição: GTIN da unidade tributável diverge do GTIN Contido cadastrado no CCG [nItem:999; GTIN Contido esperado: 99999999999999]</option>
+
+  <option value="894">894 - Rejeição: GTIN da unidade tributável inexistente no Cadastro Centralizado de GTIN (CCG) [nItem:999]</option>
+
+  <option value="895">895 - Rejeição: GTIN da unidade tributável incompatível com a NCM [nItem:999; NCM esperada: 99999999]</option>
+
+  <option value="896">896 - Rejeição: GTIN da unidade tributável incompatível com CEST [nItem:999; CEST esperado: 9999999]</option>
+
+  <option value="897">897 - Rejeição: Valor Fatura maior que Valor Total da NF-e</option>
+
+  <option value="898">898 - Rejeição: Data de vencimento da parcela não informada ou menor que Data de Autorização</option>
+
+  <option value="899">899 - Rejeição: Informado incorretamente o campo meio de pagamento</option>
+
+  <option value="900">900 - Rejeição: Data de vencimento da parcela não informada ou menor que Data de Emissão</option>
+
+  <option value="901">901 - Rejeição: Valor do Desconto da Fatura maior que o Valor Original da Fatura</option>
+
+  <option value="902">902 - Rejeição: Valor Liquido da Fatura difere do Valor Original menos o Valor do Desconto</option>
+
+  <option value="903">903 - Rejeição: Versão informada no QR-Code (“100”) não é mais válida para a data de emissão</option>
+
+  <option value="904">904 - Rejeição: Informado indevidamente campo valor de pagamento</option>
+
+  <option value="905">905 - Rejeição: Campos do grupo fatura não informados</option>
+
+  <option value="907">907 - Rejeição: Grupo de combustível não pode ter o índice de mistura do Biodiesel</option>
+
+  <option value="908">908 - Rejeição: Obrigatório o preenchimento do índice de mistura do Biodiesel</option>
+
+  <option value="922">922 - Rejeição: Contranota de Produtor só pode referenciar NF-e ou NF de Produtor Modelo 4</option>
+
+  <option value="923">923 - Rejeição: Referenciado documento de operação interna em operação interestadual ou com o exterior</option>
+
+  <option value="924">924 - Rejeição: Informado Cupom Fiscal referenciado</option>
+
+  <option value="925">925 - Rejeição: NF-e com identificação de estrangeiro e inscrição estadual informada para destinatário</option>
+
+  <option value="926">926 - Rejeição: Operação com Exterior e país de destino igual a Brasil</option>
+
+  <option value="927">927 - Rejeição: Número do item fora da ordem sequencial</option>
+
+  <option value="928">928 - Rejeição: Informado código de benefício fiscal para CST sem benefício fiscal [nItem: nnn]</option>
+
+  <option value="929">929 - Rejeição: Informado o CST de Diferimento sem as informações do Diferimento [nItem: nnn]</option>
+
+  <option value="930">930 - Rejeição: CST com benefício fiscal e não informado o código de benefício fiscal [nItem: nnn]</option>
+
+  <option value="931">931 - Rejeição: Informado código de benefício fiscal incompatível com CST e UF [nItem: nnn]</option>
+
+  <option value="932">932 - Rejeição:: Informada modalidade de determinação da BC da ST como MVA e não informado o campo pMVAST [nItem: nnn]</option>
+
+  <option value="933">933 - Rejeição: Informada a modalidade de determinação da BC da ST diferente de MVA e informado o campo pMVAST [nItem: nnn]</option>
+
+  <option value="934">934 - Rejeição: Não informado valor do ICMS desonerado ou o Motivo de desoneração [nItem: nnn]</option>
+
+  <option value="935">935 - Rejeição: Valor total da Base de Cálculo superior ao valor limite estabelecido [Valor Limite: R$ XXX.XXX,XX] (valor definido pela UF)</option>
+
+  <option value="938">938 - Rejeição: Não informada vBCSTRet, pST, vICMSSubstituto e vICMSSTRet [nItem: 999]</option>
+
+  <option value="939">939 - Rejeição: Pedido de cancelamento para NF-e com evento de averbação para exportação</option>
+
+  <option value="940">940 - Rejeição: Pedido de cancelamento para NF-e com evento financeiro</option>
+
+  <option value="941">941 - Rejeição: Número do Regime especial inválido</option>
+
+  <option value="942">942 - Rejeição: IE do local de retirada não cadastrada</option>
+
+  <option value="943">943 - Rejeição: IE do local de retirada não vinculada ao CNPJ</option>
+
+  <option value="944">944 - Rejeição: IE do local de retirada não vinculada ao CPF</option>
+
+  <option value="945">945 - Rejeição: IE do local de entrega não cadastrada</option>
+
+  <option value="946">946 - Rejeição: Informado código de benefício fiscal incorreto ou inexistente na UF [nItem: nnn]</option>
+
+  <option value="947">947 - Rejeição: IE do local de entrega não vinculada ao CNPJ</option>
+
+  <option value="948">948 - Rejeição: IE do local de entrega não vinculada ao CPF</option>
+
+  <option value="958">958 - Rejeição: Somatório dos percentuais originários para a UF do combustível diverge de 100</option>
+
+  <option value="961">961 - Rejeição: CNPJ transacional do pagamento inválido [nOcor:999]</option>
+
+  <option value="963">963 - Rejeição: Tipo de pagamento não aceita o grupo de cartões ou boletos. [nOcor:999]</option>
+
+  <option value="964">964 - Rejeição: Valor do ICMS com retenção difere do calculado</option>
+
+  <option value="965">965 - Rejeição: Valor do troco acima do permitido</option>
+
+  <option value="971">971 - Rejeição: IE inválida [local de retirada/entrega]</option>
+
+  <option value="972">972 - Rejeição: Obrigatória as informações do responsável técnico</option>
+
+  <option value="973">973 - Rejeição: CNPJ do responsável técnico inválido</option>
+
+  <option value="974">974 - Rejeição: CNPJ do responsável técnico diverge do cadastrado</option>
+
+  <option value="975">975 - Rejeiçãp: Obrigatória a informação do identificador do CSRT e do hash do CSRT</option>
+
+  <option value="999">999 - Rejeição: Erro não catalogado</option>
+
+</select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div id="loading-spinner" class="spinner-border spinner-border-sm me-2 d-none" role="status">
+                                                        <span class="visually-hidden">Carregando...</span>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        <i class="bi bi-funnel me-1"></i> Filtrar
+                                                    </button>
+                                                    <button type="reset" class="btn btn-light btn-sm ms-2">
+                                                        <i class="bi bi-x-circle"></i> Limpar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div id="operacional-results">
+                                    
+
+<div class="row g-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-metric h-100 border-primary-subtle">
+            <div class="card-body">
+                <h5 class="card-title text-secondary"><i class="bi bi-files"></i> TOTAL DE NOTAS</h5>
+                <p class="display-4 fw-bold">0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-metric h-100 border-success-subtle">
+            <div class="card-body">
+                <h5 class="card-title text-secondary"><i class="bi bi-cash-coin"></i> VALOR TOTAL (R$)</h5>
+                <p class="display-6 fw-bold">0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-metric h-100 border-success-subtle">
+            <div class="card-body">
+                <h5 class="card-title text-secondary"><i class="bi bi-check-circle"></i> NOTAS AUTORIZADAS</h5>
+                <p class="display-4 fw-bold">0</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card card-metric h-100 border-danger-subtle">
+            <div class="card-body">
+                <h5 class="card-title text-secondary"><i class="bi bi-x-octagon"></i> NOTAS CANCELADAS</h5>
+                <p class="display-4 fw-bold">0</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-end mt-4">
+    <a href="/dashboards/export/pdf/?" class="btn btn-danger" target="_blank">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Gerar Relatório PDF
+    </a>
+</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filter-form');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const resultsContainer = document.getElementById('operacional-results');
+    const formInputs = filterForm.querySelectorAll('input, select');
+    const resetButton = filterForm.querySelector('button[type="reset"]');
+
+    // ===============================
+    // 🔹 1. MANTER A ABA ATIVA APÓS RECARREGAR
+    // ===============================
+    const tabElements = document.querySelectorAll('button[data-bs-toggle="tab"], a[data-bs-toggle="tab"]');
+
+    tabElements.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(event) {
+            // Salva a aba ativa no localStorage
+            localStorage.setItem('activeTab', event.target.getAttribute('data-bs-target'));
+        });
+    });
+
+    const activeTab = localStorage.getItem('activeTab');
+    if (activeTab) {
+        const triggerEl = document.querySelector(`[data-bs-target="${activeTab}"]`);
+        if (triggerEl) {
+            const tab = new bootstrap.Tab(triggerEl);
+            tab.show();
+        }
+    }
+
+    // ===============================
+    // 🔹 2. FUNÇÃO DE DEBOUNCE
+    // ===============================
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func(...args), wait);
+        };
+    }
+
+    // ===============================
+    // 🔹 3. FUNÇÃO AJAX DE FILTRAGEM
+    // ===============================
+    function loadOperationalData() {
+        loadingSpinner.classList.remove('d-none');
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+
+        fetch(`/dashboards/?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Erro na requisição');
+            return response.text();
+        })
+        .then(html => {
+            resultsContainer.innerHTML = html;
+            loadingSpinner.classList.add('d-none');
+        })
+        .catch(error => {
+            console.error('Erro ao carregar dados:', error);
+            resultsContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    Erro ao carregar os dados. Tente novamente.
+                </div>`;
+            loadingSpinner.classList.add('d-none');
+        });
+    }
+
+    const debouncedLoad = debounce(loadOperationalData, 300);
+
+    // ===============================
+    // 🔹 4. EVENTOS DO FORMULÁRIO
+    // ===============================
+
+    // 🔸 Botão FILTRAR (envio AJAX)
+    filterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        loadOperationalData();
+    });
+
+    // 🔸 Atualiza resultados ao alterar filtros
+    formInputs.forEach(input => {
+        if (input.type === 'text' || input.type === 'date') {
+            input.addEventListener('keyup', debouncedLoad);
+        } else {
+            input.addEventListener('change', loadOperationalData);
+        }
+    });
+
+    // 🔸 Botão LIMPAR (reset AJAX)
+    resetButton.addEventListener('click', function(event) {
+        event.preventDefault(); // Evita reload
+        filterForm.reset();     // Reseta os campos
+
+        // Opcional: se quiser remover selects com "choices", redefina manualmente:
+        formInputs.forEach(input => {
+            if (input.tagName === 'SELECT') {
+                input.selectedIndex = 0;
+            }
+        });
+
+        // Recarrega todos os dados (sem filtros)
+        loadOperationalData();
+    });
+});
+</script>
+
+
+        </div>
+    </main>
+
+    <!-- Profile Modal -->
+     <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">
+                        <i class="bi bi-person-gear me-2"></i>
+                        Editar Perfil
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/accounts/update-profile/" id="profileForm">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="6E2EkewPRi1DqxK8wVSdodiGT5cQ8I8VaKpTE4YCAzAco8MXOf5633OCa43Q4pV8">
+                        <!-- User Initial Display -->
+                        <div class="text-center mb-4">
+                            <div class="user-initial mx-auto" style="width: 80px; height: 80px; font-size: 32px;">
+                                P
+                            </div>
+                            <p class="text-muted mt-2">Inicial baseada no seu nome</p>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="Planejamento" required="">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Sobrenome</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3" style="padding-top: 20px;">
+                            <label for="email" class="form-label">E-mail (não editável)</label>
+                            <input type="email" class="form-control" id="email" value="planejamentotributario@grupomgbr.com" disabled="">
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="mb-3">Alterar Senha</h6>
+                        
+                        <!--
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Senha Atual</label>
+                            <div class="password-field">
+                                <input type="password" class="form-control" id="current_password" name="current_password">
+                                <button type="button" class="password-toggle" onclick="togglePassword('current_password')">
+                                    <i class="bi bi-eye" id="current_password_icon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        -->
+                        
+                        <!-- Campo fake invisível para enganar o autofill -->
+                        <input type="text" name="fakeusernameremembered" id="fakeusernameremembered" style="display:none">
+                        <input type="password" name="fakepasswordremembered" id="fakepasswordremembered" style="display:none">
+
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label for="new_password" class="form-label">Nova Senha</label>
+                                <div class="password-field">
+                                    <input type="password" class="form-control" id="new_password" name="new_password" autocomplete="new-password" placeholder="Digite a nova senha">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('new_password')">
+                                        <i class="bi bi-eye" id="new_password_icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="confirm_password" class="form-label">Confirmar Nova Senha</label>
+                                <div class="password-field">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" autocomplete="new-password" placeholder="Confirme a nova senha">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                                        <i class="bi bi-eye" id="confirm_password_icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <small class="text-muted">Deixe os campos de senha em branco se não quiser alterá-la.</small>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="profileForm" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // --- 1. Lógica para carregar Toasts na inicialização ---
+        //const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        //const toastList = toastElList.map(function(toastEl) {
+            // Cria uma instância do Toast e a exibe
+        //    const toast = new bootstrap.Toast(toastEl);
+        //    toast.show();
+        //    return toast;
+        //});
+
+        // Sidebar functionality
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        
+        let isCollapsed = false;
+        let isMobile = window.innerWidth <= 768;
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            if (isMobile) {
+                sidebar.classList.toggle('show');
+                mobileOverlay.classList.toggle('show');
+            } else {
+                isCollapsed = !isCollapsed;
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                toggleIcon.className = isCollapsed ? 'bi bi-chevron-right' : 'bi bi-chevron-left';
+                
+                // Close all dropdowns when collapsing
+                if (isCollapsed) {
+                    document.querySelectorAll('.submenu.show').forEach(submenu => {
+                        submenu.classList.remove('show');
+                    });
+                    document.querySelectorAll('.menu-arrow.rotated').forEach(arrow => {
+                        arrow.classList.remove('rotated');
+                    });
+                }
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        mobileOverlay.addEventListener('click', toggleSidebar);
+
+        // Dropdown functionality
+        document.querySelectorAll('[data-toggle]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (isCollapsed && !isMobile) return;
+                
+                const target = this.getAttribute('data-toggle');
+                const submenu = document.getElementById(target + '-submenu');
+                const arrow = this.querySelector('.menu-arrow');
+                
+                // Close other dropdowns
+                document.querySelectorAll('.submenu.show').forEach(otherSubmenu => {
+                    if (otherSubmenu !== submenu) {
+                        otherSubmenu.classList.remove('show');
+                    }
+                });
+                
+                document.querySelectorAll('.menu-arrow.rotated').forEach(otherArrow => {
+                    if (otherArrow !== arrow) {
+                        otherArrow.classList.remove('rotated');
+                    }
+                });
+                
+                // Toggle current dropdown
+                submenu.classList.toggle('show');
+                arrow.classList.toggle('rotated');
+                
+                // Set active state
+                document.querySelectorAll('.menu-link.active').forEach(activeLink => {
+                    activeLink.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+
+        // User menu functionality
+        const userProfile = document.getElementById('userProfile');
+        const userMenu = document.getElementById('userMenu');
+        
+        userProfile.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userMenu.classList.toggle('show');
+        });
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', function() {
+            userMenu.classList.remove('show');
+        });
+
+        // Password toggle functionality
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '_icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        // Form validation
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const currentPassword = document.getElementById('current_password').value;
+            
+            // Only validate password if user is trying to change it
+            if (newPassword || confirmPassword) {
+                if (!currentPassword) {
+                    e.preventDefault();
+                    alert('Digite sua senha atual para alterar a senha.');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    e.preventDefault();
+                    alert('A nova senha e a confirmação não coincidem.');
+                    return;
+                }
+                
+                if (newPassword.length < 8) {
+                    e.preventDefault();
+                    alert('A nova senha deve ter pelo menos 8 caracteres.');
+                    return;
+                }
+            }
+            
+            // If only current password is filled but no new password
+            if (newPassword && !confirmPassword) {
+                e.preventDefault();
+                alert('Digite a nova senha para alterar sua senha.');
+                return;
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth <= 768;
+            
+            if (wasMobile && !isMobile) {
+                // Switching from mobile to desktop
+                sidebar.classList.remove('show');
+                mobileOverlay.classList.remove('show');
+            } else if (!wasMobile && isMobile) {
+                // Switching from desktop to mobile
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+                isCollapsed = false;
+                toggleIcon.className = 'bi bi-chevron-left';
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set first menu item as active by default
+            const firstMenuItem = document.querySelector('[data-toggle="dashboards"]');
+            if (firstMenuItem) {
+                firstMenuItem.classList.add('active');
+            }
+        });
+
+        // CHAT
+        //window.$crisp=[];
+        //window.CRISP_WEBSITE_ID="2b84f14e-1162-4798-a613-1c317291e208";
+        //(function(){
+        //    d=document;
+        //    s=d.createElement("script");
+        //    s.src="https://client.crisp.chat/l.js";
+        //    s.async=1;
+        //    d.getElementsByTagName("head")[0].appendChild(s);
+        //   window.$crisp.push(["set", "user:email", "planejamentotributario@grupomgbr.com"]);
+        //    window.$crisp.push(["set", "user:nickname", "Planejamento"]);
+        //    window.$crisp.push(["set", "user:segments", ["Cliente App Django"]]);
+        //})();
+
+
+    </script>
+
+</body></html>

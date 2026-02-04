@@ -1,0 +1,2240 @@
+<html lang="pt-br"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="joxRGSMpy1fMyQtn07hmfGa4I8ZG56xt24XEg17pPBqRrhltdTva66yPiv61wwd4">
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #8C40F0;
+            --secondary-color: #FF8C40;
+            --dark-color: #000000;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 1050;
+            width: 250px;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .sidebar-header .app-version {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .sidebar.collapsed .app-version {
+            display: none;
+        }
+        .sidebar:not(.collapsed) .app-version {
+            display: inline;
+        }
+
+        .logo-full {
+            height: 75px;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo-mini {
+            width: 30px;
+            height: 30px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .logo-full {
+            display: none;
+        }
+
+        .sidebar.collapsed .logo-mini {
+            display: flex;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 18px;
+            padding: 2px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .menu-link:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .menu-link.active {
+            background-color: rgba(140, 64, 240, 0.1);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .menu-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .menu-text {
+            margin-left: 12px;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-arrow.rotated {
+            transform: rotate(180deg);
+        }
+
+        .sidebar.collapsed .menu-text,
+        .sidebar.collapsed .menu-arrow {
+            opacity: 0;
+            width: 0;
+            margin: 0;
+        }
+
+        .submenu {
+            background-color: #f8f9fa;
+            border-left: 2px solid var(--primary-color);
+            margin-left: 20px;
+            display: none;
+        }
+
+        .submenu.show {
+            display: block;
+        }
+
+        .sidebar.collapsed .submenu {
+            display: none !important;
+        }
+
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 8px 24px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .submenu-link:hover {
+            background-color: white;
+            color: #374151;
+        }
+
+        .submenu-icon {
+            font-size: 14px;
+            width: 16px;
+            margin-right: 8px;
+        }
+
+        .user-section {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-initial {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            border: 1px solid var(--primary-color);
+        }
+
+        .user-info {
+            margin-left: 12px;
+            flex: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .user-email {
+            color: #6b7280;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .sidebar.collapsed .user-info {
+            display: none;
+        }
+
+        .user-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .user-menu.show {
+            display: block;
+        }
+
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .user-menu-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-menu-item.danger {
+            color: #dc3545;
+        }
+
+        .user-menu-item i {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            min-height: 50vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 70px;
+        }
+
+        .content-wrapper {
+            padding: 0.5rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-card.purple {
+            background: linear-gradient(135deg, var(--primary-color), #7C3AED);
+            color: white;
+        }
+
+        .stats-card.orange {
+            background: linear-gradient(135deg, var(--secondary-color), #F97316);
+            color: white;
+        }
+
+        .stats-card.dark {
+            background: linear-gradient(135deg, #374151, var(--dark-color));
+            color: white;
+        }
+
+        .stats-icon {
+            font-size: 48px;
+            opacity: 0.8;
+        }
+
+        .stats-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .stats-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .btn-secondary-custom {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: #F97316;
+            border-color: #F97316;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(140, 64, 240, 0.25);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+                display: none;
+            }
+            
+            .mobile-overlay.show {
+                display: block;
+            }
+        }
+
+        /* Scrollbar customization */
+        .sidebar-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+    </style>
+    
+</head>
+<body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <!-- Header -->
+        <div class="sidebar-header">
+            <div class="d-flex align-items-center">
+                <img src="/static/images/logo_completa.png" class="logo-full">
+                <img src="/static/images/logo.png" class="logo-mini">
+                <span class="app-version ms-2">v1.0.0</span>
+            </div>
+            <button class="toggle-btn" id="toggleSidebar">
+                <i class="bi bi-chevron-left" id="toggleIcon"></i>
+            </button>
+        </div>
+
+        <!-- Menu -->
+        <div class="sidebar-menu">
+            <!-- Dashboards -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="dashboards">
+                    <i class="bi bi-speedometer2 menu-icon"></i>
+                    <span class="menu-text">Dashboards</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="dashboards-submenu">
+                    <a href="/dashboards/" class="submenu-link">
+                        <i class="bi bi-house submenu-icon"></i>
+                        Dashboard Principal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Arquivos SPEDs -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="speds">
+                    <i class="bi bi-file-earmark-code menu-icon"></i>
+                    <span class="menu-text">SPEDs</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="speds-submenu">
+                    <a href="/importar-sped/" class="submenu-link">
+                        <i class="bi bi-upload submenu-icon"></i>
+                        Importar SPED
+                    </a>
+                    <a href="/exportar-sped/" class="submenu-link">
+                        <i class="bi bi-download submenu-icon"></i>
+                        Gerar SPED
+                    </a>
+                    <a href="/excluir-sped/" class="submenu-link">
+                        <i class="bi bi-trash submenu-icon"></i>
+                        Excluir SPED
+                    </a>
+                    <a href="/importar-xmls/" class="submenu-link">
+                        <i class="bi bi-filetype-xml submenu-icon"></i>
+                        Importar XMLs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Notas Fiscais -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="notas">
+                    <i class="bi bi-receipt menu-icon"></i>
+                    <span class="menu-text">Notas Fiscais</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="notas-submenu">
+                    <a href="/api/documentos-fiscais/" class="submenu-link">
+                        <i class="bi bi-search submenu-icon"></i>
+                        Gerenciamento de Documentos
+                    </a>
+                </div>
+            </div>
+
+            <!-- Reforma Tributária -->
+            <div class="menu-item">
+                <a href="#" class="menu-link active" data-toggle="reforma">
+                    <i class="bi bi-shield-fill-check menu-icon"></i>
+                    <span class="menu-text">Reforma Tributária</span>
+                    <i class="bi bi-chevron-down menu-arrow rotated"></i>
+                </a>
+                <div class="submenu show" id="reforma-submenu">
+                    <a href="/reforma-tributaria/consulta-gtin/" class="submenu-link">
+                        <i class="bi bi-clipboard2-check-fill submenu-icon"></i>
+                        GTIN X NCM
+                    </a>
+                    <a href="/em-desenvolvimento/" class="submenu-link">
+                        <i class="bi bi-robot submenu-icon"></i>
+                        NCM Inteligente
+                    </a>
+                    <a href="/reforma-tributaria/consulta/" class="submenu-link">
+                        <i class="bi bi-card-checklist submenu-icon"></i>
+                        NCM X cClassTrib
+                    </a>
+                    <a href="/dashboards/relatorio-fiscal/" class="submenu-link">
+                        <i class="bi bi-speedometer2 submenu-icon"></i>
+                        Relatórios
+                    </a>
+                </div>
+            </div>
+
+            <!-- Configurações -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="config">
+                    <i class="bi bi-gear menu-icon"></i>
+                    <span class="menu-text">Configurações</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="config-submenu">
+                    <a href="/empresa/" class="submenu-link">
+                        <i class="bi bi-building submenu-icon"></i>
+                        Empresas
+                    </a>
+                    <a href="/accounts/" class="submenu-link">
+                        <i class="bi bi-people submenu-icon"></i>
+                        Usuários
+                    </a>
+                    <a href="/utilitarios/" class="submenu-link">
+                        <i class="bi bi-sliders submenu-icon"></i>
+                        Logs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Suporte -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="suporte">
+                    <i class="bi bi-headset menu-icon"></i>
+                    <span class="menu-text">Suporte</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="suporte-submenu">
+                    <a href="https://wa.link/6bqejl" class="submenu-link" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-telephone submenu-icon"></i>
+                        WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Section -->
+        <div class="user-section">
+            <div class="user-menu" id="userMenu">
+                <button class="user-menu-item" data-bs-toggle="modal" data-bs-target="#profileModal">
+                    <i class="bi bi-person-gear"></i>
+                    Editar Perfil
+                </button>
+                <form method="POST" action="/accounts/logout/" style="margin: 0;">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="joxRGSMpy1fMyQtn07hmfGa4I8ZG56xt24XEg17pPBqRrhltdTva66yPiv61wwd4">
+                    <button type="submit" class="user-menu-item danger" onclick="return confirm('Tem certeza que deseja sair?')">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Sair
+                    </button>
+                </form>
+            </div>
+            <div class="user-profile" id="userProfile">
+                <div class="user-initial">P</div>
+                <div class="user-info">
+                    <p class="user-name">Planejamento </p>
+                    <p class="user-email">planejamentotributario@grupomgbr.com</p>
+                </div>
+                <i class="bi bi-three-dots-vertical text-muted"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="content-wrapper">
+            <!-- Messages -->
+            <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+                
+            </div>
+
+            <!-- Content Block -->
+            
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContPRO - Consulta GTIN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group select:disabled,
+        .form-group input:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+        }
+
+        .results-container {
+            margin-top: 30px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-height: 500px;
+            overflow-y: auto;
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr {
+            transition: all 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .row-correto {
+            background: #d4edda !important;
+        }
+
+        .row-diferente {
+            background: #c98f8f !important;
+        }
+
+        .btn-corrigir {
+            padding: 6px 12px;
+            background: #ffc107;
+            color: #333;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-corrigir:hover {
+            background: #e0a800;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .close:hover {
+            opacity: 0.8;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .file-upload-area:hover {
+            background: #e9ecef;
+            border-color: #764ba2;
+        }
+
+        .file-upload-area.dragover {
+            background: #e7f0ff;
+            border-color: #667eea;
+        }
+
+        .file-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .file-item button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Spinner */
+        .spinner-overlay {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Limitar texto a 15 caracteres com tooltip */
+        .truncate-cell {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        /* Scroll vertical */
+        .tabela-scroll {
+            max-height: 300px;
+            overflow-y: auto;
+            display: block;
+        }
+
+        /* Paginação */
+        #paginacao button {
+            padding: 5px 12px;
+            margin: 4px 4px;
+            margin-bottom: 4px;
+            border: 1px solid #999;
+            background: #f2f2f2;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #paginacao button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #paginacao span {
+            margin: 0 10px;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+
+
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Consulta GTIN - SEFAZ</h1>
+            <p>Sistema de Validação de NCM via Código de Barras</p>
+        </div>
+
+        <div class="content">
+            <input type="hidden" name="csrfmiddlewaretoken" value="joxRGSMpy1fMyQtn07hmfGa4I8ZG56xt24XEg17pPBqRrhltdTva66yPiv61wwd4">
+            <!-- Filtros -->
+            <div class="filters">
+                <div class="form-group">
+                    <label for="empresaSelect">Empresa (com certificado digital)*</label>
+                    <select id="empresaSelect"><option value="">Selecione uma empresa</option></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fonteSelect">Fonte de Dados</label>
+                    <select id="fonteSelect" disabled="">
+                        <option value="">Selecione a fonte</option>
+                        <option value="fiscal">Fiscal (SPED Fiscal)</option>
+                        <option value="registro">Registro (SPED Contribuições)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="periodoInicialSelect">Período Inicial</label>
+                    <select id="periodoInicialSelect" disabled="">
+                        <option value="">Selecione o período inicial</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="periodoFinalSelect">Período Final</label>
+                    <select id="periodoFinalSelect" disabled="">
+                        <option value="">Selecione o período final</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="actions">
+                <button class="btn btn-primary" id="btnBuscarSPED" disabled="">
+                    📊 Buscar do SPED
+                </button>
+                <button class="btn btn-success" id="btnBuscarXML" disabled="">
+                    📄 Buscar do XML
+                </button>
+                <button class="btn btn-secondary" id="btnExportar" disabled="">
+                    📥 Exportar Excel
+                </button>
+                <button class="btn btn-secondary" id="btnProcessar" disabled="">
+                    📥 Consultar Produtos
+                </button>
+                <button class="btn btn-warning" style="margin-bottom:15px;" onclick="corrigirSelecionados()" id="btnCorrigir" disabled="">
+                    🔧 Corrigir Selecionados
+                </button>
+            </div>
+
+            <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" id="filtroDiferentes" onchange="aplicarFiltro()">
+                <label class="form-check-label" for="filtroDiferentes">
+                    Mostrar apenas NCMs divergentes
+                </label>
+            </div>
+
+            <!-- Área de Resultados -->
+            <div class="results-container" id="resultsContainer" style="display: none;">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="checkAll" onclick="toggleSelectAll(this)"></th>
+                                <th>Código</th>
+                                <th>Cód. Barras</th>
+                                <th>Descrição</th>
+                                <th>Descrição Consulta</th>
+                                <th>Unidade</th>
+                                <th>NCM Cadastro</th>
+                                <th>NCM Consulta</th>
+                                <th>Retorno SEFAZ</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Paginação -->
+                <div id="paginacao" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal XML -->
+    <div id="xmlModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Importar Arquivos XML</h2>
+                <button class="close" onclick="fecharModalXML()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="file-upload-area" id="dropArea">
+                    <p style="font-size: 18px; margin-bottom: 10px;">📁 Arraste arquivos XML aqui</p>
+                    <p style="color: #666; margin-bottom: 15px;">ou</p>
+                    <input type="file" id="fileInput" multiple="" accept=".xml" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Selecionar Arquivos
+                    </button>
+                </div>
+                <div class="file-list" id="fileList"></div>
+                <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="fecharModalXML()">Cancelar</button>
+                    <button class="btn btn-primary" id="btnProcessarXML" onclick="processarXML()">Processar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spinner -->
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner-content">
+            <div class="spinner"></div>
+            <div class="spinner-text" id="spinnerText">Carregando...</div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let empresaSelecionada = null;
+        let produtosCarregados = [];
+        let produtosFiltrados = [];
+        let arquivosXML = [];
+        let paginaAtual = 1;
+        const linhasPorPagina = 1000;
+
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function truncateText(text, length = 20) {
+            if (text == null) return '';
+            return text.length > length ? text.substring(0, length) : text;
+        }
+
+        function aplicarFiltro() {
+            const somenteDiferentes = document.getElementById("filtroDiferentes").checked;
+
+            if (somenteDiferentes) {
+                produtosFiltrados = produtosCarregados.filter(p => 
+                    p.ncm && 
+                    p.ncm_consulta && 
+                    p.ncm.trim() !== p.ncm_consulta.trim() &&
+                    p.ncm_consulta !== 'Não encontrado'
+                );
+            } else {
+                produtosFiltrados = [...produtosCarregados];
+            }
+
+            paginaAtual = 1;
+            atualizarTabela();
+        }
+
+        /* --------------------------
+        FUNÇÃO AUXILIAR: célula truncada com tooltip
+        ----------------------------*/
+        function criarCelula(texto) {
+            const td = document.createElement("td");
+            td.classList.add("truncate-cell");
+            td.textContent = texto ? texto.substring(0, 15) : "";
+            td.title = texto ?? "";
+            return td;
+        }
+
+        /* --------------------------
+        CÁLCULO DA PÁGINA
+        ----------------------------*/
+        function obterPagina(pagina) {
+            const inicio = (pagina - 1) * linhasPorPagina;
+            return produtosCarregados.slice(inicio, inicio + linhasPorPagina);
+        }
+
+        /* --------------------------
+        ATUALIZAR PAGINAÇÃO
+        ----------------------------*/
+        function atualizarPaginacao(totalRegistros) {
+            const elemTotalPaginas = document.getElementById("totalPaginas");
+            const elemPaginaAtual = document.getElementById("paginaAtual");
+            const btnAnterior = document.getElementById("btnAnterior");
+            const btnProximo = document.getElementById("btnProximo");
+
+            // Se a paginação não existir na tela ainda, não faz nada
+            if (!elemTotalPaginas || !elemPaginaAtual || !btnAnterior || !btnProximo) {
+                return;
+            }
+
+            totalRegistros = totalRegistros || produtosFiltrados.length || produtosCarregados.length;
+
+            const totalPaginas = Math.ceil(totalRegistros / linhasPorPagina);
+
+            elemTotalPaginas.innerText = totalPaginas;
+            elemPaginaAtual.innerText = paginaAtual;
+
+            btnAnterior.disabled = paginaAtual === 1;
+            btnProximo.disabled = paginaAtual === totalPaginas;
+        }
+
+        function paginaAnterior() {
+            if (paginaAtual > 1) {
+                paginaAtual--;
+                atualizarTabela();
+            }
+        }
+
+        function proximaPagina() {
+            const totalPaginas = Math.ceil(produtosCarregados.length / linhasPorPagina);
+            if (paginaAtual < totalPaginas) {
+                paginaAtual++;
+                atualizarTabela();
+            }
+        }
+
+        // Função para obter o CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        // Carregar empresas ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarEmpresas();
+            configurarEventos();
+        });
+
+        function configurarEventos() {
+            document.getElementById('empresaSelect').addEventListener('change', onEmpresaChange);
+            document.getElementById('fonteSelect').addEventListener('change', onFonteChange);
+            document.getElementById('btnBuscarSPED').addEventListener('click', buscarSPED);
+            document.getElementById('btnBuscarXML').addEventListener('click', () => {
+                document.getElementById('xmlModal').style.display = 'block';
+            });
+            document.getElementById('btnExportar').addEventListener('click', exportarExcel);
+            document.getElementById('btnProcessar').addEventListener('click', consultarGTINs);
+
+            
+            // Eventos do drop area
+            const dropArea = document.getElementById('dropArea');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+            });
+            
+            dropArea.addEventListener('drop', handleDrop, false);
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        async function carregarEmpresas() {
+            try {
+                const response = await fetch('/reforma-tributaria/api/empresas/');
+                const empresas = await response.json();
+                
+                const select = document.getElementById('empresaSelect');
+                select.innerHTML = '<option value="">Selecione uma empresa</option>';
+                
+                empresas.forEach(empresa => {
+                    const option = document.createElement('option');
+                    option.value = empresa.id;
+
+                    // Formata o CNPJ (caso venha sem máscara)
+                    const formatarCNPJ = (cnpj_cpf) => {
+                        if (cnpj_cpf.length === 14) {
+                            return `${cnpj_cpf.substr(0,2)}.${cnpj_cpf.substr(2,3)}.${cnpj_cpf.substr(5,3)}/${cnpj_cpf.substr(8,4)}-${cnpj_cpf.substr(12,2)}`;
+                        }
+                        else if (cnpj_cpf.length === 11) {
+                            return `${cnpj_cpf.substr(0,3)}.${cnpj_cpf.substr(3,3)}.${cnpj_cpf.substr(6,3)}-${cnpj_cpf.substr(9,2)}`;
+                        }
+                        return cnpj_cpf;
+                    };
+
+                    option.textContent = `${formatarCNPJ(empresa.cnpj_cpf)} - ${empresa.razao_social}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar empresas:', error);
+                alert('Erro ao carregar empresas. Verifique o console.');
+            }
+        }
+
+        async function onEmpresaChange(e) {
+            empresaSelecionada = e.target.value;
+            
+            if (empresaSelecionada) {
+                document.getElementById('fonteSelect').disabled = false;
+                //document.getElementById('btnBuscarXML').disabled = false;
+            } else {
+                document.getElementById('fonteSelect').disabled = true;
+                document.getElementById('fonteSelect').value = '';
+                document.getElementById('btnBuscarXML').disabled = true;
+                limparPeriodos();
+            }
+        }
+
+        async function onFonteChange(e) {
+            const fonte = e.target.value;
+            
+            if (!fonte || !empresaSelecionada) {
+                limparPeriodos();
+                return;
+            }
+            
+            await carregarPeriodos(fonte);
+        }
+
+        async function carregarPeriodos(fonte) {
+            try {
+                mostrarSpinner('Carregando períodos...');
+                
+                const response = await fetch(`/reforma-tributaria/api/periodos/?empresa_id=${empresaSelecionada}&fonte=${fonte}`);
+                const periodos = await response.json();
+                
+                const selectInicial = document.getElementById('periodoInicialSelect');
+                const selectFinal = document.getElementById('periodoFinalSelect');
+                
+                selectInicial.innerHTML = '<option value="">Selecione o período inicial</option>';
+                selectFinal.innerHTML = '<option value="">Selecione o período final</option>';
+                
+                periodos.forEach(periodo => {
+                    const optionInicial = document.createElement('option');
+                    optionInicial.value = periodo.id;
+                    optionInicial.textContent = periodo.label;
+                    optionInicial.dataset.dtIni = periodo.dt_ini;
+                    optionInicial.dataset.dtFin = periodo.dt_fin;
+                    selectInicial.appendChild(optionInicial);
+                    
+                    const optionFinal = document.createElement('option');
+                    optionFinal.value = periodo.id;
+                    optionFinal.textContent = periodo.label;
+                    optionFinal.dataset.dtIni = periodo.dt_ini;
+                    optionFinal.dataset.dtFin = periodo.dt_fin;
+                    selectFinal.appendChild(optionFinal);
+                });
+                
+                selectInicial.disabled = false;
+                selectFinal.disabled = false;
+                document.getElementById('btnBuscarSPED').disabled = false;
+                
+                esconderSpinner();
+            } catch (error) {
+                console.error('Erro ao carregar períodos:', error);
+                esconderSpinner();
+                alert('Erro ao carregar períodos. Verifique o console.');
+            }
+        }
+
+        function limparPeriodos() {
+            document.getElementById('periodoInicialSelect').innerHTML = '<option value="">Selecione o período inicial</option>';
+            document.getElementById('periodoFinalSelect').innerHTML = '<option value="">Selecione o período final</option>';
+            document.getElementById('periodoInicialSelect').disabled = true;
+            document.getElementById('periodoFinalSelect').disabled = true;
+            document.getElementById('btnBuscarSPED').disabled = true;
+        }
+
+        async function buscarSPED() {
+            const fonte = document.getElementById('fonteSelect').value;
+            const periodoInicial = document.getElementById('periodoInicialSelect').value;
+            const periodoFinal = document.getElementById('periodoFinalSelect').value;
+            
+            if (!empresaSelecionada || !fonte || !periodoInicial || !periodoFinal) {
+                alert('Preencha todos os campos obrigatórios!');
+                return;
+            }
+            
+            try {
+                mostrarSpinner('Buscando produtos...');
+                
+                // Obter todos os períodos entre inicial e final
+                const selectInicial = document.getElementById('periodoInicialSelect');
+                const selectFinal = document.getElementById('periodoFinalSelect');
+                const indexInicial = Array.from(selectInicial.options).findIndex(opt => opt.value === periodoInicial);
+                const indexFinal = Array.from(selectFinal.options).findIndex(opt => opt.value === periodoFinal);
+                
+                const periodoIds = [];
+                for (let i = indexInicial; i <= indexFinal; i++) {
+                    const option = selectInicial.options[i];
+                    if (option.value) {
+                        periodoIds.push(option.value);
+                    }
+                }
+                
+                const response = await fetch('/reforma-tributaria/api/buscar-sped/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "X-CSRFToken": csrftoken
+                    },
+                    body: JSON.stringify({
+                        empresa_id: empresaSelecionada,
+                        fonte: fonte,
+                        periodo_ids: periodoIds
+                    })
+                });
+                
+                const data = await response.json();
+                produtosCarregados = data.produtos;
+                
+                esconderSpinner();
+                
+                if (produtosCarregados.length === 0) {
+                    alert('Nenhum produto encontrado com código de barras válido (8+ dígitos numéricos).');
+                    return;
+                }
+                
+                // Iniciar consulta dos GTINs
+                //await consultarGTINs();
+                exibirProdutosCarregados();
+
+                document.getElementById('btnProcessar').disabled = false;
+                
+            } catch (error) {
+                console.error('Erro ao buscar produtos:', error);
+                esconderSpinner();
+                alert('Erro ao buscar produtos. Verifique o console.');
+            }
+        }
+
+        function exibirProdutosCarregados() {
+            // garante que a lista filtrada começa como a completa
+            produtosFiltrados = [...produtosCarregados];
+            paginaAtual = 1;
+
+            // mostra o container de resultados
+            document.getElementById('resultsContainer').style.display = 'block';
+
+            // habilita o botão de processar (consultar)
+            document.getElementById('btnProcessar').disabled = false;
+
+            // atualiza a tabela usando a função existente (que já faz paginação)
+            atualizarTabela();
+        }
+
+        async function consultarGTINs() {
+            const total = produtosCarregados.length;
+            let consultados = 0;
+            
+            mostrarSpinner(`Consultando ${consultados} de ${total} produtos...`);
+            
+            document.getElementById('resultsContainer').style.display = 'block';
+            
+            for (let i = 0; i < produtosCarregados.length; i++) {
+                const produto = produtosCarregados[i];
+
+                consultados++;
+                mostrarSpinner(`Consultando ${consultados} de ${total}`);
+                
+                try {
+                    const response = await fetch('/reforma-tributaria/api/consultar-gtin/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            "X-CSRFToken": csrftoken
+                        },
+                        body: JSON.stringify({
+                            empresa_id: empresaSelecionada,
+                            gtin: produto.cod_barra
+                        })
+                    });
+                    
+                    const resultado = await response.json();
+
+                    produto.ncm_consulta = resultado.ncm || 'Não encontrado';
+                    produto.descricao_consulta = resultado.descricao_produto || '';
+                    produto.descr_consulta = resultado.descricao_produto || '';
+                    produto.retorno_sefaz = resultado.xMotivo || '';
+                    
+                } catch (error) {
+                    console.error(`Erro ao consultar GTIN ${produto.cod_barra}:`, error);
+                    produto.ncm_consulta = 'Erro na consulta';
+                    produto.retorno_sefaz = '';
+                    produto.descricao_consulta = '';
+                        }
+                
+            }
+            
+            esconderSpinner();
+            aplicarFiltro();
+            document.getElementById('btnExportar').disabled = false;
+        }
+
+        function adicionarLinhaTabela(produto) {
+            const tbody = document.getElementById('tableBody');
+
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-id', produto.id);
+
+            // Verificar se pode ser selecionado
+            const podeSelecionar = produto.ncm !== produto.ncm_consulta && produto.ncm_consulta !== 'Não encontrado' && produto.ncm_consulta !== undefined;
+
+            // classes de linha
+            if (produto.ncm === produto.ncm_consulta) {
+                tr.className = 'row-correto';
+            } 
+            if (produto.ncm !== produto.ncm_consulta && produto.ncm_consulta !== 'Não encontrado' && produto.ncm_consulta !== undefined) {
+                tr.className = 'row-diferente';
+            }
+
+            // Helper para criar td truncada com tooltip
+            function tdTrunc(texto) {
+                const td = document.createElement('td');
+                td.className = 'truncate-cell';
+                td.textContent = truncateText(texto, 15);
+                td.title = escapeHtml(texto);
+                return td;
+            }
+
+            // checkbox
+            const tdCheck = document.createElement('td');
+            tdCheck.innerHTML = `<input type="checkbox" class="select-produto" 
+                                data-id="${produto.id}" 
+                                data-ncm="${produto.ncm_consulta}"
+                                data-fonte="${produto.fonte}"
+                                ${podeSelecionar ? "" : "disabled"}>`;
+            tr.appendChild(tdCheck);
+
+            // colunas (usar tdTrunc onde fizer sentido)
+            tr.appendChild(tdTrunc(produto.cod_prod));
+            tr.appendChild(tdTrunc(produto.cod_barra));
+            tr.appendChild(tdTrunc(produto.descr_item));
+            tr.appendChild(tdTrunc(produto.descricao_consulta || produto.descr_consulta || '-'));
+            tr.appendChild(tdTrunc(produto.unid));
+            tr.appendChild(tdTrunc(produto.ncm));
+            tr.appendChild(tdTrunc(produto.ncm_consulta || '-'));
+            tr.appendChild(tdTrunc(produto.retorno_sefaz || '-'));
+
+            // ações (manter botão individual)
+            const tdAcoes = document.createElement('td');
+            tdAcoes.innerHTML = (produto.ncm !== produto.ncm_consulta && produto.ncm_consulta !== 'Não encontrado' && produto.ncm_consulta !== 'Erro na consulta' && produto.ncm_consulta !== undefined)
+                ? `<button class="btn-corrigir" onclick="corrigirNCM('${produto.id}', '${produto.fonte}', '${produto.ncm_consulta}')">Corrigir</button>`
+                : '-';
+            tr.appendChild(tdAcoes);
+
+            if (produto.ncm !== produto.ncm_consulta && produto.ncm_consulta !== 'Não encontrado' && produto.ncm_consulta !== undefined) {
+                document.getElementById('btnCorrigir').disabled = false;
+            }
+
+            tbody.appendChild(tr);
+        }
+
+        async function corrigirNCM(produtoId, fonte, novoNCM) {
+            if (!confirm(`Deseja realmente corrigir o NCM para ${novoNCM}?`)) {
+                return;
+            }
+            
+            try {
+                mostrarSpinner('Corrigindo NCM...');
+                
+                const response = await fetch('/reforma-tributaria/api/corrigir-ncm/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "X-CSRFToken": csrftoken
+                    },
+                    body: JSON.stringify({
+                        produto_id: produtoId,
+                        fonte: fonte,
+                        novo_ncm: novoNCM
+                    })
+                });
+                
+                const data = await response.json();
+                
+                esconderSpinner();
+                
+                if (data.success) {
+                    alert('NCM corrigido com sucesso!');
+                    // Atualizar a linha na tabela
+                    const produto = produtosCarregados.find(p => p.id == produtoId);
+                    if (produto) {
+                        produto.ncm = novoNCM;
+                        atualizarTabela();
+                    }
+                } else {
+                    alert('Erro ao corrigir NCM: ' + data.error);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao corrigir NCM:', error);
+                esconderSpinner();
+                alert('Erro ao corrigir NCM. Verifique o console.');
+            }
+        }
+
+        function atualizarTabela() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            // Se não estiver filtrado ainda, assume lista completa
+            const lista = produtosFiltrados.length ? produtosFiltrados : produtosCarregados;
+
+            // Calcula o intervalo de produtos exibidos na página atual
+            const inicio = (paginaAtual - 1) * linhasPorPagina;
+            const fim = inicio + linhasPorPagina;
+
+            const pagina = lista.slice(inicio, fim);
+
+            // Renderiza apenas os itens da página atual
+            pagina.forEach(produto => {
+                adicionarLinhaTabela(produto);
+            });
+
+            atualizarPaginacao(lista.length);
+        }
+
+        function atualizarTabelaFiltrada() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            produtosFiltrados.forEach(produto => {
+                adicionarLinhaTabela(produto);
+            });
+
+            atualizarContador();
+        }
+
+        function atualizarContador() {
+            const total = produtosFiltrados.length;
+            document.getElementById("contadorProdutos").innerText = total;
+        }
+
+        async function exportarExcel() {
+            if (produtosCarregados.length === 0) {
+                alert('Não há dados para exportar!');
+                return;
+            }
+            
+            try {
+                mostrarSpinner('Gerando planilha...');
+                
+                const response = await fetch('/reforma-tributaria/api/exportar-excel/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "X-CSRFToken": csrftoken
+                    },
+                    body: JSON.stringify({
+                        produtos: produtosCarregados
+                    })
+                });
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `consulta_gtin_${new Date().getTime()}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                esconderSpinner();
+                
+            } catch (error) {
+                console.error('Erro ao exportar:', error);
+                esconderSpinner();
+                alert('Erro ao exportar. Verifique o console.');
+            }
+        }
+
+        // Funções do Modal XML
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            arquivosXML = Array.from(files).filter(file => file.name.endsWith('.xml'));
+            exibirArquivos();
+        }
+
+        function exibirArquivos() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            if (arquivosXML.length === 0) {
+                fileList.innerHTML = '<p style="text-align: center; color: #666;">Nenhum arquivo selecionado</p>';
+                return;
+            }
+            
+            arquivosXML.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>📄 ${file.name}</span>
+                    <button onclick="removerArquivo(${index})">Remover</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removerArquivo(index) {
+            arquivosXML.splice(index, 1);
+            exibirArquivos();
+        }
+
+        function fecharModalXML() {
+            document.getElementById('xmlModal').style.display = 'none';
+            arquivosXML = [];
+            document.getElementById('fileList').innerHTML = '';
+            document.getElementById('fileInput').value = '';
+        }
+
+        async function processarXML() {
+            if (arquivosXML.length === 0) {
+                alert('Selecione pelo menos um arquivo XML!');
+                return;
+            }
+            
+            try {
+                mostrarSpinner('Processando XMLs...');
+                
+                const formData = new FormData();
+                arquivosXML.forEach(file => {
+                    formData.append('arquivos', file);
+                });
+                
+                const response = await fetch('/reforma-tributaria/api/processar-xml/', {
+                    method: 'POST',
+                    headers: {
+                        "X-CSRFToken": csrftoken
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.produtos && data.produtos.length > 0) {
+                    produtosCarregados = data.produtos;
+                    fecharModalXML();
+                    await consultarGTINs();
+                } else {
+                    esconderSpinner();
+                    alert('Nenhum produto encontrado nos XMLs ou erro no processamento.');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao processar XMLs:', error);
+                esconderSpinner();
+                alert('Erro ao processar XMLs. Verifique o console.');
+            }
+        }
+
+        // Funções auxiliares
+        function mostrarSpinner(texto) {
+            document.getElementById('spinnerText').textContent = texto;
+            document.getElementById('spinnerOverlay').style.display = 'flex';
+        }
+
+        function esconderSpinner() {
+            document.getElementById('spinnerOverlay').style.display = 'none';
+        }
+
+        function toggleSelectAll(master) {
+            document.querySelectorAll('.select-produto').forEach(chk => {
+                if (!chk.disabled) {
+                    chk.checked = master.checked;
+                } else {
+                    chk.checked = false; // segurança extra
+                }
+            });
+        }
+
+        function corrigirSelecionados() {
+            const selecionados = [...document.querySelectorAll('.select-produto:checked')];
+
+            if (selecionados.length === 0) {
+                alert("Nenhum produto selecionado.");
+                return;
+            }
+
+            // Monta uma lista de objetos {id, ncm}
+            const itensParaCorrigir = selecionados.map(s => ({
+                id: s.dataset.id,
+                ncm: s.dataset.ncm
+            }));
+
+            if (!confirm(`Corrigir ${itensParaCorrigir.length} produtos com seus respectivos NCMs de consulta?`)) {
+                return;
+            }
+
+            const fonte = selecionados[0].dataset.fonte;
+
+            aplicarCorrecaoLote(itensParaCorrigir, fonte);
+        }
+
+        async function aplicarCorrecaoLote(itens, fonte) {
+            try {
+                mostrarSpinner("Aplicando correções...");
+
+                const response = await fetch('/reforma-tributaria/api/corrigir-ncm-lote/', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrftoken
+                    },
+                    body: JSON.stringify({
+                        itens: itens,   // agora vai a lista de {id, ncm}
+                        fonte: fonte
+                    })
+                });
+
+                const data = await response.json();
+                esconderSpinner();
+
+                if (data.success) {
+                    alert(`Correção aplicada a ${itens.length} produtos.`);
+
+                    // Atualiza apenas os itens alterados
+                    itens.forEach(item => {
+                        const produto = produtosCarregados.find(p => p.id == item.id);
+                        if (produto) {
+                            produto.ncm = item.ncm; // atualiza o NCM correto
+                        }
+                    });
+
+                    atualizarTabela();
+
+                } else {
+                    alert("Erro ao corrigir: " + data.message);
+                }
+
+            } catch (error) {
+                esconderSpinner();
+                alert("Erro ao aplicar correção em lote.");
+                console.error(error);
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('xmlModal');
+            if (event.target == modal) {
+                fecharModalXML();
+            }
+        }
+    </script>
+
+
+
+        </div>
+    </main>
+
+    <!-- Profile Modal -->
+     <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">
+                        <i class="bi bi-person-gear me-2"></i>
+                        Editar Perfil
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/accounts/update-profile/" id="profileForm">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="joxRGSMpy1fMyQtn07hmfGa4I8ZG56xt24XEg17pPBqRrhltdTva66yPiv61wwd4">
+                        <!-- User Initial Display -->
+                        <div class="text-center mb-4">
+                            <div class="user-initial mx-auto" style="width: 80px; height: 80px; font-size: 32px;">
+                                P
+                            </div>
+                            <p class="text-muted mt-2">Inicial baseada no seu nome</p>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="Planejamento" required="">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Sobrenome</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3" style="padding-top: 20px;">
+                            <label for="email" class="form-label">E-mail (não editável)</label>
+                            <input type="email" class="form-control" id="email" value="planejamentotributario@grupomgbr.com" disabled="">
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="mb-3">Alterar Senha</h6>
+                        
+                        <!--
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Senha Atual</label>
+                            <div class="password-field">
+                                <input type="password" class="form-control" id="current_password" name="current_password">
+                                <button type="button" class="password-toggle" onclick="togglePassword('current_password')">
+                                    <i class="bi bi-eye" id="current_password_icon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        -->
+                        
+                        <!-- Campo fake invisível para enganar o autofill -->
+                        <input type="text" name="fakeusernameremembered" id="fakeusernameremembered" style="display:none">
+                        <input type="password" name="fakepasswordremembered" id="fakepasswordremembered" style="display:none">
+
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label for="new_password" class="form-label">Nova Senha</label>
+                                <div class="password-field">
+                                    <input type="password" class="form-control" id="new_password" name="new_password" autocomplete="new-password" placeholder="Digite a nova senha">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('new_password')">
+                                        <i class="bi bi-eye" id="new_password_icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="confirm_password" class="form-label">Confirmar Nova Senha</label>
+                                <div class="password-field">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" autocomplete="new-password" placeholder="Confirme a nova senha">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                                        <i class="bi bi-eye" id="confirm_password_icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <small class="text-muted">Deixe os campos de senha em branco se não quiser alterá-la.</small>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="profileForm" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // --- 1. Lógica para carregar Toasts na inicialização ---
+        //const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        //const toastList = toastElList.map(function(toastEl) {
+            // Cria uma instância do Toast e a exibe
+        //    const toast = new bootstrap.Toast(toastEl);
+        //    toast.show();
+        //    return toast;
+        //});
+
+        // Sidebar functionality
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        
+        let isCollapsed = false;
+        let isMobile = window.innerWidth <= 768;
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            if (isMobile) {
+                sidebar.classList.toggle('show');
+                mobileOverlay.classList.toggle('show');
+            } else {
+                isCollapsed = !isCollapsed;
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                toggleIcon.className = isCollapsed ? 'bi bi-chevron-right' : 'bi bi-chevron-left';
+                
+                // Close all dropdowns when collapsing
+                if (isCollapsed) {
+                    document.querySelectorAll('.submenu.show').forEach(submenu => {
+                        submenu.classList.remove('show');
+                    });
+                    document.querySelectorAll('.menu-arrow.rotated').forEach(arrow => {
+                        arrow.classList.remove('rotated');
+                    });
+                }
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        mobileOverlay.addEventListener('click', toggleSidebar);
+
+        // Dropdown functionality
+        document.querySelectorAll('[data-toggle]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (isCollapsed && !isMobile) return;
+                
+                const target = this.getAttribute('data-toggle');
+                const submenu = document.getElementById(target + '-submenu');
+                const arrow = this.querySelector('.menu-arrow');
+                
+                // Close other dropdowns
+                document.querySelectorAll('.submenu.show').forEach(otherSubmenu => {
+                    if (otherSubmenu !== submenu) {
+                        otherSubmenu.classList.remove('show');
+                    }
+                });
+                
+                document.querySelectorAll('.menu-arrow.rotated').forEach(otherArrow => {
+                    if (otherArrow !== arrow) {
+                        otherArrow.classList.remove('rotated');
+                    }
+                });
+                
+                // Toggle current dropdown
+                submenu.classList.toggle('show');
+                arrow.classList.toggle('rotated');
+                
+                // Set active state
+                document.querySelectorAll('.menu-link.active').forEach(activeLink => {
+                    activeLink.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+
+        // User menu functionality
+        const userProfile = document.getElementById('userProfile');
+        const userMenu = document.getElementById('userMenu');
+        
+        userProfile.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userMenu.classList.toggle('show');
+        });
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', function() {
+            userMenu.classList.remove('show');
+        });
+
+        // Password toggle functionality
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '_icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        // Form validation
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const currentPassword = document.getElementById('current_password').value;
+            
+            // Only validate password if user is trying to change it
+            if (newPassword || confirmPassword) {
+                if (!currentPassword) {
+                    e.preventDefault();
+                    alert('Digite sua senha atual para alterar a senha.');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    e.preventDefault();
+                    alert('A nova senha e a confirmação não coincidem.');
+                    return;
+                }
+                
+                if (newPassword.length < 8) {
+                    e.preventDefault();
+                    alert('A nova senha deve ter pelo menos 8 caracteres.');
+                    return;
+                }
+            }
+            
+            // If only current password is filled but no new password
+            if (newPassword && !confirmPassword) {
+                e.preventDefault();
+                alert('Digite a nova senha para alterar sua senha.');
+                return;
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth <= 768;
+            
+            if (wasMobile && !isMobile) {
+                // Switching from mobile to desktop
+                sidebar.classList.remove('show');
+                mobileOverlay.classList.remove('show');
+            } else if (!wasMobile && isMobile) {
+                // Switching from desktop to mobile
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+                isCollapsed = false;
+                toggleIcon.className = 'bi bi-chevron-left';
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set first menu item as active by default
+            const firstMenuItem = document.querySelector('[data-toggle="dashboards"]');
+            if (firstMenuItem) {
+                firstMenuItem.classList.add('active');
+            }
+        });
+
+        // CHAT
+        //window.$crisp=[];
+        //window.CRISP_WEBSITE_ID="2b84f14e-1162-4798-a613-1c317291e208";
+        //(function(){
+        //    d=document;
+        //    s=d.createElement("script");
+        //    s.src="https://client.crisp.chat/l.js";
+        //    s.async=1;
+        //    d.getElementsByTagName("head")[0].appendChild(s);
+        //   window.$crisp.push(["set", "user:email", "planejamentotributario@grupomgbr.com"]);
+        //    window.$crisp.push(["set", "user:nickname", "Planejamento"]);
+        //    window.$crisp.push(["set", "user:segments", ["Cliente App Django"]]);
+        //})();
+
+
+    </script>
+
+</body></html>

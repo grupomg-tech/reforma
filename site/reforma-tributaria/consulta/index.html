@@ -1,0 +1,2300 @@
+<html lang="pt-br"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="QjvRCCaHqjUQRXOYgk2DdfFHRLDpVh5CzZVEcLvHHT5VKoG4t6gr4F3sr8KKmHLd">
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #8C40F0;
+            --secondary-color: #FF8C40;
+            --dark-color: #000000;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 1050;
+            width: 250px;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .sidebar-header .app-version {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .sidebar.collapsed .app-version {
+            display: none;
+        }
+        .sidebar:not(.collapsed) .app-version {
+            display: inline;
+        }
+
+        .logo-full {
+            height: 75px;
+            transition: opacity 0.3s ease;
+        }
+
+        .logo-mini {
+            width: 30px;
+            height: 30px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .logo-full {
+            display: none;
+        }
+
+        .sidebar.collapsed .logo-mini {
+            display: flex;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 18px;
+            padding: 2px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .menu-link:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .menu-link.active {
+            background-color: rgba(140, 64, 240, 0.1);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .menu-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .menu-text {
+            margin-left: 12px;
+            font-weight: 500;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-arrow.rotated {
+            transform: rotate(180deg);
+        }
+
+        .sidebar.collapsed .menu-text,
+        .sidebar.collapsed .menu-arrow {
+            opacity: 0;
+            width: 0;
+            margin: 0;
+        }
+
+        .submenu {
+            background-color: #f8f9fa;
+            border-left: 2px solid var(--primary-color);
+            margin-left: 20px;
+            display: none;
+        }
+
+        .submenu.show {
+            display: block;
+        }
+
+        .sidebar.collapsed .submenu {
+            display: none !important;
+        }
+
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 8px 24px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .submenu-link:hover {
+            background-color: white;
+            color: #374151;
+        }
+
+        .submenu-icon {
+            font-size: 14px;
+            width: 16px;
+            margin-right: 8px;
+        }
+
+        .user-section {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-initial {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            border: 1px solid var(--primary-color);
+        }
+
+        .user-info {
+            margin-left: 12px;
+            flex: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .user-email {
+            color: #6b7280;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .sidebar.collapsed .user-info {
+            display: none;
+        }
+
+        .user-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .user-menu.show {
+            display: block;
+        }
+
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #374151;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .user-menu-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .user-menu-item.danger {
+            color: #dc3545;
+        }
+
+        .user-menu-item i {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
+            min-height: 50vh;
+        }
+
+        .main-content.expanded {
+            margin-left: 70px;
+        }
+
+        .content-wrapper {
+            padding: 0.5rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-card.purple {
+            background: linear-gradient(135deg, var(--primary-color), #7C3AED);
+            color: white;
+        }
+
+        .stats-card.orange {
+            background: linear-gradient(135deg, var(--secondary-color), #F97316);
+            color: white;
+        }
+
+        .stats-card.dark {
+            background: linear-gradient(135deg, #374151, var(--dark-color));
+            color: white;
+        }
+
+        .stats-icon {
+            font-size: 48px;
+            opacity: 0.8;
+        }
+
+        .stats-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .stats-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .btn-secondary-custom {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary-custom:hover {
+            background-color: #F97316;
+            border-color: #F97316;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(140, 64, 240, 0.25);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+                display: none;
+            }
+            
+            .mobile-overlay.show {
+                display: block;
+            }
+        }
+
+        /* Scrollbar customization */
+        .sidebar-menu::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+    </style>
+    
+</head>
+<body>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <!-- Header -->
+        <div class="sidebar-header">
+            <div class="d-flex align-items-center">
+                <img src="/static/images/logo_completa.png" class="logo-full">
+                <img src="/static/images/logo.png" class="logo-mini">
+                <span class="app-version ms-2">v1.0.0</span>
+            </div>
+            <button class="toggle-btn" id="toggleSidebar">
+                <i class="bi bi-chevron-left" id="toggleIcon"></i>
+            </button>
+        </div>
+
+        <!-- Menu -->
+        <div class="sidebar-menu">
+            <!-- Dashboards -->
+            <div class="menu-item">
+                <a href="#" class="menu-link active" data-toggle="dashboards">
+                    <i class="bi bi-speedometer2 menu-icon"></i>
+                    <span class="menu-text">Dashboards</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="dashboards-submenu">
+                    <a href="/dashboards/" class="submenu-link">
+                        <i class="bi bi-house submenu-icon"></i>
+                        Dashboard Principal
+                    </a>
+                </div>
+            </div>
+
+            <!-- Arquivos SPEDs -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="speds">
+                    <i class="bi bi-file-earmark-code menu-icon"></i>
+                    <span class="menu-text">SPEDs</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="speds-submenu">
+                    <a href="/importar-sped/" class="submenu-link">
+                        <i class="bi bi-upload submenu-icon"></i>
+                        Importar SPED
+                    </a>
+                    <a href="/exportar-sped/" class="submenu-link">
+                        <i class="bi bi-download submenu-icon"></i>
+                        Gerar SPED
+                    </a>
+                    <a href="/excluir-sped/" class="submenu-link">
+                        <i class="bi bi-trash submenu-icon"></i>
+                        Excluir SPED
+                    </a>
+                    <a href="/importar-xmls/" class="submenu-link">
+                        <i class="bi bi-filetype-xml submenu-icon"></i>
+                        Importar XMLs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Notas Fiscais -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="notas">
+                    <i class="bi bi-receipt menu-icon"></i>
+                    <span class="menu-text">Notas Fiscais</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="notas-submenu">
+                    <a href="/api/documentos-fiscais/" class="submenu-link">
+                        <i class="bi bi-search submenu-icon"></i>
+                        Gerenciamento de Documentos
+                    </a>
+                </div>
+            </div>
+
+            <!-- Reforma Tributária -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="reforma">
+                    <i class="bi bi-shield-fill-check menu-icon"></i>
+                    <span class="menu-text">Reforma Tributária</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="reforma-submenu">
+                    <a href="/reforma-tributaria/consulta-gtin/" class="submenu-link">
+                        <i class="bi bi-clipboard2-check-fill submenu-icon"></i>
+                        GTIN X NCM
+                    </a>
+                    <a href="/em-desenvolvimento/" class="submenu-link">
+                        <i class="bi bi-robot submenu-icon"></i>
+                        NCM Inteligente
+                    </a>
+                    <a href="/reforma-tributaria/consulta/" class="submenu-link">
+                        <i class="bi bi-card-checklist submenu-icon"></i>
+                        NCM X cClassTrib
+                    </a>
+                    <a href="/dashboards/relatorio-fiscal/" class="submenu-link">
+                        <i class="bi bi-speedometer2 submenu-icon"></i>
+                        Relatórios
+                    </a>
+                </div>
+            </div>
+
+            <!-- Configurações -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="config">
+                    <i class="bi bi-gear menu-icon"></i>
+                    <span class="menu-text">Configurações</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="config-submenu">
+                    <a href="/empresa/" class="submenu-link">
+                        <i class="bi bi-building submenu-icon"></i>
+                        Empresas
+                    </a>
+                    <a href="/accounts/" class="submenu-link">
+                        <i class="bi bi-people submenu-icon"></i>
+                        Usuários
+                    </a>
+                    <a href="/utilitarios/" class="submenu-link">
+                        <i class="bi bi-sliders submenu-icon"></i>
+                        Logs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Suporte -->
+            <div class="menu-item">
+                <a href="#" class="menu-link" data-toggle="suporte">
+                    <i class="bi bi-headset menu-icon"></i>
+                    <span class="menu-text">Suporte</span>
+                    <i class="bi bi-chevron-down menu-arrow"></i>
+                </a>
+                <div class="submenu" id="suporte-submenu">
+                    <a href="https://wa.link/6bqejl" class="submenu-link" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-telephone submenu-icon"></i>
+                        WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Section -->
+        <div class="user-section">
+            <div class="user-menu" id="userMenu">
+                <button class="user-menu-item" data-bs-toggle="modal" data-bs-target="#profileModal">
+                    <i class="bi bi-person-gear"></i>
+                    Editar Perfil
+                </button>
+                <form method="POST" action="/accounts/logout/" style="margin: 0;">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="QjvRCCaHqjUQRXOYgk2DdfFHRLDpVh5CzZVEcLvHHT5VKoG4t6gr4F3sr8KKmHLd">
+                    <button type="submit" class="user-menu-item danger" onclick="return confirm('Tem certeza que deseja sair?')">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Sair
+                    </button>
+                </form>
+            </div>
+            <div class="user-profile" id="userProfile">
+                <div class="user-initial">P</div>
+                <div class="user-info">
+                    <p class="user-name">Planejamento </p>
+                    <p class="user-email">planejamentotributario@grupomgbr.com</p>
+                </div>
+                <i class="bi bi-three-dots-vertical text-muted"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="content-wrapper">
+            <!-- Messages -->
+            <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+                
+            </div>
+
+            <!-- Content Block -->
+            
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContPRO - Consulta CClassTrib</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--secondary-color);
+        }
+
+        .page-header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .page-header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .filter-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .filter-section h5 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-section h5 i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success-custom {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-warning-custom {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-warning-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .btn-custom:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .anexos-section {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .anexos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .anexos-header h6 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+        }
+
+        .toggle-icon.collapsed {
+            transform: rotate(-180deg);
+        }
+
+        .anexos-content {
+            margin-top: 5px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        .anexos-content.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .anexos-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 20px;        }
+
+        .anexos-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .anexos-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .anexos-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .anexos-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .form-check {
+            padding: 2;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-check:hover {
+            background: #f8f9fa;
+        }
+
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .form-check-label {
+            font-size: 1rem;
+            color: #495057;
+            cursor: pointer;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .pagination-info {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            padding-bottom: 5px;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 300px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 5px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 5px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .table {
+            margin-bottom: 0;
+            table-layout: fixed;
+            width: max-content;
+            min-width: 100%;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table thead th {
+            border: none;
+            padding: 12px 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            min-width: 120px;
+            color : white;
+        }
+
+        .table tbody td {
+            padding: 10px;
+            vertical-align: middle;
+            max-height: 40px;
+            height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            position: relative;
+            max-width: 200px;
+        }
+
+        .table tbody td .cell-content {
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .table tbody td[data-full-text] {
+            cursor: help;
+        }
+
+        .table tbody tr {
+            height: 40px;
+            max-height: 40px;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Tooltip customizado */
+        .custom-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            z-index: 1000;
+            max-width: 400px;
+            word-wrap: break-word;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            pointer-events: none;
+            display: none;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination {
+            margin: 0;
+        }
+
+        .pagination .page-link {
+            border: 2px solid #e0e0e0;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+
+        .pagination .page-link:hover {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .loading i {
+            font-size: 4rem;
+            color: var(--secondary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        .loading p {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .alert-custom i {
+            font-size: 1.5rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #bdc3c7;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+    </style>
+
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1><i class="fas fa-search-dollar"></i> Consulta de Produtos e Classificação Tributária</h1>
+            <p>Busque e analise informações tributárias de produtos</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="filter-section">
+            <h5><i class="fas fa-filter"></i> Filtros de Busca</h5>
+            
+            <form id="filtroForm">
+                <input type="hidden" name="csrfmiddlewaretoken" value="QjvRCCaHqjUQRXOYgk2DdfFHRLDpVh5CzZVEcLvHHT5VKoG4t6gr4F3sr8KKmHLd">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="id_empresa" class="form-label">
+                            <i class="fas fa-building"></i> Empresa *
+                        </label>
+                        <select name="empresa" class="form-control" id="id_empresa" required="">
+  <option value="" selected="">Selecione uma empresa</option>
+
+  <option value="1">00.749.616/0001-60 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="2">00.749.616/0002-40 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="3">00.749.616/0004-02 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="4">00.749.616/0005-93 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="5">00.749.616/0006-74 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="6">00.749.616/0007-55 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="7">00.749.616/0008-36 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="8">00.749.616/0009-17 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="9">00.749.616/0010-50 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+  <option value="10">00.749.616/0011-31 - RENACOR COMERCIO DE TINTAS LTDA.</option>
+
+</select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_data_inicial" class="form-label">
+                            <i class="fas fa-calendar-alt"></i> Data Inicial *
+                        </label>
+                        <select name="data_inicial" class="form-select" id="id_data_inicial" required="">
+  <option value="" selected="">-- Selecione --</option>
+
+</select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_data_final" class="form-label">
+                            <i class="fas fa-calendar-check"></i> Data Final *
+                        </label>
+                        <select name="data_final" class="form-select" id="id_data_final" required="">
+  <option value="" selected="">-- Selecione --</option>
+
+</select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_origem_dados" class="form-label">
+                            <i class="fas fa-database"></i> Origem dos Dados *
+                        </label>
+                        <select name="origem_dados" class="form-control form-select" id="id_origem_dados">
+  <option value="fiscal">SPED Fiscal</option>
+
+  <option value="registro">SPED Contribuições</option>
+
+</select>
+                    </div>
+                </div>
+
+                <div class="anexos-section">
+                    <div class="anexos-header" id="anexosHeader">
+                        <h6>
+                            <i class="fas fa-paperclip"></i> 
+                            Filtrar por Anexos (opcional)
+                        </h6>
+                        <i class="fas fa-chevron-down toggle-icon collapsed" id="toggleIcon"></i>
+                    </div>
+                    <div class="anexos-content collapsed" id="anexosContent">
+                        <div class="anexos-list">
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="" class="form-check-input" id="id_anexos_0" checked="">
+                                <label class="form-check-label" for="id_anexos_0">
+                                    Anexo 
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="I - Produtos destinados à alimentação humana (cesta básica nacional)" class="form-check-input" id="id_anexos_1" checked="">
+                                <label class="form-check-label" for="id_anexos_1">
+                                    Anexo I - Produtos destinados à alimentação humana (cesta básica nacional)
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="II - Seviços de educação" class="form-check-input" id="id_anexos_2" checked="">
+                                <label class="form-check-label" for="id_anexos_2">
+                                    Anexo II - Seviços de educação
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="III - Serviços de saúde" class="form-check-input" id="id_anexos_3" checked="">
+                                <label class="form-check-label" for="id_anexos_3">
+                                    Anexo III - Serviços de saúde
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="IV - Dispositivos médicos" class="form-check-input" id="id_anexos_4" checked="">
+                                <label class="form-check-label" for="id_anexos_4">
+                                    Anexo IV - Dispositivos médicos
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="IX - Insumos agropecuários e aquícolas" class="form-check-input" id="id_anexos_5" checked="">
+                                <label class="form-check-label" for="id_anexos_5">
+                                    Anexo IX - Insumos agropecuários e aquícolas
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="V - Dispositivos de acessibilidade próprios para pessoas com deficiência" class="form-check-input" id="id_anexos_6" checked="">
+                                <label class="form-check-label" for="id_anexos_6">
+                                    Anexo V - Dispositivos de acessibilidade próprios para pessoas com deficiência
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="VI - Medicamentos" class="form-check-input" id="id_anexos_7" checked="">
+                                <label class="form-check-label" for="id_anexos_7">
+                                    Anexo VI - Medicamentos
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="VII - Alimentos destinados ao consumo humano" class="form-check-input" id="id_anexos_8" checked="">
+                                <label class="form-check-label" for="id_anexos_8">
+                                    Anexo VII - Alimentos destinados ao consumo humano
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="VIII - Produtos de higiene pessoal e limpeza majoritariamente consumidos por famílias de baixa renda" class="form-check-input" id="id_anexos_9" checked="">
+                                <label class="form-check-label" for="id_anexos_9">
+                                    Anexo VIII - Produtos de higiene pessoal e limpeza majoritariamente consumidos por famílias de baixa renda
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="X - Produções nacionais artísticas, culturais, eventos, jornalísticas e audiovisuais" class="form-check-input" id="id_anexos_10" checked="">
+                                <label class="form-check-label" for="id_anexos_10">
+                                    Anexo X - Produções nacionais artísticas, culturais, eventos, jornalísticas e audiovisuais
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="XI - Bens e serviços relacionados à soberania e segurança nacional, segurança da informação e segurança cibernética" class="form-check-input" id="id_anexos_11" checked="">
+                                <label class="form-check-label" for="id_anexos_11">
+                                    Anexo XI - Bens e serviços relacionados à soberania e segurança nacional, segurança da informação e segurança cibernética
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="XII - Dispositivos médicos (quando adquiridos por órgãos públicos e entidades de saúde específicas)" class="form-check-input" id="id_anexos_12" checked="">
+                                <label class="form-check-label" for="id_anexos_12">
+                                    Anexo XII - Dispositivos médicos (quando adquiridos por órgãos públicos e entidades de saúde específicas)
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="XIII - Dispositivos de acessibilidade para pessoas com deficiência (para órgãos públicos e entidades específicas)" class="form-check-input" id="id_anexos_13" checked="">
+                                <label class="form-check-label" for="id_anexos_13">
+                                    Anexo XIII - Dispositivos de acessibilidade para pessoas com deficiência (para órgãos públicos e entidades específicas)
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="XIV - Medicamentos (registrados na Anvisa, quando adquiridos por órgãos públicos e entidades específicas)" class="form-check-input" id="id_anexos_14" checked="">
+                                <label class="form-check-label" for="id_anexos_14">
+                                    Anexo XIV - Medicamentos (registrados na Anvisa, quando adquiridos por órgãos públicos e entidades específicas)
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" name="anexos" value="XV - Produtos hortícolas, frutas e ovos" class="form-check-input" id="id_anexos_15" checked="">
+                                <label class="form-check-label" for="id_anexos_15">
+                                    Anexo XV - Produtos hortícolas, frutas e ovos
+                                </label>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="d-flex gap-3 flex-wrap">
+                            <button type="button" id="btnBuscarSped" class="btn btn-primary-custom btn-custom" disabled="">
+                                <i class="fas fa-database"></i> Buscar do SPED
+                            </button>
+                            <button type="button" id="btnAbrirModalXML" class="btn btn-success-custom btn-custom" disabled="">
+                                <i class="fas fa-file-code"></i> Buscar do XML
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Processando informações...</p>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <div>
+                    <h5><i class="fas fa-list"></i> Resultados (<span id="totalResults">0</span> registros)</h5>
+                    <div class="pagination-info">
+                        Página <span id="currentPage">1</span> de <span id="totalPages">1</span>
+                    </div>
+                </div>
+                <button type="button" id="btnExportar" class="btn btn-warning-custom btn-custom">
+                    <i class="fas fa-file-excel"></i> Exportar Todos
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Código Barras</th>
+                            <th>Descrição</th>
+                            <th>NCM</th>
+                            <th>Descrição NCM</th>
+                            <th>CEST</th>
+                            <th>CST IBS/CBS</th>
+                            <th>Anexo</th>
+                            <th>CClassTrib</th>
+                            <th>Nome CCT</th>
+                            <th>Descrição CCT</th>
+                            <th>LC Redação</th>
+                            <th>LC 214/25</th>
+                            <th>Tipo Alíquota</th>
+                            <th>% Red. IBS</th>
+                            <th>% Red. CBS</th>
+                            <th>Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container">
+                <nav aria-label="Navegação de página">
+                    <ul class="pagination" id="paginationNav">
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal XML -->
+    <div class="modal fade" id="modalXML" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-upload"></i> Importar XML</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formXML" enctype="multipart/form-data">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="QjvRCCaHqjUQRXOYgk2DdfFHRLDpVh5CzZVEcLvHHT5VKoG4t6gr4F3sr8KKmHLd">
+                        <div class="mb-3">
+                            <label for="id_arquivo_xml" class="form-label">
+                                <i class="fas fa-file-code"></i> Arquivo XML *
+                            </label>
+                            <input type="file" name="arquivo_xml" class="form-control" accept=".zip" id="id_arquivo_xml" required="">
+                            <div class="form-text">Selecione um arquivo XML para importar (máximo 100MB)</div>
+                        </div>
+                        <div class="alert alert-info alert-custom">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Informação:</strong> O XML será processado e os produtos serão relacionados automaticamente com as classificações tributárias.
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" id="btnImportarXML" class="btn btn-success-custom btn-custom">
+                        <i class="fas fa-upload"></i> Importar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        /* ============================================================
+           TOOLTIP CUSTOMIZADO PARA CÉLULAS TRUNCADAS
+        ============================================================ */
+        let tooltipElement = null;
+
+        function initTooltip() {
+            // Criar elemento tooltip se não existir
+            if (!tooltipElement) {
+                tooltipElement = $('<div class="custom-tooltip"></div>');
+                $('body').append(tooltipElement);
+            }
+        }
+
+        function showTooltip(element, text, event) {
+            if (!text || text.length <= 20) return;
+            
+            tooltipElement.text(text).css({
+                display: 'block',
+                left: event.pageX + 10 + 'px',
+                top: event.pageY + 10 + 'px'
+            });
+        }
+
+        function hideTooltip() {
+            if (tooltipElement) {
+                tooltipElement.css('display', 'none');
+            }
+        }
+
+        function truncateText(text, maxLength = 20) {
+            if (!text) return '';
+            const str = text.toString();
+            if (str.length <= maxLength) return str;
+            return str.substring(0, maxLength) + '...';
+        }
+
+        // Inicializar tooltip ao carregar
+        $(document).ready(function() {
+            initTooltip();
+        });
+
+        /* ============================================================
+       🔄 CARREGAR PERÍODOS DINAMICAMENTE
+        ============================================================ */
+
+        $('#id_empresa, #id_origem_dados').on('change', function () {
+            carregarPeriodos();
+        });
+
+        /**
+         * Carrega os períodos da view Django e preenche os selects
+         */
+        function carregarPeriodos() {
+            const empresa = $('#id_empresa').val();
+            const origem = $('#id_origem_dados').val();
+
+            if (!empresa) {
+                $('#id_data_inicial').html('<option value="">Selecione a empresa</option>');
+                $('#id_data_final').html('<option value="">Selecione a empresa</option>');
+                return;
+            }
+
+            $.ajax({
+                url: '/reforma-tributaria/buscar-periodos/',
+                method: 'GET',
+                data: {
+                    empresa: empresa,
+                    origem: origem
+                },
+                success: function (response) {
+
+                    if (!response.success) {
+                        showAlert('warning', 'Nenhum período encontrado para esta empresa.');
+                        return;
+                    }
+
+                    const periodos = response.periodos;
+                    let options = '<option value="">-- Selecione --</option>';
+
+                    periodos.forEach(p => {
+                        options += `
+                            <option value="${p.value}" data-dt-ini="${p.dt_ini}">
+                                ${p.label}
+                            </option>
+                        `;
+                    });
+
+                    // Preenche os selects
+                    $('#id_data_inicial').html(options);
+                    $('#id_data_final').html(options);
+
+                    // Limpa seleção anterior
+                    $('#id_data_inicial').val('');
+                    $('#id_data_final').val('');
+                },
+                error: function () {
+                    showAlert('danger', 'Erro ao carregar períodos.');
+                }
+            });
+        }
+
+        /**
+         * FILTRO: Ao selecionar a data inicial → filtrar opções válidas na data final
+         */
+        $('#id_data_inicial').on('change', function () {
+
+            const selecionado = $(this).val();
+            if (!selecionado) return;
+
+            const dtSelecionada = new Date(selecionado.split('|')[0]);
+
+            // Reexibe todas as opções antes de filtrar
+            $('#id_data_final option').show();
+
+            // Filtra opções: só datas >= dtSelecionada
+            $('#id_data_final option').each(function () {
+
+                const val = $(this).val();
+                if (!val) return; // mantém a opção default
+
+                const dtIni = new Date(val.split('|')[0]);
+
+                if (dtIni < dtSelecionada) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            });
+
+            // Se a data final atual não for mais válida → limpar
+            const dtFinalAtual = $('#id_data_final').val();
+            if (dtFinalAtual) {
+                const dtFinalObj = new Date(dtFinalAtual.split('|')[0]);
+                if (dtFinalObj < dtSelecionada) {
+                    $('#id_data_final').val('');
+                }
+            }
+        });
+
+        let produtosData = [];
+        let currentPage = 1;
+        const itemsPerPage = 1000;
+        const modalXML = new bootstrap.Modal(document.getElementById('modalXML'));
+
+        // Toggle anexos section
+        $('#anexosHeader').on('click', function() {
+            const content = $('#anexosContent');
+            const icon = $('#toggleIcon');
+            
+            if (content.hasClass('collapsed')) {
+                // Expandir
+                content.removeClass('collapsed');
+                const scrollHeight = $('.anexos-list')[0].scrollHeight;
+                content.css('max-height', (scrollHeight + 30) + 'px');
+                icon.removeClass('collapsed');
+            } else {
+                // Minimizar
+                content.css('max-height', '0');
+                content.addClass('collapsed');
+                icon.addClass('collapsed');
+            }
+        });
+
+        // Habilitar botões apenas quando empresa for selecionada
+        $('#id_empresa').on('change', function() {
+            const empresaSelecionada = $(this).val();
+            if (empresaSelecionada) {
+                $('#btnBuscarSped, #btnAbrirModalXML').prop('disabled', false);
+            } else {
+                $('#btnBuscarSped, #btnAbrirModalXML').prop('disabled', true);
+            }
+        });
+
+        // Buscar do SPED
+        $('#btnBuscarSped').on('click', function() {
+            if (!validarFormulario()) return;
+
+            $('#loading').show();
+            $('#resultsSection').hide();
+            $(this).prop('disabled', true);
+
+            const formData = new FormData($('#filtroForm')[0]);
+
+            $.ajax({
+                url: '/reforma-tributaria/buscar-sped/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#loading').hide();
+                    $('#btnBuscarSped').prop('disabled', false);
+                    
+                    if (response.success) {
+                        produtosData = response.data;
+                        currentPage = 1;
+                        exibirResultados();
+                        showAlert('success', `${response.data.length} produto(s) encontrado(s) com sucesso!`);
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    $('#loading').hide();
+                    $('#btnBuscarSped').prop('disabled', false);
+                    const message = xhr.responseJSON?.message || 'Erro ao buscar produtos do SPED';
+                    showAlert('danger', message);
+                }
+            });
+        });
+
+        // Abrir modal XML
+        $('#btnAbrirModalXML').on('click', function() {
+            if (!validarFormularioXml()) return;
+            modalXML.show();
+        });
+
+        // Importar XML
+        $('#btnImportarXML').on('click', function() {
+            const fileInput = $('#id_arquivo_xml')[0];
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showAlert('warning', 'Selecione um arquivo XML');
+                return;
+            }
+
+            $('#loading').show();
+            modalXML.hide();
+            $(this).prop('disabled', true);
+
+            const formData = new FormData($('#filtroForm')[0]);
+            formData.append('arquivo_xml', fileInput.files[0]);
+
+            $.ajax({
+                url: '/reforma-tributaria/buscar-xml/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#loading').hide();
+                    $('#btnImportarXML').prop('disabled', false);
+                    
+                    if (response.success) {
+                        produtosData = response.data;
+                        currentPage = 1;
+                        exibirResultados();
+                        if (response.data.length === 0) {
+                            showAlert('info', 'Nenhum produto encontrado no XML para a empresa selecionada.');
+                        } else {
+                            showAlert('success', `${response.data.length} produto(s) processado(s).`);}
+                    } else {
+                        showAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr) {
+                    $('#loading').hide();
+                    $('#btnImportarXML').prop('disabled', false);
+                    const message = xhr.responseJSON?.message || 'Erro ao importar XML';
+                    showAlert('danger', message);
+                }
+            });
+        });
+
+        // Exportar Excel
+        $('#btnExportar').on('click', function() {
+            if (produtosData.length === 0) {
+                showAlert('warning', 'Não há dados para exportar');
+                return;
+            }
+
+            $(this).prop('disabled', true);
+            showAlert('info', 'Gerando planilha...');
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        // Verifica se o cookie começa com o nome desejado
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+            
+
+            $.ajax({
+                url: '/reforma-tributaria/exportar-excel/',
+                type: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                data: JSON.stringify({ produtos: produtosData }),
+                contentType: 'application/json',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function(blob) {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `produtos_classificacao_${new Date().getTime()}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    $('#btnExportar').prop('disabled', false);
+                    showAlert('success', 'Planilha exportada com sucesso!');
+                },
+                error: function() {
+                    $('#btnExportar').prop('disabled', false);
+                    showAlert('danger', 'Erro ao exportar planilha');
+                }
+            });
+        });
+
+        function validarFormulario() {
+            const empresa = $('#id_empresa').val();
+            const dataInicial = $('#id_data_inicial').val();
+            const dataFinal = $('#id_data_final').val();
+
+            if (!empresa) {
+                showAlert('warning', 'Selecione uma empresa');
+                return false;
+            }
+
+            if (!dataInicial || !dataFinal) {
+                showAlert('warning', 'Preencha as datas inicial e final');
+                return false;
+            }
+
+            if (new Date(dataInicial) > new Date(dataFinal)) {
+                showAlert('warning', 'Data inicial não pode ser maior que data final');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validarFormularioXml() {
+            const empresa = $('#id_empresa').val();
+
+            if (!empresa) {
+                showAlert('warning', 'Selecione uma empresa');
+                return false;
+            }
+
+            return true;
+        }
+
+        function exibirResultados() {
+            const tbody = $('#resultsBody');
+            tbody.empty();
+
+            const totalPages = Math.ceil(produtosData.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = produtosData.slice(startIndex, endIndex);
+
+            if (produtosData.length === 0) {
+                tbody.append(`
+                    <tr>
+                        <td colspan="17" class="no-results">
+                            <i class="fas fa-inbox"></i>
+                            <p>Nenhum resultado encontrado</p>
+                        </td>
+                    </tr>
+                `);
+            } else {
+                paginatedData.forEach(item => {
+                    const fullData = {
+                        codigo_produto: item.codigo_produto || '',
+                        codigo_barras: item.codigo_barras || '',
+                        descricao_produto: item.descricao_produto || '',
+                        codigo_ncm: item.codigo_ncm || '',
+                        descricao_ncm: item.descricao_ncm || '',
+                        codigo_cest: item.codigo_cest || '',
+                        cst_ibs_cbs: item.cst_ibs_cbs || '',
+                        anexo: item.anexo || '',
+                        cclasstrib: item.cclasstrib || '',
+                        nome_cclasstrib: item.nome_cclasstrib || '',
+                        descricao_cclasstrib: item.descricao_cclasstrib || '',
+                        lc_redacao: item.lc_redacao || '',
+                        lc_214_25: item.lc_214_25 || '',
+                        tipo_aliquota: item.tipo_aliquota || '',
+                        p_red_ibs: item.p_red_ibs || '',
+                        p_red_cbs: item.p_red_cbs || '',
+                        observacao: item.observacao || ''
+                    };
+
+                    tbody.append(`
+                        <tr>
+                            <td data-full-text="${escapeHtml(fullData.codigo_produto)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.codigo_produto)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.codigo_barras)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.codigo_barras)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.descricao_produto)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.descricao_produto)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.codigo_ncm)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.codigo_ncm)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.descricao_ncm)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.descricao_ncm)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.codigo_cest)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.codigo_cest)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.cst_ibs_cbs)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.cst_ibs_cbs)}</span>
+                            </td>
+                            <td><span class="badge bg-primary">${escapeHtml(fullData.anexo)}</span></td>
+                            <td data-full-text="${escapeHtml(fullData.cclasstrib)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.cclasstrib)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.nome_cclasstrib)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.nome_cclasstrib)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.descricao_cclasstrib)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.descricao_cclasstrib)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.lc_redacao)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.lc_redacao)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.lc_214_25)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.lc_214_25)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.tipo_aliquota)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.tipo_aliquota)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.p_red_ibs)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.p_red_ibs)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.p_red_cbs)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.p_red_cbs)}</span>
+                            </td>
+                            <td data-full-text="${escapeHtml(fullData.observacao)}" class="tooltip-cell">
+                                <span class="cell-content">${truncateText(fullData.observacao)}</span>
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                // Adicionar eventos de tooltip após renderizar
+                $('.tooltip-cell').off('mouseenter mouseleave mousemove');
+                $('.tooltip-cell').on('mouseenter', function(e) {
+                    const fullText = $(this).attr('data-full-text');
+                    showTooltip($(this), fullText, e);
+                }).on('mousemove', function(e) {
+                    const fullText = $(this).attr('data-full-text');
+                    showTooltip($(this), fullText, e);
+                }).on('mouseleave', function() {
+                    hideTooltip();
+                });
+            }
+
+            $('#totalResults').text(produtosData.length);
+            $('#currentPage').text(currentPage);
+            $('#totalPages').text(totalPages);
+            
+            renderPagination(totalPages);
+            $('#resultsSection').show();
+            
+            // Scroll suave para os resultados
+            $('html, body').animate({
+                scrollTop: $('#resultsSection').offset().top - 20
+            }, 500);
+        }
+
+        function renderPagination(totalPages) {
+            const paginationNav = $('#paginationNav');
+            paginationNav.empty();
+
+            if (totalPages <= 1) {
+                return;
+            }
+
+            // Botão Anterior
+            paginationNav.append(`
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </a>
+                </li>
+            `);
+
+            // Páginas
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            if (startPage > 1) {
+                paginationNav.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="1">1</a>
+                    </li>
+                `);
+                if (startPage > 2) {
+                    paginationNav.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationNav.append(`
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationNav.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+                }
+                paginationNav.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                    </li>
+                `);
+            }
+
+            // Botão Próximo
+            paginationNav.append(`
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">
+                        Próximo <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            `);
+
+            // Event listeners para paginação
+            $('.page-link').on('click', function(e) {
+                e.preventDefault();
+                const page = parseInt($(this).data('page'));
+                if (page && page !== currentPage && page >= 1 && page <= totalPages) {
+                    currentPage = page;
+                    exibirResultados();
+                    
+                    // Scroll para o topo da tabela
+                    $('html, body').animate({
+                        scrollTop: $('#resultsSection').offset().top - 20
+                    }, 300);
+                }
+            });
+        }
+
+        function showAlert(type, message) {
+            const iconMap = {
+                'success': 'check-circle',
+                'danger': 'exclamation-circle',
+                'warning': 'exclamation-triangle',
+                'info': 'info-circle'
+            };
+
+            const alertHtml = `
+                <div class="alert alert-${type} alert-custom alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${iconMap[type]}"></i>
+                    <div>
+                        <strong>${type === 'success' ? 'Sucesso!' : type === 'danger' ? 'Erro!' : type === 'warning' ? 'Atenção!' : 'Informação:'}</strong>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            $('#alertContainer').html(alertHtml);
+
+            setTimeout(() => {
+                $('.alert').fadeOut(500, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+
+            // Scroll para o topo
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.toString().replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Limpar arquivo ao fechar modal
+        $('#modalXML').on('hidden.bs.modal', function () {
+            $('#id_arquivo_xml').val('');
+        });
+    </script>
+
+
+
+
+        </div>
+    </main>
+
+    <!-- Profile Modal -->
+     <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">
+                        <i class="bi bi-person-gear me-2"></i>
+                        Editar Perfil
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/accounts/update-profile/" id="profileForm">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="QjvRCCaHqjUQRXOYgk2DdfFHRLDpVh5CzZVEcLvHHT5VKoG4t6gr4F3sr8KKmHLd">
+                        <!-- User Initial Display -->
+                        <div class="text-center mb-4">
+                            <div class="user-initial mx-auto" style="width: 80px; height: 80px; font-size: 32px;">
+                                P
+                            </div>
+                            <p class="text-muted mt-2">Inicial baseada no seu nome</p>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="Planejamento" required="">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Sobrenome</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3" style="padding-top: 20px;">
+                            <label for="email" class="form-label">E-mail (não editável)</label>
+                            <input type="email" class="form-control" id="email" value="planejamentotributario@grupomgbr.com" disabled="">
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="mb-3">Alterar Senha</h6>
+                        
+                        <!--
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Senha Atual</label>
+                            <div class="password-field">
+                                <input type="password" class="form-control" id="current_password" name="current_password">
+                                <button type="button" class="password-toggle" onclick="togglePassword('current_password')">
+                                    <i class="bi bi-eye" id="current_password_icon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        -->
+                        
+                        <!-- Campo fake invisível para enganar o autofill -->
+                        <input type="text" name="fakeusernameremembered" id="fakeusernameremembered" style="display:none">
+                        <input type="password" name="fakepasswordremembered" id="fakepasswordremembered" style="display:none">
+
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label for="new_password" class="form-label">Nova Senha</label>
+                                <div class="password-field">
+                                    <input type="password" class="form-control" id="new_password" name="new_password" autocomplete="new-password" placeholder="Digite a nova senha">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('new_password')">
+                                        <i class="bi bi-eye" id="new_password_icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="confirm_password" class="form-label">Confirmar Nova Senha</label>
+                                <div class="password-field">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" autocomplete="new-password" placeholder="Confirme a nova senha">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                                        <i class="bi bi-eye" id="confirm_password_icon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <small class="text-muted">Deixe os campos de senha em branco se não quiser alterá-la.</small>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="profileForm" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // --- 1. Lógica para carregar Toasts na inicialização ---
+        //const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        //const toastList = toastElList.map(function(toastEl) {
+            // Cria uma instância do Toast e a exibe
+        //    const toast = new bootstrap.Toast(toastEl);
+        //    toast.show();
+        //    return toast;
+        //});
+
+        // Sidebar functionality
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+        
+        let isCollapsed = false;
+        let isMobile = window.innerWidth <= 768;
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            if (isMobile) {
+                sidebar.classList.toggle('show');
+                mobileOverlay.classList.toggle('show');
+            } else {
+                isCollapsed = !isCollapsed;
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                toggleIcon.className = isCollapsed ? 'bi bi-chevron-right' : 'bi bi-chevron-left';
+                
+                // Close all dropdowns when collapsing
+                if (isCollapsed) {
+                    document.querySelectorAll('.submenu.show').forEach(submenu => {
+                        submenu.classList.remove('show');
+                    });
+                    document.querySelectorAll('.menu-arrow.rotated').forEach(arrow => {
+                        arrow.classList.remove('rotated');
+                    });
+                }
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        mobileOverlay.addEventListener('click', toggleSidebar);
+
+        // Dropdown functionality
+        document.querySelectorAll('[data-toggle]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (isCollapsed && !isMobile) return;
+                
+                const target = this.getAttribute('data-toggle');
+                const submenu = document.getElementById(target + '-submenu');
+                const arrow = this.querySelector('.menu-arrow');
+                
+                // Close other dropdowns
+                document.querySelectorAll('.submenu.show').forEach(otherSubmenu => {
+                    if (otherSubmenu !== submenu) {
+                        otherSubmenu.classList.remove('show');
+                    }
+                });
+                
+                document.querySelectorAll('.menu-arrow.rotated').forEach(otherArrow => {
+                    if (otherArrow !== arrow) {
+                        otherArrow.classList.remove('rotated');
+                    }
+                });
+                
+                // Toggle current dropdown
+                submenu.classList.toggle('show');
+                arrow.classList.toggle('rotated');
+                
+                // Set active state
+                document.querySelectorAll('.menu-link.active').forEach(activeLink => {
+                    activeLink.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+
+        // User menu functionality
+        const userProfile = document.getElementById('userProfile');
+        const userMenu = document.getElementById('userMenu');
+        
+        userProfile.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userMenu.classList.toggle('show');
+        });
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', function() {
+            userMenu.classList.remove('show');
+        });
+
+        // Password toggle functionality
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '_icon');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                field.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        // Form validation
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const currentPassword = document.getElementById('current_password').value;
+            
+            // Only validate password if user is trying to change it
+            if (newPassword || confirmPassword) {
+                if (!currentPassword) {
+                    e.preventDefault();
+                    alert('Digite sua senha atual para alterar a senha.');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    e.preventDefault();
+                    alert('A nova senha e a confirmação não coincidem.');
+                    return;
+                }
+                
+                if (newPassword.length < 8) {
+                    e.preventDefault();
+                    alert('A nova senha deve ter pelo menos 8 caracteres.');
+                    return;
+                }
+            }
+            
+            // If only current password is filled but no new password
+            if (newPassword && !confirmPassword) {
+                e.preventDefault();
+                alert('Digite a nova senha para alterar sua senha.');
+                return;
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth <= 768;
+            
+            if (wasMobile && !isMobile) {
+                // Switching from mobile to desktop
+                sidebar.classList.remove('show');
+                mobileOverlay.classList.remove('show');
+            } else if (!wasMobile && isMobile) {
+                // Switching from desktop to mobile
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+                isCollapsed = false;
+                toggleIcon.className = 'bi bi-chevron-left';
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set first menu item as active by default
+            const firstMenuItem = document.querySelector('[data-toggle="dashboards"]');
+            if (firstMenuItem) {
+                firstMenuItem.classList.add('active');
+            }
+        });
+
+        // CHAT
+        //window.$crisp=[];
+        //window.CRISP_WEBSITE_ID="2b84f14e-1162-4798-a613-1c317291e208";
+        //(function(){
+        //    d=document;
+        //    s=d.createElement("script");
+        //    s.src="https://client.crisp.chat/l.js";
+        //    s.async=1;
+        //    d.getElementsByTagName("head")[0].appendChild(s);
+        //   window.$crisp.push(["set", "user:email", "planejamentotributario@grupomgbr.com"]);
+        //    window.$crisp.push(["set", "user:nickname", "Planejamento"]);
+        //    window.$crisp.push(["set", "user:segments", ["Cliente App Django"]]);
+        //})();
+
+
+    </script>
+
+<div class="custom-tooltip"></div></body></html>

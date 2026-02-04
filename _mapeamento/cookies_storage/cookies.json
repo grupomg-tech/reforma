@@ -1,0 +1,21 @@
+{
+  "csrftoken": {
+    "domain": "eagle.contpro.app.br",
+    "expiry": 1801665346,
+    "httpOnly": false,
+    "name": "csrftoken",
+    "path": "/",
+    "sameSite": "Lax",
+    "secure": false,
+    "value": "TQAXKjvarKlf3B2gnWoY1AyVKxhvBAQL"
+  },
+  "sessionid": {
+    "domain": "eagle.contpro.app.br",
+    "httpOnly": true,
+    "name": "sessionid",
+    "path": "/",
+    "sameSite": "Lax",
+    "secure": false,
+    "value": "67yrbddfyidzoiuizeexvg06if4w8z67"
+  }
+}
