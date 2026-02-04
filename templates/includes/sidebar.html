@@ -1,0 +1,173 @@
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+    <!-- Header -->
+    <div class="sidebar-header">
+        <div class="d-flex align-items-center">
+            <img src="{% load static %}{% static 'images/logo_completa.png' %}" class="logo-full" alt="Eagle">
+            <span class="app-version ms-2">v1.0.0</span>
+        </div>
+        <button class="toggle-btn" id="toggleSidebar">
+            <i class="bi bi-chevron-left" id="toggleIcon"></i>
+        </button>
+    </div>
+
+    <!-- Menu -->
+    <div class="sidebar-menu">
+        <!-- Dashboards -->
+        <div class="menu-item">
+            <a href="{% url 'dashboards:index' %}" class="menu-link {% if request.resolver_match.url_name == 'index' and 'dashboards' in request.path %}active{% endif %}">
+                <i class="bi bi-speedometer2 menu-icon"></i>
+                <span class="menu-text">Dashboards</span>
+            </a>
+        </div>
+
+        <!-- SPEDs -->
+        <div class="menu-item">
+            <a href="#" class="menu-link" data-toggle="speds">
+                <i class="bi bi-file-earmark-code menu-icon"></i>
+                <span class="menu-text">SPEDs</span>
+                <i class="bi bi-chevron-down menu-arrow"></i>
+            </a>
+            <div class="submenu" id="speds-submenu">
+                <a href="{% url 'sped_importar:importar' %}" class="submenu-link">
+                    <i class="bi bi-upload submenu-icon"></i>
+                    Importar SPED
+                </a>
+                <a href="{% url 'sped_exportar:exportar' %}" class="submenu-link">
+                    <i class="bi bi-download submenu-icon"></i>
+                    Exportar SPED
+                </a>
+                <a href="{% url 'sped_excluir:excluir' %}" class="submenu-link">
+                    <i class="bi bi-trash submenu-icon"></i>
+                    Excluir SPED
+                </a>
+            </div>
+        </div>
+
+        <!-- Notas Fiscais -->
+        <div class="menu-item">
+            <a href="#" class="menu-link" data-toggle="notas">
+                <i class="bi bi-file-text menu-icon"></i>
+                <span class="menu-text">Notas Fiscais</span>
+                <i class="bi bi-chevron-down menu-arrow"></i>
+            </a>
+            <div class="submenu" id="notas-submenu">
+                <a href="{% url 'api_documentos:list' %}" class="submenu-link">
+                    <i class="bi bi-files submenu-icon"></i>
+                    Documentos Fiscais
+                </a>
+                <a href="{% url 'xml_importar:importar' %}" class="submenu-link">
+                    <i class="bi bi-upload submenu-icon"></i>
+                    Importar XMLs
+                </a>
+            </div>
+        </div>
+
+        <!-- Reforma Tributária -->
+        <div class="menu-item">
+            <a href="#" class="menu-link" data-toggle="reforma">
+                <i class="bi bi-calculator menu-icon"></i>
+                <span class="menu-text">Reforma Tributária</span>
+                <i class="bi bi-chevron-down menu-arrow"></i>
+            </a>
+            <div class="submenu" id="reforma-submenu">
+                <a href="{% url 'reforma_tributaria:consulta_gtin' %}" class="submenu-link">
+                    <i class="bi bi-search submenu-icon"></i>
+                    Consulta GTIN
+                </a>
+                <a href="{% url 'reforma_tributaria:consulta' %}" class="submenu-link">
+                    <i class="bi bi-card-list submenu-icon"></i>
+                    Consulta
+                </a>
+            </div>
+        </div>
+
+        <!-- Configurações -->
+        <div class="menu-item">
+            <a href="#" class="menu-link" data-toggle="config">
+                <i class="bi bi-gear menu-icon"></i>
+                <span class="menu-text">Configurações</span>
+                <i class="bi bi-chevron-down menu-arrow"></i>
+            </a>
+            <div class="submenu" id="config-submenu">
+                <a href="{% url 'empresa:list' %}" class="submenu-link">
+                    <i class="bi bi-building submenu-icon"></i>
+                    Empresas
+                </a>
+                <a href="{% url 'accounts:usuarios' %}" class="submenu-link">
+                    <i class="bi bi-people submenu-icon"></i>
+                    Usuários
+                </a>
+                <a href="{% url 'utilitarios:logs' %}" class="submenu-link">
+                    <i class="bi bi-journal-text submenu-icon"></i>
+                    Logs
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Section -->
+    <div class="user-section">
+        <div class="user-profile">
+            <div class="user-initial">
+                {{ user.first_name|slice:":1"|upper|default:"U" }}
+            </div>
+            <div class="user-info">
+                <p class="user-name mb-0 small">{{ user.get_full_name|default:user.email }}</p>
+                <p class="user-email mb-0 small text-muted">{{ user.email }}</p>
+            </div>
+            <a href="{% url 'accounts:logout' %}" class="ms-auto text-muted" title="Sair">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<style>
+    .submenu {
+        display: none;
+        background-color: #f8f9fa;
+        border-left: 2px solid var(--primary-color);
+        margin-left: 20px;
+    }
+    
+    .submenu.show {
+        display: block;
+    }
+    
+    .submenu-link {
+        display: flex;
+        align-items: center;
+        padding: 8px 24px;
+        color: #6b7280;
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+    
+    .submenu-link:hover {
+        background-color: white;
+        color: var(--primary-color);
+    }
+    
+    .submenu-icon {
+        font-size: 14px;
+        width: 16px;
+        margin-right: 8px;
+    }
+</style>
+
+<script>
+    // Toggle submenus
+    document.querySelectorAll('[data-toggle]').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const submenuId = this.getAttribute('data-toggle') + '-submenu';
+            const submenu = document.getElementById(submenuId);
+            const arrow = this.querySelector('.menu-arrow');
+            
+            // Toggle current submenu
+            submenu.classList.toggle('show');
+            arrow?.classList.toggle('rotated');
+        });
+    });
+</script>
