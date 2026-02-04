@@ -170,6 +170,7 @@ def processar_sped_completo(registro_0000_id):
     logger.info(f"  - Itens de Doc (C170): {qtd_c170}")
     
     resultado = {
+        'participantes': 0,
         'itens': 0,
         'documentos': 0,
         'nfes_criadas': 0,
@@ -177,6 +178,12 @@ def processar_sped_completo(registro_0000_id):
     }
     
     with transaction.atomic():
+        # Processa participantes (0150)
+        logger.info("-" * 40)
+        logger.info("Processando Participantes (Registro 0150)...")
+        resultado['participantes'] = processar_participantes_0150(registro_0000, dados.get('0150', []))
+        logger.info(f"  → {resultado['participantes']} participantes processados")
+        
         # Processa itens (0200)
         logger.info("-" * 40)
         logger.info("Processando Itens (Registro 0200)...")
@@ -418,6 +425,31 @@ def popular_ncm_classtrib(registro_0000, dados):
     
     if itens_sem_ncm > 0:
         logger.warning(f"  ⚠ {itens_sem_ncm} itens ignorados (sem NCM)")
+    
+    return count
+
+
+def processar_participantes_0150(registro_0000, participantes_data):
+    """Processa e salva os registros 0150 (Participantes)"""
+    from apps.sped.models import Registro0150
+    
+    count = 0
+    for part in participantes_data:
+        obj, created = Registro0150.objects.update_or_create(
+            registro_0000=registro_0000,
+            cod_part=part['cod_part'],
+            defaults={
+                'nome': part.get('nome', ''),
+                'cnpj': part.get('cnpj', '').replace('.', '').replace('/', '').replace('-', ''),
+                'cpf': part.get('cpf', '').replace('.', '').replace('-', ''),
+                'ie': part.get('ie', ''),
+                'cod_mun': part.get('cod_mun', ''),
+                'endereco': part.get('end', ''),
+            }
+        )
+        count += 1
+        if count <= 5 or count % 100 == 0:
+            logger.debug(f"  Participante {count}: {part['cod_part']} - {part.get('nome', 'N/A')[:30]} - {'CRIADO' if created else 'ATUALIZADO'}")
     
     return count
 

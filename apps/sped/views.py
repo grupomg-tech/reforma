@@ -12,7 +12,7 @@ from django.contrib import messages
 
 from apps.sped.models import Registro0000
 from apps.sped.parser import parse_sped_file
-from apps.sped.services import processar_sped_completo
+from apps.sped.services import processar_sped_completo, processar_participantes_0150
 from apps.empresa.models import Empresa
 
 # Logger para importação
@@ -110,13 +110,14 @@ def processar_importacao_sped(request):
         logger.info("PROCESSAMENTO DOS REGISTROS IMPORTADOS")
         logger.info("-" * 40)
         
-        # Processa os registros importados (popula módulos relacionados)
+# Processa os registros importados (popula módulos relacionados)
         for reg_id in registros_ids:
             try:
                 logger.info(f"Processando registro {reg_id} (Documentos Fiscais e NCM)...")
                 resultado_proc = processar_sped_completo(reg_id)
                 logger.info(f"  → Itens 0200: {resultado_proc.get('itens', 0)}")
                 logger.info(f"  → Documentos C100: {resultado_proc.get('documentos', 0)}")
+                logger.info(f"  → Participantes 0150: {resultado_proc.get('participantes', 0)}")
             except Exception as e:
                 logger.error(f"Erro ao processar SPED {reg_id}: {e}")
         
@@ -211,9 +212,36 @@ def processar_arquivo_sped(nome_arquivo, conteudo, tipo, sobrescrever):
         if not empresa:
             # Tenta criar empresa
             from apps.empresa.models import UF
-            uf = UF.objects.filter(sigla=reg_0000.get('uf', 'SP')).first()
+            sigla_uf = reg_0000.get('uf', 'SP').upper().strip()
+            uf = UF.objects.filter(sigla=sigla_uf).first()
+            
             if not uf:
-                uf = UF.objects.first()
+                # Cria a UF se não existir
+                codigos_uf = {
+                    'AC': 12, 'AL': 27, 'AP': 16, 'AM': 13, 'BA': 29, 'CE': 23,
+                    'DF': 53, 'ES': 32, 'GO': 52, 'MA': 21, 'MT': 51, 'MS': 50,
+                    'MG': 31, 'PA': 15, 'PB': 25, 'PR': 41, 'PE': 26, 'PI': 22,
+                    'RJ': 33, 'RN': 24, 'RS': 43, 'RO': 11, 'RR': 14, 'SC': 42,
+                    'SP': 35, 'SE': 28, 'TO': 17
+                }
+                nomes_uf = {
+                    'AC': 'Acre', 'AL': 'Alagoas', 'AP': 'Amapá', 'AM': 'Amazonas',
+                    'BA': 'Bahia', 'CE': 'Ceará', 'DF': 'Distrito Federal', 'ES': 'Espírito Santo',
+                    'GO': 'Goiás', 'MA': 'Maranhão', 'MT': 'Mato Grosso', 'MS': 'Mato Grosso do Sul',
+                    'MG': 'Minas Gerais', 'PA': 'Pará', 'PB': 'Paraíba', 'PR': 'Paraná',
+                    'PE': 'Pernambuco', 'PI': 'Piauí', 'RJ': 'Rio de Janeiro', 'RN': 'Rio Grande do Norte',
+                    'RS': 'Rio Grande do Sul', 'RO': 'Rondônia', 'RR': 'Roraima', 'SC': 'Santa Catarina',
+                    'SP': 'São Paulo', 'SE': 'Sergipe', 'TO': 'Tocantins'
+                }
+                codigo = codigos_uf.get(sigla_uf, 35)
+                nome = nomes_uf.get(sigla_uf, 'São Paulo')
+                if sigla_uf not in codigos_uf:
+                    sigla_uf = 'SP'
+                
+                uf, _ = UF.objects.get_or_create(
+                    codigo=codigo,
+                    defaults={'sigla': sigla_uf, 'nome': nome}
+                )
             
             empresa = Empresa.objects.create(
                 cnpj_cpf=formatar_cnpj(cnpj_limpo),
@@ -280,3 +308,72 @@ def excluir_sped(request):
         'empresas': Empresa.objects.filter(ativo=True),
     }
     return render(request, 'sped/excluir.html', context)
+
+
+@login_required
+def consultar_participantes(request, registro_id):
+    """API para iniciar consulta de participantes"""
+    from apps.sped.consulta_participantes import consultar_participantes_lote
+    
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
+    try:
+        registro = Registro0000.objects.get(id=registro_id)
+        
+        # Executa consulta
+        stats = consultar_participantes_lote(registro_id, apenas_nao_consultados=True)
+        
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'message': f'Consulta concluída! {stats["atualizados"]} participantes atualizados.',
+                'stats': stats,
+            })
+        
+        messages.success(request, f'Consulta concluída! {stats["atualizados"]} participantes atualizados.')
+        
+    except Registro0000.DoesNotExist:
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': 'Registro não encontrado.'}, status=404)
+        messages.error(request, 'Registro não encontrado.')
+    except Exception as e:
+        logger.error(f"Erro na consulta de participantes: {e}", exc_info=True)
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+        messages.error(request, f'Erro: {str(e)}')
+    
+    return render(request, 'sped/importar.html', {
+        'empresas': Empresa.objects.filter(ativo=True),
+        'registros': Registro0000.objects.order_by('-created_at')[:10],
+    })
+
+
+@login_required
+def status_participantes(request, registro_id):
+    """API para verificar status dos participantes de um SPED"""
+    from apps.sped.models import Registro0150
+    
+    try:
+        registro = Registro0000.objects.get(id=registro_id)
+        participantes = Registro0150.objects.filter(registro_0000=registro)
+        
+        total = participantes.count()
+        consultados = participantes.filter(consultado=True).count()
+        com_cnpj = participantes.exclude(cnpj='').exclude(cnpj__isnull=True).count()
+        simples = participantes.filter(optante_simples=True).count()
+        mei = participantes.filter(optante_mei=True).count()
+        erros = participantes.filter(consultado=True).exclude(erro_consulta='').count()
+        
+        return JsonResponse({
+            'success': True,
+            'total': total,
+            'com_cnpj': com_cnpj,
+            'consultados': consultados,
+            'pendentes': com_cnpj - consultados,
+            'simples': simples,
+            'mei': mei,
+            'regime_normal': consultados - simples - mei - erros,
+            'erros': erros,
+        })
+    except Registro0000.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Registro não encontrado.'}, status=404)

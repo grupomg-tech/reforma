@@ -72,6 +72,66 @@ class RegistroC100(models.Model):
         return f"{self.cod_mod} {self.ser}/{self.num_doc}"
 
 
+class Registro0150(models.Model):
+    """Tabela de Cadastro do Participante"""
+    registro_0000 = models.ForeignKey(Registro0000, on_delete=models.CASCADE, related_name='participantes')
+    cod_part = models.CharField('Código do Participante', max_length=60)
+    nome = models.CharField('Nome/Razão Social', max_length=200)
+    cnpj = models.CharField('CNPJ', max_length=14, blank=True)
+    cpf = models.CharField('CPF', max_length=11, blank=True)
+    ie = models.CharField('Inscrição Estadual', max_length=20, blank=True)
+    cod_mun = models.CharField('Código Município', max_length=7, blank=True)
+    uf = models.CharField('UF', max_length=2, blank=True)
+    endereco = models.CharField('Endereço', max_length=200, blank=True)
+    
+    # Campos de consulta (preenchidos pela API)
+    situacao_cadastral = models.CharField('Situação Cadastral', max_length=50, blank=True)
+    optante_simples = models.BooleanField('Optante Simples Nacional', null=True, blank=True)
+    data_opcao_simples = models.DateField('Data Opção Simples', null=True, blank=True)
+    data_exclusao_simples = models.DateField('Data Exclusão Simples', null=True, blank=True)
+    optante_mei = models.BooleanField('Optante MEI', null=True, blank=True)
+    natureza_juridica = models.CharField('Natureza Jurídica', max_length=100, blank=True)
+    porte = models.CharField('Porte', max_length=50, blank=True)
+    cnae_principal = models.CharField('CNAE Principal', max_length=10, blank=True)
+    descricao_cnae = models.CharField('Descrição CNAE', max_length=200, blank=True)
+    
+    # Controle de consulta
+    consultado = models.BooleanField('Consultado', default=False)
+    data_consulta = models.DateTimeField('Data da Consulta', null=True, blank=True)
+    erro_consulta = models.TextField('Erro na Consulta', blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Participante (Registro 0150)'
+        verbose_name_plural = 'Participantes (Registros 0150)'
+        unique_together = ['registro_0000', 'cod_part']
+    
+    def __str__(self):
+        doc = self.cnpj or self.cpf or 'S/N'
+        return f"{self.cod_part} - {self.nome[:30]} ({doc})"
+    
+    @property
+    def regime_tributario(self):
+        """Retorna o regime tributário baseado nos dados consultados"""
+        if self.optante_mei:
+            return 'MEI'
+        elif self.optante_simples:
+            return 'Simples Nacional'
+        elif self.cnpj:
+            return 'Regime Normal'
+        else:
+            return 'Pessoa Física' if self.cpf else 'Não Identificado'
+    
+    @property
+    def is_contribuinte(self):
+        """Verifica se é contribuinte de ICMS"""
+        if self.ie and self.ie.upper() not in ['ISENTO', 'ISENTA', '']:
+            return True
+        return False
+
+
 class RegistroC170(models.Model):
     """Itens do Documento (Código 01, 1B, 04 e 55)"""
     registro_c100 = models.ForeignKey(RegistroC100, on_delete=models.CASCADE, related_name='itens')
