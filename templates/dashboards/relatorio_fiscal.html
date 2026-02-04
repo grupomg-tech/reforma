@@ -1,0 +1,1720 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Relatório Reforma Tributária{% endblock %}
+
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    .container-relatorio {
+        max-width: 1600px;
+        margin: 0 auto;
+        background: white;
+        border-bottom-right-radius: 10px;
+        border-bottom-left-radius: 10px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+    }
+    
+    .header-relatorio {
+        max-width: 1600px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, #4e6ae9 0%, #764ba2 100%);
+        color: white;
+        padding: 7px;
+        text-align: left;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+    
+    .header-relatorio h4 {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 5px;
+    }
+    
+    .content-wrapper-relatorio {
+        padding: 10px;
+    }
+    
+    .form-filtros {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .filters-section:first-of-type {
+        flex: 2;
+    }
+
+    .filters-section:last-of-type {
+        flex: 1;
+    }
+
+    .filters-section {
+        min-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding-bottom: 20px;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        max-width: 400px;
+    }
+    
+    .filter-group label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .filter-group-aliquota select,
+    .filter-group-aliquota input {
+        max-width: 115px;
+    }
+    
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-filtrar {
+        grid-column: 1 / -1;
+        padding: 11px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 25px;
+    }
+    
+    .btn-filtrar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Tabs */
+    .tabs-container {
+        margin-bottom: 30px;
+    }
+    
+    .tabs-header {
+        display: flex;
+        gap: 5px;
+        border-bottom: 2px solid #e0e0e0;
+        margin-bottom: 15px;
+    }
+    
+    .tab-button {
+        padding: 15px 30px;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #6c757d;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .tab-button:hover {
+        color: #667eea;
+        background: #f8f9fa;
+    }
+    
+    .tab-button.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+        background: white;
+    }
+    
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Metrics Cards */
+    .vertical-label {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        text-orientation: mixed;
+        padding: 10px 5px;
+        background-color: black;
+        border-radius: 12px;
+        text-align: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 50px;
+        flex-shrink: 0;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .metrics-section {
+        display: flex;
+        gap: 10px;
+        align-items: stretch;
+        width: 100%;
+    }
+    
+    .metric-card {
+        flex: 1;
+        padding: 10px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 12px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(255,255,255,0.5);
+        bottom: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .metric-card h3 {
+        font-size: 12px;
+        color: #6c757d;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    
+    .metric-card .value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .metric-card .value-positive {
+        font-size: 24px;
+        font-weight: 700;
+        color: #00692f;
+    }
+
+    .metric-card .value-negative {
+        font-size: 24px;
+        font-weight: 700;
+        color: #630202;
+    }
+    
+    .metric-card.reforma {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    }
+    
+    .section-title {
+        font-size: 14px;
+        color: #667eea;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        padding-top: 15px;
+        border-bottom: 2px solid #667eea;
+    }
+
+    .section-title-pizza {
+        font-size: 14px;
+        color: #667eea;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #667eea;
+        padding-left: 150px;
+        padding-right: 150px;
+    }
+    
+    /* Tables */
+    .tables-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+    
+    .table-container {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .table-container h2 {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 20px;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .table-relatorio {
+        width: 100%;
+        min-width: max-content;
+        border-collapse: collapse;
+    }
+    
+    .table-relatorio thead {
+        background: rgb(240, 248, 255);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .table-relatorio th {
+        padding: 12px 12px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 12px;
+        color: #2c3e50;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-right: #f0f0f0 1px solid;
+    }
+
+    .table-relatorio th.reforma {
+        background-color:#ffbe1b ;
+    }
+    
+    .table-relatorio td {
+        padding: 10px 6px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 12px;
+        color: #495057;
+        text-align: center;
+        white-space: nowrap;
+        border-right: #f0f0f0 1px solid;
+    }
+
+    .table-relatorio td.reforma {
+        background-color: #fcdb9e;
+    }
+    
+    .table-relatorio tbody tr {
+        transition: background 0.2s ease;
+    }
+    
+    .table-relatorio tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .table-relatorio tfoot {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        font-weight: 700;
+    }
+    
+    .table-relatorio tfoot td {
+        padding: 12px 10px;
+        border-top: 3px solid #667eea;
+        border-bottom: none;
+        color: white;
+        font-size: 14px;
+    }
+
+    .table-relatorio tfoot td.reforma {
+        background-color: #ffbe1b;
+        color: black;
+    }
+    
+    .table-relatorio tfoot td:first-child {
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .table-scroll {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+    
+    .table-scroll::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .table-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+    
+    .table-scroll::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 4px;
+    }
+    
+    .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: #5568d3;
+    }
+    
+    .empty-state {
+        padding: 60px 40px;
+        text-align: center;
+        color: #999;
+    }
+    
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    .empty-state-text {
+        font-size: 16px;
+        color: #6c757d;
+    }
+    
+    .table-container.full-width {
+        grid-column: 1 / -1;
+        margin-bottom: 30px;
+    }
+
+    /* Charts Grid */
+    .grafico-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 30px !important;
+        margin: 40px 0 !important;
+    }
+
+    .grafico-grid canvas {
+        width: 100% !important;
+        height: 350px !important;
+    }
+
+    /* Tabelas de Transição */
+    .table-scroll-trans {
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .transicao-table {
+        width: 100%;
+        min-width: 100%;
+        table-layout: fixed;
+        font-size: 13px;
+    }
+    
+    .transicao-table thead th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        padding: 15px 10px;
+        font-size: 13px;
+    }
+    
+    .transicao-table tbody td {
+        text-align: center;
+        padding: 12px 10px;
+    }
+    
+    .transicao-table tbody td:first-child {
+        text-align: left;
+        font-weight: 600;
+        background: #f8f9fa;
+    }
+    
+    .transicao-table .row-destaque {
+        background: linear-gradient(135deg, #e0e7ff 0%, #e9d5ff 100%);
+        font-weight: 700;
+    }
+    
+    .transicao-table .row-destaque td {
+        color: #667eea;
+    }
+    
+    .transicao-table .row-reforma {
+        background: #fef3c7;
+    }
+    
+    .transicao-table .row-reforma td:first-child {
+        background: #fbbf24;
+        color: white;
+    }
+    
+    .transicao-table .row-total {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        font-weight: 700;
+    }
+    
+    .transicao-table .row-total td {
+        color: white;
+        background: transparent;
+    }
+
+    /* Botão de Exportação */
+    .btn-export {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 10px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        color: white;
+    }
+    
+    .btn-export svg {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .table-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        min-height: 70px;
+    }
+    
+    .table-header-container h2 {
+        margin: 0;
+        padding: 0;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-exportar-pdf {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        margin-top: 25px;
+    }
+
+    .btn-exportar-pdf:hover {
+        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+        box-shadow: 0 6px 8px rgba(220, 38, 38, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .grafico-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 1200px) {
+        .tables-section {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .filters-section {
+            grid-template-columns: 1fr;
+        }
+        
+        .metrics-section {
+            grid-template-columns: 1fr;
+        }
+        
+        .tabs-header {
+            overflow-x: auto;
+        }
+        
+        .tab-button {
+            white-space: nowrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header-relatorio">
+    <h4>
+        <i class="fas fa-file-invoice me-2"></i>
+        Análise Reforma Tributária
+    </h4>
+</div>
+<div class="container-relatorio">
+    <div class="content-wrapper-relatorio">
+        <form id="formFiltroRelatorio" method="GET" action="" class="form-filtros">
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label>🏢 Empresa</label>
+                    <select name="empresa" required id="empresaSelect" onchange="carregarPeriodos()">
+                        <option value="">Selecione a empresa</option>
+                        {% for empresa in empresas %}
+                        <option value="{{ empresa.id }}" {% if request.GET.empresa == empresa.id|stringformat:"s" %}selected{% endif %}>
+                            {{ empresa.cnpj }} - {{ empresa.razao_social }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>📅 Período Inicial</label>
+                    <select name="periodo_inicial" required id="periodoInicialSelect">
+                        <option value="">Selecione o início</option>
+                        {% for periodo in periodos %}
+                        <option value="{{ periodo }}" {% if request.GET.periodo_inicial == periodo %}selected{% endif %}>{{ periodo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>📅 Período Final</label>
+                    <select name="periodo_final" required id="periodoFinalSelect">
+                        <option value="">Selecione o fim</option>
+                        {% for periodo in periodos %}
+                        <option value="{{ periodo }}" {% if request.GET.periodo_final == periodo %}selected{% endif %}>{{ periodo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-filtrar" onclick="mostrarSpinnerCarregamento()">
+                    🔍 Filtrar
+                </button>
+            </div>
+
+            <div class="filters-section">                   
+                <div class="filter-group filter-group-aliquota">
+                    <label>💰 Alíquota IBS</label>
+                    <input type="number" name="aliquota_ibs" value="{{ request.GET.aliquota_ibs|default:'18.5' }}" placeholder="Ex: 18.5" step="0.01">
+                </div>
+
+                <div class="filter-group filter-group-aliquota">
+                    <label>💰 Alíquota CBS</label>
+                    <input type="number" name="aliquota_cbs" value="{{ request.GET.aliquota_cbs|default:'8.5' }}" placeholder="Ex: 8.5" step="0.01">
+                </div>
+
+                <div class="filter-group filter-group-aliquota">
+                    <label>💰 Alíquota IS</label>
+                    <input type="number" name="aliquota_is" value="{{ request.GET.aliquota_is|default:'0' }}" placeholder="Ex: 2" step="0.01">
+                </div>   
+
+                <div class="filter-group filter-group-aliquota">
+                    <label>💰 Alíquota SN</label>
+                    <input type="number" name="aliquota_sn" value="{{ request.GET.aliquota_sn }}" placeholder="Ex: 3" step="0.01">
+                </div>
+
+                <div class="filter-group">
+                    <label>
+                        <input type="checkbox" name="filiais" value="1" {% if request.GET.filiais %}checked{% endif %}>
+                        Agrupar matriz e filiais?
+                    </label>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-button active" onclick="openTab(event, 'resumo')">
+                    📈 Resumo
+                </button>
+                <button class="tab-button" onclick="openTab(event, 'entradas')">
+                    📥 Entradas
+                </button>
+                <button class="tab-button" onclick="openTab(event, 'saidas')">
+                    📤 Saídas
+                </button>
+                <button class="tab-button" onclick="openTab(event, 'transicao')">
+                    🔄 Transição
+                </button>
+            </div>
+            
+            <!-- Tab: Resumo -->
+            <div id="resumo" class="tab-content active">
+                <div class="section-title">Apuração</div>
+                <div class="metrics-section">
+                    <div class="vertical-label">Atual</div>
+
+                    <div class="metric-card">
+                        <h3>Débitos</h3>
+                        <div class="value">R$ {{ debitos_atual|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Créditos</h3>
+                        <div class="value">R$ {{ creditos_atual|default:"0"|floatformat:2 }}</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <h3>Resultado</h3>
+                        <div class="{% if resultado_atual >= 0 %}value-positive{% else %}value-negative{% endif %}">
+                            R$ {{ resultado_atual|default:"0"|floatformat:2 }}
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Carga Trib. Efetiva</h3>
+                        <div class="{% if carga_atual >= 0 %}value-positive{% else %}value-negative{% endif %}">
+                            {{ carga_atual|default:"0,00" }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-section">
+                    <div class="vertical-label">Reforma</div>
+                    
+                    <div class="metric-card reforma">
+                        <h3>Débitos</h3>
+                        <div class="value">R$ {{ debitos_reforma|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card reforma">
+                        <h3>Créditos</h3>
+                        <div class="value">R$ {{ creditos_reforma|default:"0"|floatformat:2 }}</div>
+                    </div>
+
+                    <div class="metric-card reforma">
+                        <h3>Resultado</h3>
+                        <div class="{% if resultado_reforma >= 0 %}value-positive{% else %}value-negative{% endif %}">
+                            R$ {{ resultado_reforma|default:"0"|floatformat:2 }}
+                        </div>
+                    </div>
+
+                    <div class="metric-card reforma">
+                        <h3>Carga Trib. Efetiva</h3>
+                        <div class="{% if carga_reforma >= 0 %}value-positive{% else %}value-negative{% endif %}">
+                            {{ carga_reforma|default:"0,00" }}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grafico-grid">
+                    <div class="section-title">Gráfico Carga Tributária - Compras
+                        <canvas id="chartCargaCompras"></canvas>
+                    </div>
+                    <div class="section-title">Gráfico Carga Tributária - Vendas
+                        <canvas id="chartCargaVendas"></canvas>
+                    </div>
+                </div>
+
+                <div class="grafico-grid">
+                    <div class="section-title-pizza">Tributos Entradas
+                        <canvas id="chartTributosEntradas"></canvas>
+                    </div>
+                    <div class="section-title-pizza">Tributos Saídas
+                        <canvas id="chartTributosSaidas"></canvas>
+                    </div>
+                </div>
+
+                <div class="grafico-grid">
+                    <div class="section-title">Comparativo Entradas
+                        <canvas id="chartComparativoEntradas"></canvas>
+                    </div>
+                    <div class="section-title">Comparativo Saídas
+                        <canvas id="chartComparativoSaidas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Entradas -->
+            <div id="entradas" class="tab-content">
+                <div class="section-title">📊 Sistema Tributário Atual</div>
+                <div class="metrics-section">
+                    <div class="metric-card">
+                        <h3>Compra Bruta</h3>
+                        <div class="value">R$ {{ compra_bruta|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Créditos</h3>
+                        <div class="value">R$ {{ creditos_entradas|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Compra Líquida</h3>
+                        <div class="value">R$ {{ compra_liquida|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Carga Tributária</h3>
+                        <div class="value">{{ carga_entradas|default:"0,00" }}%</div>
+                    </div>
+                </div>
+
+                <div class="section-title">🔄 Projeção com Reforma Tributária</div>
+                <div class="metrics-section">
+                    <div class="metric-card reforma">
+                        <h3>Compra Líquida</h3>
+                        <div class="value">R$ {{ compra_liquida_reforma|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card reforma">
+                        <h3>Créditos IBS/CBS</h3>
+                        <div class="value">R$ {{ creditos_ibs_cbs|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card reforma">
+                        <h3>Compra Total</h3>
+                        <div class="value">R$ {{ compra_total_reforma|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card reforma">
+                        <h3>Carga Tributária</h3>
+                        <div class="value">{{ carga_entradas_reforma|default:"0,00" }}%</div>
+                    </div>
+                </div>
+                
+                <div class="tables-section">
+                    <!-- Produtos -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>🛒 Produtos Adquiridos</h2>
+                            <a href="#" class="btn-export">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Excel
+                            </a>
+                        </div>
+                        <div class="table-scroll">
+                            {% if produtos_entradas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>NCM</th>
+                                        <th>Descrição</th>
+                                        <th>CFOP</th>
+                                        <th>Qtd</th>
+                                        <th>Valor Total</th>
+                                        <th>ICMS</th>
+                                        <th>PIS</th>
+                                        <th>COFINS</th>
+                                        <th class="reforma">IBS/CBS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for produto in produtos_entradas %}
+                                    <tr>
+                                        <td>{{ produto.codigo }}</td>
+                                        <td>{{ produto.ncm }}</td>
+                                        <td>{{ produto.descricao|truncatechars:40 }}</td>
+                                        <td>{{ produto.cfop }}</td>
+                                        <td>{{ produto.quantidade }}</td>
+                                        <td>R$ {{ produto.valor_total|floatformat:2 }}</td>
+                                        <td>R$ {{ produto.icms|floatformat:2 }}</td>
+                                        <td>R$ {{ produto.pis|floatformat:2 }}</td>
+                                        <td>R$ {{ produto.cofins|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ produto.ibs_cbs|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5"><strong>TOTAL</strong></td>
+                                        <td>R$ {{ total_valor_entradas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_icms_entradas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_pis_entradas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cofins_entradas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_ibs_cbs_entradas|floatformat:2 }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum produto de entrada encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Lançamentos Manuais -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>📝 Lançamentos Manuais - Créditos IBS/CBS</h2>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn-export" id="btnImportarPlanilha" {% if not request.GET.empresa %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    Importar Planilha
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-scroll">
+                            {% if lancamentos_entradas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrição</th>
+                                        <th>Valor IBS</th>
+                                        <th>Valor CBS</th>
+                                        <th>Total</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lanc in lancamentos_entradas %}
+                                    <tr>
+                                        <td>{{ lanc.data|date:"d/m/Y" }}</td>
+                                        <td>{{ lanc.descricao }}</td>
+                                        <td>R$ {{ lanc.valor_ibs|floatformat:2 }}</td>
+                                        <td>R$ {{ lanc.valor_cbs|floatformat:2 }}</td>
+                                        <td>R$ {{ lanc.total|floatformat:2 }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" onclick="excluirLancamento({{ lanc.id }})">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum ajuste encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab: Saídas -->
+            <div id="saidas" class="tab-content">
+                <div class="section-title">📊 Sistema Tributário Atual - Saídas</div>
+                <div class="metrics-section">
+                    <div class="metric-card">
+                        <h3>Venda Bruta</h3>
+                        <div class="value">R$ {{ venda_bruta|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Débitos</h3>
+                        <div class="value">R$ {{ debitos_saidas|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Venda Líquida</h3>
+                        <div class="value">R$ {{ venda_liquida|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <h3>Carga Tributária</h3>
+                        <div class="value">{{ carga_saidas|default:"0,00" }}%</div>
+                    </div>
+                </div>
+
+                <div class="section-title">🔄 Projeção com Reforma - Saídas</div>
+                <div class="metrics-section">
+                    <div class="metric-card reforma">
+                        <h3>Venda Líquida</h3>
+                        <div class="value">R$ {{ venda_liquida_reforma|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card reforma">
+                        <h3>Débitos IBS/CBS</h3>
+                        <div class="value">R$ {{ debitos_ibs_cbs|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card reforma">
+                        <h3>Venda Total</h3>
+                        <div class="value">R$ {{ venda_total_reforma|default:"0"|floatformat:2 }}</div>
+                    </div>
+                    
+                    <div class="metric-card reforma">
+                        <h3>Carga Tributária</h3>
+                        <div class="value">{{ carga_saidas_reforma|default:"0,00" }}%</div>
+                    </div>
+                </div>
+                
+                <div class="tables-section">
+                    <!-- Produtos Vendidos -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>📦 Produtos Vendidos</h2>
+                            <a href="#" class="btn-export">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Excel
+                            </a>
+                        </div>
+                        <div class="table-scroll">
+                            {% if produtos_saidas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>NCM</th>
+                                        <th>Descrição</th>
+                                        <th>CFOP</th>
+                                        <th>Qtd</th>
+                                        <th>Valor Total</th>
+                                        <th>ICMS</th>
+                                        <th>PIS</th>
+                                        <th>COFINS</th>
+                                        <th class="reforma">IBS/CBS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for produto in produtos_saidas %}
+                                    <tr>
+                                        <td>{{ produto.codigo }}</td>
+                                        <td>{{ produto.ncm }}</td>
+                                        <td>{{ produto.descricao|truncatechars:40 }}</td>
+                                        <td>{{ produto.cfop }}</td>
+                                        <td>{{ produto.quantidade }}</td>
+                                        <td>R$ {{ produto.valor_total|floatformat:2 }}</td>
+                                        <td>R$ {{ produto.icms|floatformat:2 }}</td>
+                                        <td>R$ {{ produto.pis|floatformat:2 }}</td>
+                                        <td>R$ {{ produto.cofins|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ produto.ibs_cbs|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum produto de saída encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Clientes Detalhados -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>🏭 Clientes Detalhados</h2>
+                            <a href="#" class="btn-export">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Excel
+                            </a>
+                        </div>
+                        <div class="table-scroll">
+                            {% if clientes %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>CNPJ/CPF</th>
+                                        <th>Nome</th>
+                                        <th>UF</th>
+                                        <th>Valor Total</th>
+                                        <th>ICMS</th>
+                                        <th class="reforma">IBS/CBS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cliente in clientes %}
+                                    <tr>
+                                        <td>{{ cliente.cnpj_cpf }}</td>
+                                        <td>{{ cliente.nome|truncatechars:40 }}</td>
+                                        <td>{{ cliente.uf }}</td>
+                                        <td>R$ {{ cliente.valor_total|floatformat:2 }}</td>
+                                        <td>R$ {{ cliente.icms|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ cliente.ibs_cbs|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum cliente encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- CFOPs de Saída -->
+                    <div class="table-container">
+                        <div class="table-header-container">
+                            <h2>📋 CFOPs de Saída</h2>
+                            <a href="#" class="btn-export">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Excel
+                            </a>
+                        </div>
+                        <div class="table-scroll">
+                            {% if cfops_saidas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>CFOP</th>
+                                        <th>Descrição</th>
+                                        <th>Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cfop in cfops_saidas %}
+                                    <tr>
+                                        <td>{{ cfop.codigo }}</td>
+                                        <td>{{ cfop.descricao }}</td>
+                                        <td>R$ {{ cfop.valor|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum CFOP de saída encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Distribuição por UF -->
+                    <div class="table-container">
+                        <div class="table-header-container">
+                            <h2>🗺️ Distribuição por UF - Saídas</h2>
+                            <a href="#" class="btn-export">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Excel
+                            </a>
+                        </div>
+                        <div class="table-scroll">
+                            {% if ufs_saidas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>UF</th>
+                                        <th>Quantidade</th>
+                                        <th>Valor Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for uf in ufs_saidas %}
+                                    <tr>
+                                        <td>{{ uf.sigla }}</td>
+                                        <td>{{ uf.quantidade }}</td>
+                                        <td>R$ {{ uf.valor|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhuma UF encontrada</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Ajustes Apuração ICMS -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>Ajustes Apuração ICMS</h2>
+                        </div>
+                        <div class="table-scroll">
+                            {% if ajustes_icms %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descrição</th>
+                                        <th>Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ajuste in ajustes_icms %}
+                                    <tr>
+                                        <td>{{ ajuste.codigo }}</td>
+                                        <td>{{ ajuste.descricao }}</td>
+                                        <td>R$ {{ ajuste.valor|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum ajuste encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Lançamentos Manuais Saídas -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>📝 Lançamentos Manuais - Débitos IBS/CBS</h2>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn-export" id="btnImportarPlanilhaSaidas" {% if not request.GET.empresa %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    Importar Planilha
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-scroll">
+                            {% if lancamentos_saidas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrição</th>
+                                        <th>Valor IBS</th>
+                                        <th>Valor CBS</th>
+                                        <th>Total</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lanc in lancamentos_saidas %}
+                                    <tr>
+                                        <td>{{ lanc.data|date:"d/m/Y" }}</td>
+                                        <td>{{ lanc.descricao }}</td>
+                                        <td>R$ {{ lanc.valor_ibs|floatformat:2 }}</td>
+                                        <td>R$ {{ lanc.valor_cbs|floatformat:2 }}</td>
+                                        <td>R$ {{ lanc.total|floatformat:2 }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" onclick="excluirLancamento({{ lanc.id }})">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum ajuste encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab: Transição -->
+            <div id="transicao" class="tab-content">
+                <div class="section-title">📥 Progressão da Reforma - Compras (Entradas)</div>
+                <div class="table-container">
+                    <h2>🛒 Simulação de Tributos nas Compras (2026-2033)</h2>
+                    <div class="table-scroll-trans">
+                        <table class="transicao-table">
+                            <thead>
+                                <tr>
+                                    <th>Tributo</th>
+                                    <th>2026</th>
+                                    <th>2027</th>
+                                    <th>2028</th>
+                                    <th>2029</th>
+                                    <th>2030</th>
+                                    <th>2031</th>
+                                    <th>2032</th>
+                                    <th>2033</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="row-destaque">
+                                    <td><strong>Compra Bruta</strong></td>
+                                    <td>R$ {{ transicao_compras.compra_bruta_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.compra_bruta_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.compra_bruta_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.compra_bruta_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.compra_bruta_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.compra_bruta_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.compra_bruta_2032|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.compra_bruta_2033|default:"0"|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PIS</strong></td>
+                                    <td>R$ {{ transicao_compras.pis_2026|default:"0"|floatformat:2 }}</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>COFINS</strong></td>
+                                    <td>R$ {{ transicao_compras.cofins_2026|default:"0"|floatformat:2 }}</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ICMS</strong></td>
+                                    <td>R$ {{ transicao_compras.icms_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.icms_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.icms_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.icms_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.icms_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.icms_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.icms_2032|default:"0"|floatformat:2 }}</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                </tr>
+                                <tr class="row-reforma">
+                                    <td><strong>IBS</strong></td>
+                                    <td>R$ {{ transicao_compras.ibs_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.ibs_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.ibs_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.ibs_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.ibs_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.ibs_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.ibs_2032|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.ibs_2033|default:"0"|floatformat:2 }}</td>
+                                </tr>
+                                <tr class="row-reforma">
+                                    <td><strong>CBS</strong></td>
+                                    <td>R$ {{ transicao_compras.cbs_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.cbs_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.cbs_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.cbs_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.cbs_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.cbs_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.cbs_2032|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.cbs_2033|default:"0"|floatformat:2 }}</td>
+                                </tr>
+                                <tr class="row-total">
+                                    <td style="color:#2c3e50"><strong>TOTAL</strong></td>
+                                    <td>R$ {{ transicao_compras.total_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.total_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.total_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.total_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.total_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.total_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.total_2032|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_compras.total_2033|default:"0"|floatformat:2 }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section-title">📤 Progressão da Reforma - Vendas (Saídas)</div>
+                <div class="table-container">
+                    <h2>📦 Simulação de Tributos nas Vendas (2026-2033)</h2>
+                    <div class="table-scroll-trans">
+                        <table class="transicao-table">
+                            <thead>
+                                <tr>
+                                    <th>Tributo</th>
+                                    <th>2026</th>
+                                    <th>2027</th>
+                                    <th>2028</th>
+                                    <th>2029</th>
+                                    <th>2030</th>
+                                    <th>2031</th>
+                                    <th>2032</th>
+                                    <th>2033</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="row-destaque">
+                                    <td><strong>Venda Bruta</strong></td>
+                                    <td>R$ {{ transicao_vendas.venda_bruta_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.venda_bruta_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.venda_bruta_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.venda_bruta_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.venda_bruta_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.venda_bruta_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.venda_bruta_2032|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.venda_bruta_2033|default:"0"|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PIS</strong></td>
+                                    <td>R$ {{ transicao_vendas.pis_2026|default:"0"|floatformat:2 }}</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>COFINS</strong></td>
+                                    <td>R$ {{ transicao_vendas.cofins_2026|default:"0"|floatformat:2 }}</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ICMS</strong></td>
+                                    <td>R$ {{ transicao_vendas.icms_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.icms_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.icms_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.icms_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.icms_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.icms_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.icms_2032|default:"0"|floatformat:2 }}</td>
+                                    <td style="letter-spacing: 0.5px;">EXTINTO</td>
+                                </tr>
+                                <tr class="row-reforma">
+                                    <td><strong>IBS</strong></td>
+                                    <td>R$ {{ transicao_vendas.ibs_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.ibs_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.ibs_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.ibs_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.ibs_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.ibs_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.ibs_2032|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.ibs_2033|default:"0"|floatformat:2 }}</td>
+                                </tr>
+                                <tr class="row-reforma">
+                                    <td><strong>CBS</strong></td>
+                                    <td>R$ {{ transicao_vendas.cbs_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.cbs_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.cbs_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.cbs_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.cbs_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.cbs_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.cbs_2032|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.cbs_2033|default:"0"|floatformat:2 }}</td>
+                                </tr>
+                                <tr class="row-total">
+                                    <td style="color:#2c3e50"><strong>TOTAL</strong></td>
+                                    <td>R$ {{ transicao_vendas.total_2026|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.total_2027|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.total_2028|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.total_2029|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.total_2030|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.total_2031|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.total_2032|default:"0"|floatformat:2 }}</td>
+                                    <td>R$ {{ transicao_vendas.total_2033|default:"0"|floatformat:2 }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Função para abrir tabs
+    function openTab(evt, tabName) {
+        const tabContents = document.getElementsByClassName('tab-content');
+        for (let i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove('active');
+        }
+        
+        const tabButtons = document.getElementsByClassName('tab-button');
+        for (let i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove('active');
+        }
+        
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    // Função para carregar períodos via AJAX
+    function carregarPeriodos() {
+        const empresaId = document.getElementById('empresaSelect').value;
+        if (!empresaId) return;
+        
+        fetch(`/dashboards/api/periodos/?empresa=${empresaId}`)
+            .then(response => response.json())
+            .then(data => {
+                const periodoInicial = document.getElementById('periodoInicialSelect');
+                const periodoFinal = document.getElementById('periodoFinalSelect');
+                
+                periodoInicial.innerHTML = '<option value="">Selecione o início</option>';
+                periodoFinal.innerHTML = '<option value="">Selecione o fim</option>';
+                
+                data.periodos.forEach(periodo => {
+                    periodoInicial.innerHTML += `<option value="${periodo}">${periodo}</option>`;
+                    periodoFinal.innerHTML += `<option value="${periodo}">${periodo}</option>`;
+                });
+            });
+    }
+
+    // Spinner de carregamento
+    function mostrarSpinnerCarregamento() {
+        const spinnerExistente = document.getElementById('spinnerCarregamento');
+        if (spinnerExistente) spinnerExistente.remove();
+        
+        const overlay = document.createElement('div');
+        overlay.id = 'spinnerCarregamento';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); display: flex;
+            justify-content: center; align-items: center; z-index: 999999;
+        `;
+        
+        const spinnerContainer = document.createElement('div');
+        spinnerContainer.style.cssText = `
+            background: white; padding: 40px 50px; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4); text-align: center; min-width: 300px;
+        `;
+        
+        const spinner = document.createElement('div');
+        spinner.style.cssText = `
+            width: 60px; height: 60px; border: 6px solid #f3f4f6;
+            border-top-color: #667eea; border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 20px;
+        `;
+        
+        const texto = document.createElement('div');
+        texto.style.cssText = 'font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 8px;';
+        texto.textContent = 'Processando dados...';
+        
+        const subtexto = document.createElement('div');
+        subtexto.style.cssText = 'font-size: 14px; color: #6b7280;';
+        subtexto.textContent = 'Aguarde enquanto carregamos as informações';
+        
+        spinnerContainer.appendChild(spinner);
+        spinnerContainer.appendChild(texto);
+        spinnerContainer.appendChild(subtexto);
+        overlay.appendChild(spinnerContainer);
+        document.body.appendChild(overlay);
+        
+        if (!document.getElementById('spinnerStyles')) {
+            const style = document.createElement('style');
+            style.id = 'spinnerStyles';
+            style.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+            document.head.appendChild(style);
+        }
+    }
+
+    // Configuração dos gráficos
+    Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    Chart.defaults.color = '#495057';
+    
+    const colors = {
+        primary: '#667eea',
+        secondary: '#764ba2',
+        success: '#10b981',
+        warning: '#f59e0b',
+        danger: '#ef4444',
+        info: '#3b82f6',
+        purple: '#8b5cf6',
+        pink: '#ec4899'
+    };
+    
+    // Dados dos gráficos (vindos do Django)
+    const dadosResumo = {
+        cargaAtualCompras: Number({{ carga_atual_compras|default:"0" }}),
+        cargaReformaCompras: Number({{ carga_reforma_compras|default:"0" }}),
+        cargaAtualVendas: Number({{ carga_atual_vendas|default:"0" }}),
+        cargaReformaVendas: Number({{ carga_reforma_vendas|default:"0" }}),
+        icmsEntradas: Number({{ icms_entradas|default:"0" }}),
+        pisEntradas: Number({{ pis_entradas|default:"0" }}),
+        cofinsEntradas: Number({{ cofins_entradas|default:"0" }}),
+        ibsCbsEntradas: Number({{ ibs_cbs_entradas|default:"0" }}),
+        icmsSaidas: Number({{ icms_saidas|default:"0" }}),
+        pisSaidas: Number({{ pis_saidas|default:"0" }}),
+        cofinsSaidas: Number({{ cofins_saidas|default:"0" }}),
+        ibsCbsSaidas: Number({{ ibs_cbs_saidas|default:"0" }})
+    };
+    
+    // Gráfico Carga Tributária - Compras
+    const ctxCargaCompras = document.getElementById('chartCargaCompras');
+    if (ctxCargaCompras) {
+        new Chart(ctxCargaCompras, {
+            type: 'bar',
+            data: {
+                labels: ['Atual', 'Reforma'],
+                datasets: [{
+                    label: 'Carga Tributária (%)',
+                    data: [dadosResumo.cargaAtualCompras, dadosResumo.cargaReformaCompras],
+                    backgroundColor: [colors.primary, colors.warning],
+                    borderRadius: 8,
+                    barThickness: 60
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + '%' } } }
+            }
+        });
+    }
+    
+    // Gráfico Carga Tributária - Vendas
+    const ctxCargaVendas = document.getElementById('chartCargaVendas');
+    if (ctxCargaVendas) {
+        new Chart(ctxCargaVendas, {
+            type: 'bar',
+            data: {
+                labels: ['Atual', 'Reforma'],
+                datasets: [{
+                    label: 'Carga Tributária (%)',
+                    data: [dadosResumo.cargaAtualVendas, dadosResumo.cargaReformaVendas],
+                    backgroundColor: [colors.primary, colors.warning],
+                    borderRadius: 8,
+                    barThickness: 60
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { callback: (value) => value + '%' } } }
+            }
+        });
+    }
+    
+    // Gráfico Tributos Entradas (Pizza)
+    const ctxTributosEntradas = document.getElementById('chartTributosEntradas');
+    if (ctxTributosEntradas) {
+        new Chart(ctxTributosEntradas, {
+            type: 'doughnut',
+            data: {
+                labels: ['ICMS', 'PIS', 'COFINS', 'IBS/CBS'],
+                datasets: [{
+                    data: [dadosResumo.icmsEntradas, dadosResumo.pisEntradas, dadosResumo.cofinsEntradas, dadosResumo.ibsCbsEntradas],
+                    backgroundColor: [colors.primary, colors.success, colors.warning, colors.pink]
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
+    
+    // Gráfico Tributos Saídas (Pizza)
+    const ctxTributosSaidas = document.getElementById('chartTributosSaidas');
+    if (ctxTributosSaidas) {
+        new Chart(ctxTributosSaidas, {
+            type: 'doughnut',
+            data: {
+                labels: ['ICMS', 'PIS', 'COFINS', 'IBS/CBS'],
+                datasets: [{
+                    data: [dadosResumo.icmsSaidas, dadosResumo.pisSaidas, dadosResumo.cofinsSaidas, dadosResumo.ibsCbsSaidas],
+                    backgroundColor: [colors.primary, colors.success, colors.warning, colors.pink]
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+    }
+    
+    // Gráfico Comparativo Entradas
+    const ctxComparativoEntradas = document.getElementById('chartComparativoEntradas');
+    if (ctxComparativoEntradas) {
+        new Chart(ctxComparativoEntradas, {
+            type: 'bar',
+            data: {
+                labels: ['ICMS', 'PIS', 'COFINS', 'IBS/CBS'],
+                datasets: [
+                    { label: 'Atual', data: [dadosResumo.icmsEntradas, dadosResumo.pisEntradas, dadosResumo.cofinsEntradas, 0], backgroundColor: colors.primary },
+                    { label: 'Reforma', data: [0, 0, 0, dadosResumo.ibsCbsEntradas], backgroundColor: colors.warning }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+        });
+    }
+    
+    // Gráfico Comparativo Saídas
+    const ctxComparativoSaidas = document.getElementById('chartComparativoSaidas');
+    if (ctxComparativoSaidas) {
+        new Chart(ctxComparativoSaidas, {
+            type: 'bar',
+            data: {
+                labels: ['ICMS', 'PIS', 'COFINS', 'IBS/CBS'],
+                datasets: [
+                    { label: 'Atual', data: [dadosResumo.icmsSaidas, dadosResumo.pisSaidas, dadosResumo.cofinsSaidas, 0], backgroundColor: colors.primary },
+                    { label: 'Reforma', data: [0, 0, 0, dadosResumo.ibsCbsSaidas], backgroundColor: colors.warning }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } } }
+        });
+    }
+</script>
+{% endblock %}

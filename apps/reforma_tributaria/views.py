@@ -37,10 +37,11 @@ def consulta(request):
         itens = itens.filter(cod_ncm__icontains=ncm)
     
     if cst:
+        from django.db import models as db_models
         itens = itens.filter(
-            models.Q(cst_icms__icontains=cst) |
-            models.Q(cst_pis__icontains=cst) |
-            models.Q(cst_cofins__icontains=cst)
+            db_models.Q(cst_icms__icontains=cst) |
+            db_models.Q(cst_pis__icontains=cst) |
+            db_models.Q(cst_cofins__icontains=cst)
         )
     
     if descricao:

@@ -1,93 +1,219 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Consulta - Reforma Tributária{% endblock %}
+{% block title %}NCM x cClassTrib{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filters-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    .badge-cst {
+        font-family: monospace;
+        font-size: 0.85rem;
+    }
+    .ncm-code {
+        font-family: monospace;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    .anexos-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .anexo-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        background: #f8f9fa;
+        border-radius: 5px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
     <div class="card shadow">
         <div class="card-header">
-            <h4 class="mb-0">
-                <i class="bi bi-search me-2"></i>
-                Consulta - Reforma Tributária
-            </h4>
+            <div class="row align-items-center">
+                <div class="col">
+                    <h4 class="mb-0">
+                        <i class="bi bi-card-checklist me-2"></i>
+                        NCM x Classificação Tributária
+                    </h4>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-light btn-sm" onclick="exportarExcel()">
+                        <i class="fas fa-file-excel me-1"></i> Exportar
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div class="card-body">
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <label class="form-label">NCM</label>
-                    <input type="text" class="form-control" id="ncmInput" placeholder="Ex: 84714900">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">CEST</label>
-                    <input type="text" class="form-control" id="cestInput" placeholder="Ex: 2106300">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Descrição</label>
-                    <input type="text" class="form-control" id="descricaoInput" placeholder="Buscar por descrição">
-                </div>
-            </div>
-            
-            <div class="d-flex gap-2 mb-4">
-                <button class="btn btn-primary" id="btnConsultar">
-                    <i class="bi bi-search me-1"></i> Consultar
-                </button>
-                <button class="btn btn-secondary" id="btnLimpar">
-                    <i class="bi bi-eraser me-1"></i> Limpar
-                </button>
-            </div>
-            
-            <!-- Resultados -->
-            <div id="resultadosContainer" style="display: none;">
-                <h5 class="mb-3">Resultados da Consulta</h5>
+            <!-- Filtros -->
+            <div class="filters-card">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label"><small>Empresa</small></label>
+                        <select name="empresa" class="form-select form-select-sm">
+                            <option value="">Todas</option>
+                            {% for empresa in empresas %}
+                            <option value="{{ empresa.id }}" {% if filtros.empresa == empresa.id|stringformat:"s" %}selected{% endif %}>
+                                {{ empresa.razao_social }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label"><small>Origem</small></label>
+                        <select name="origem" class="form-select form-select-sm">
+                            <option value="">Todas</option>
+                            <option value="SPED">SPED</option>
+                            <option value="XML">XML</option>
+                            <option value="MANUAL">Manual</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label"><small>NCM</small></label>
+                        <input type="text" name="ncm" class="form-control form-control-sm" 
+                               value="{{ filtros.ncm }}" placeholder="Ex: 84714900">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label"><small>CST</small></label>
+                        <input type="text" name="cst" class="form-control form-control-sm" 
+                               value="{{ filtros.cst }}" placeholder="Ex: 000">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                        <a href="{% url 'reforma_tributaria:consulta' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-eraser"></i>
+                        </a>
+                    </div>
+                </form>
                 
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped">
-                        <thead>
-                            <tr>
-                                <th>NCM</th>
-                                <th>CEST</th>
-                                <th>Descrição</th>
-                                <th class="text-center">CBS (%)</th>
-                                <th class="text-center">IBS (%)</th>
-                                <th class="text-center">Total (%)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultadosBody">
-                        </tbody>
-                    </table>
+                <!-- Anexos da Reforma -->
+                <div class="mt-3">
+                    <label class="form-label"><small>Filtrar por Anexo da Reforma Tributária:</small></label>
+                    <div class="anexos-container">
+                        <label class="anexo-checkbox">
+                            <input type="checkbox" name="anexo" value="I"> Anexo I
+                        </label>
+                        <label class="anexo-checkbox">
+                            <input type="checkbox" name="anexo" value="II"> Anexo II
+                        </label>
+                        <label class="anexo-checkbox">
+                            <input type="checkbox" name="anexo" value="III"> Anexo III
+                        </label>
+                        <label class="anexo-checkbox">
+                            <input type="checkbox" name="anexo" value="IV"> Anexo IV
+                        </label>
+                        <label class="anexo-checkbox">
+                            <input type="checkbox" name="anexo" value="V"> Anexo V
+                        </label>
+                        <label class="anexo-checkbox">
+                            <input type="checkbox" name="anexo" value="VI"> Anexo VI
+                        </label>
+                        <label class="anexo-checkbox">
+                            <input type="checkbox" name="anexo" value="VII"> Anexo VII
+                        </label>
+                        <label class="anexo-checkbox">
+                            <input type="checkbox" name="anexo" value="VIII"> Anexo VIII
+                        </label>
+                    </div>
                 </div>
             </div>
             
-            <!-- Mensagem inicial -->
-            <div id="mensagemInicial" class="text-center py-5 text-muted">
-                <i class="bi bi-calculator fs-1 mb-3 d-block"></i>
-                <p>Informe os parâmetros de busca para consultar as alíquotas da Reforma Tributária.</p>
+            <!-- Tabela -->
+            <div class="table-container">
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>Código</th>
+                            <th>NCM</th>
+                            <th>Descrição</th>
+                            <th class="text-center">CST ICMS</th>
+                            <th class="text-center">CST PIS</th>
+                            <th class="text-center">CST COFINS</th>
+                            <th class="text-center">CFOP</th>
+                            <th class="text-center">Alíq. ICMS</th>
+                            <th class="text-center">Alíq. PIS</th>
+                            <th class="text-center">Alíq. COFINS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in itens %}
+                        <tr>
+                            <td><code>{{ item.cod_item }}</code></td>
+                            <td><span class="ncm-code">{{ item.cod_ncm }}</span></td>
+                            <td title="{{ item.descricao }}">{{ item.descricao|truncatechars:40 }}</td>
+                            <td class="text-center"><span class="badge bg-primary badge-cst">{{ item.cst_icms|default:"-" }}</span></td>
+                            <td class="text-center"><span class="badge bg-info badge-cst">{{ item.cst_pis|default:"-" }}</span></td>
+                            <td class="text-center"><span class="badge bg-info badge-cst">{{ item.cst_cofins|default:"-" }}</span></td>
+                            <td class="text-center"><code>{{ item.cfop|default:"-" }}</code></td>
+                            <td class="text-center">{{ item.aliq_icms|floatformat:2 }}%</td>
+                            <td class="text-center">{{ item.aliq_pis|floatformat:2 }}%</td>
+                            <td class="text-center">{{ item.aliq_cofins|floatformat:2 }}%</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                <p>Nenhum item encontrado.</p>
+                                <small>Importe arquivos SPED para popular esta tabela.</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </div>
-    
-    <!-- Card informativo -->
-    <div class="card shadow mt-4">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0">
-                <i class="bi bi-info-circle me-2"></i>
-                Sobre a Reforma Tributária
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>CBS - Contribuição sobre Bens e Serviços</h6>
-                    <p class="text-muted small">Tributo federal que substituirá PIS e COFINS.</p>
-                </div>
-                <div class="col-md-6">
-                    <h6>IBS - Imposto sobre Bens e Serviços</h6>
-                    <p class="text-muted small">Tributo estadual/municipal que substituirá ICMS e ISS.</p>
-                </div>
-            </div>
+            
+            <!-- Paginação -->
+            {% if itens.has_other_pages %}
+            <nav class="mt-3">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if itens.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ itens.previous_page_number }}&empresa={{ filtros.empresa }}&ncm={{ filtros.ncm }}&cst={{ filtros.cst }}&descricao={{ filtros.descricao }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <span class="page-link">Página {{ itens.number }} de {{ itens.paginator.num_pages }}</span>
+                    </li>
+                    
+                    {% if itens.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ itens.next_page_number }}&empresa={{ filtros.empresa }}&ncm={{ filtros.ncm }}&cst={{ filtros.cst }}&descricao={{ filtros.descricao }}">Próximo</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportarExcel() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'excel');
+    window.location.href = '{% url "reforma_tributaria:consulta" %}?' + params.toString();
+}
+</script>
 {% endblock %}
