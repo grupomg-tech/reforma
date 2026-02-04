@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Documentos Fiscais{% endblock %}
+
+{% block extra_css %}
+<style>
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge.success { background: #d5f4e6; color: #27ae60; }
+    .badge.danger { background: #fadbd8; color: #e74c3c; }
+    .badge.warning { background: #fff3cd; color: #856404; }
+    .badge.info { background: #d1ecf1; color: #0c5460; }
+    
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(135deg, #8C40F0 0%, #FF8C40 100%);
+        color: white;
+        border-color: transparent;
+    }
+    
+    .selection-toolbar {
+        background-color: #e3f2fd;
+        border: 1px solid #2196f3;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin: 0.5rem;
+        display: none;
+    }
+    .selection-toolbar.show { display: block; }
+    
+    .btn-xml-lote, .btn-danfe-lote {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        border: none;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-0">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="mb-0">
+                                <i class="fas fa-file-invoice me-2"></i>
+                                Documentos Fiscais Eletrônicos
+                            </h4>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-success btn-sm" id="btnBuscaManual" disabled title="Selecione uma empresa">
+                                <i class="fas fa-sync-alt me-1"></i> Busca Manual
+                            </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-file-excel me-1"></i> Exportar
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-file-excel me-2"></i> Página Atual</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-file-export me-2"></i> Todos os Registros</a></li>
+                                </ul>
+                            </div>
+                            <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalImportarXML">
+                                <i class="fas fa-cloud-upload me-1"></i> Importar XML
+                            </button>
+                            <button class="btn btn-light btn-sm" onclick="location.reload()">
+                                <i class="fas fa-sync-alt me-1"></i> Atualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <!-- Barra de seleção em lote -->
+                    <div class="selection-toolbar" id="selectionToolbar">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <span class="fw-bold">
+                                    <i class="fas fa-check-square me-2"></i>
+                                    <span id="contadorSelecionados">0</span> documento(s) selecionado(s)
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-xml-lote btn-sm"><i class="fas fa-download me-1"></i> Baixar XMLs</button>
+                                <button class="btn btn-danfe-lote btn-sm"><i class="fas fa-file-pdf me-1"></i> Baixar Docs</button>
+                                <button class="btn btn-outline-success btn-sm"><i class="fas fa-check-circle me-1"></i> Conferido</button>
+                                <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash-alt me-1"></i> Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Abas -->
+                    <div class="px-0 pt-1">
+                        <ul class="nav nav-tabs" id="documentTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#nfe">
+                                    <i class="fas fa-file-invoice me-2"></i>NF-e/NFC-e
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#cte">
+                                    <i class="fas fa-truck me-2"></i>CT-e
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link disabled"><i class="fas fa-times me-2"></i>NFS-e</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link disabled"><i class="fas fa-times me-2"></i>MDF-e</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content">
+                        <!-- Aba NF-e -->
+                        <div class="tab-pane fade show active" id="nfe">
+                            <!-- Filtros -->
+                            <div class="p-3 bg-light border-bottom">
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-3">
+                                        <label class="form-label mb-1"><small>Empresa</small></label>
+                                        <select class="form-select form-select-sm" id="empresaSelecao">
+                                            <option value="">Selecione uma empresa</option>
+                                            {% for empresa in empresas %}
+                                            <option value="{{ empresa.id }}">{{ empresa.razao_social }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-1"><small>Data Inicial</small></label>
+                                        <input type="date" class="form-control form-control-sm" id="dataInicial">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-1"><small>Data Final</small></label>
+                                        <input type="date" class="form-control form-control-sm" id="dataFinal">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label mb-1"><small>Tipo</small></label>
+                                        <select class="form-select form-select-sm" id="tipoNota">
+                                            <option value="">Todos</option>
+                                            <option value="entrada">Entrada</option>
+                                            <option value="saida">Saída</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-primary btn-sm" title="Filtrar">
+                                            <i class="fas fa-search"></i> Filtrar
+                                        </button>
+                                        <button class="btn btn-secondary btn-sm" title="Limpar">
+                                            <i class="fas fa-eraser"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabela NF-e -->
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width: 40px;">
+                                                <input type="checkbox" class="form-check-input" id="selectAll">
+                                            </th>
+                                            <th class="text-center">Tipo</th>
+                                            <th class="text-center">Número</th>
+                                            <th class="text-center">Série</th>
+                                            <th class="text-center">Data Emissão</th>
+                                            <th class="text-center">Emitente/Destinatário</th>
+                                            <th class="text-center">Valor Total</th>
+                                            <th class="text-center">Status</th>
+                                            <th class="text-center" style="width: 80px;">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for nfe in nfes %}
+                                        <tr>
+                                            <td class="text-center">
+                                                <input type="checkbox" class="form-check-input doc-checkbox" value="{{ nfe.id }}">
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge {% if nfe.tipo == 'entrada' %}info{% else %}success{% endif %}">
+                                                    {{ nfe.tipo|title }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">{{ nfe.numero }}</td>
+                                            <td class="text-center">{{ nfe.serie }}</td>
+                                            <td class="text-center">{{ nfe.data_emissao|date:"d/m/Y" }}</td>
+                                            <td class="text-center">{{ nfe.empresa.razao_social|truncatechars:30 }}</td>
+                                            <td class="text-center">R$ {{ nfe.valor_total|floatformat:2 }}</td>
+                                            <td class="text-center"><span class="badge success">Autorizada</span></td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary btn-sm" title="Detalhes">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-success btn-sm" title="Download XML">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="9" class="text-center py-4 text-muted">
+                                                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                                Nenhum documento encontrado. Selecione uma empresa e aplique os filtros.
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Aba CT-e -->
+                        <div class="tab-pane fade" id="cte">
+                            <div class="p-4 text-center text-muted">
+                                <i class="fas fa-truck fa-3x mb-3"></i>
+                                <p>Selecione uma empresa e aplique os filtros para visualizar os CT-es.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Importar XML -->
+<div class="modal fade" id="modalImportarXML" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-cloud-upload me-2"></i>Importar XMLs</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Empresa *</label>
+                    <select class="form-select" id="empresaImportacao" required>
+                        <option value="">Selecione...</option>
+                        {% for empresa in empresas %}
+                        <option value="{{ empresa.id }}">{{ empresa.razao_social }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Arquivos XML</label>
+                    <input type="file" class="form-control" id="arquivosXML" multiple accept=".xml">
+                    <small class="text-muted">Selecione um ou mais arquivos XML de NF-e ou CT-e</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary"><i class="fas fa-upload me-1"></i> Importar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Selecionar todos
+    document.getElementById('selectAll')?.addEventListener('change', function() {
+        document.querySelectorAll('.doc-checkbox').forEach(cb => {
+            cb.checked = this.checked;
+        });
+        atualizarContador();
+    });
+
+    // Atualizar contador
+    function atualizarContador() {
+        const selecionados = document.querySelectorAll('.doc-checkbox:checked').length;
+        document.getElementById('contadorSelecionados').textContent = selecionados;
+        document.getElementById('selectionToolbar').classList.toggle('show', selecionados > 0);
+    }
+
+    document.querySelectorAll('.doc-checkbox').forEach(cb => {
+        cb.addEventListener('change', atualizarContador);
+    });
+
+    // Habilitar botão de busca manual ao selecionar empresa
+    document.getElementById('empresaSelecao')?.addEventListener('change', function() {
+        document.getElementById('btnBuscaManual').disabled = !this.value;
+    });
+</script>
+{% endblock %}

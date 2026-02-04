@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Consulta - Reforma Tributária{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow">
+        <div class="card-header">
+            <h4 class="mb-0">
+                <i class="bi bi-search me-2"></i>
+                Consulta - Reforma Tributária
+            </h4>
+        </div>
+        
+        <div class="card-body">
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label">NCM</label>
+                    <input type="text" class="form-control" id="ncmInput" placeholder="Ex: 84714900">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">CEST</label>
+                    <input type="text" class="form-control" id="cestInput" placeholder="Ex: 2106300">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" class="form-control" id="descricaoInput" placeholder="Buscar por descrição">
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2 mb-4">
+                <button class="btn btn-primary" id="btnConsultar">
+                    <i class="bi bi-search me-1"></i> Consultar
+                </button>
+                <button class="btn btn-secondary" id="btnLimpar">
+                    <i class="bi bi-eraser me-1"></i> Limpar
+                </button>
+            </div>
+            
+            <!-- Resultados -->
+            <div id="resultadosContainer" style="display: none;">
+                <h5 class="mb-3">Resultados da Consulta</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>NCM</th>
+                                <th>CEST</th>
+                                <th>Descrição</th>
+                                <th class="text-center">CBS (%)</th>
+                                <th class="text-center">IBS (%)</th>
+                                <th class="text-center">Total (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultadosBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Mensagem inicial -->
+            <div id="mensagemInicial" class="text-center py-5 text-muted">
+                <i class="bi bi-calculator fs-1 mb-3 d-block"></i>
+                <p>Informe os parâmetros de busca para consultar as alíquotas da Reforma Tributária.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Card informativo -->
+    <div class="card shadow mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                Sobre a Reforma Tributária
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>CBS - Contribuição sobre Bens e Serviços</h6>
+                    <p class="text-muted small">Tributo federal que substituirá PIS e COFINS.</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>IBS - Imposto sobre Bens e Serviços</h6>
+                    <p class="text-muted small">Tributo estadual/municipal que substituirá ICMS e ISS.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

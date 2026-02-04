@@ -20,16 +20,4 @@
     </div>
     {% endfor %}
 </div>
-
-<script>
-    // Auto-hide toasts after 5 seconds
-    document.addEventListener('DOMContentLoaded', function() {
-        const toasts = document.querySelectorAll('.toast');
-        toasts.forEach(function(toast) {
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 5000);
-        });
-    });
-</script>
 {% endif %}

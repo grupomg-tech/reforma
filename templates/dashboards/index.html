@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-0">
+                <i class="bi bi-speedometer2 me-2"></i>
+                Dashboard Principal
+            </h4>
+            <p class="text-muted">Bem-vindo(a), {{ user.first_name|default:user.email }}!</p>
+        </div>
+    </div>
+
+    <!-- Cards de estatísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                                <i class="bi bi-building text-primary fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Empresas</h6>
+                            <h3 class="mb-0">{{ total_empresas|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 rounded-3 p-3">
+                                <i class="bi bi-file-earmark-code text-success fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">SPEDs</h6>
+                            <h3 class="mb-0">{{ total_speds|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 rounded-3 p-3">
+                                <i class="bi bi-file-text text-warning fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Notas Fiscais</h6>
+                            <h3 class="mb-0">{{ total_nfes|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 rounded-3 p-3">
+                                <i class="bi bi-people text-info fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Usuários</h6>
+                            <h3 class="mb-0">{{ total_usuarios|default:1 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning me-2"></i>
+                        Ações Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'sped_importar:importar' %}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="bi bi-upload me-2"></i>
+                                Importar SPED
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'xml_importar:importar' %}" class="btn btn-outline-success w-100 py-3">
+                                <i class="bi bi-file-earmark-code me-2"></i>
+                                Importar XMLs
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'reforma_tributaria:consulta_gtin' %}" class="btn btn-outline-warning w-100 py-3">
+                                <i class="bi bi-upc-scan me-2"></i>
+                                Consulta GTIN
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'empresa:list' %}" class="btn btn-outline-info w-100 py-3">
+                                <i class="bi bi-building me-2"></i>
+                                Empresas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimas atividades e gráficos -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Últimas Importações
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if ultimas_importacoes %}
+                    <ul class="list-group list-group-flush">
+                        {% for item in ultimas_importacoes %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <span class="fw-bold">{{ item.empresa.razao_social|truncatechars:25 }}</span>
+                                <br>
+                                <small class="text-muted">{{ item.tipo }} - {{ item.periodo|date:"m/Y" }}</small>
+                            </div>
+                            <span class="badge {% if item.processado %}bg-success{% else %}bg-warning{% endif %}">
+                                {% if item.processado %}Concluído{% else %}Pendente{% endif %}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-1"></i>
+                        <p class="mt-2 mb-0">Nenhuma importação recente</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>
+                        Resumo do Mês
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <h4 class="text-primary mb-1">{{ nfes_mes|default:0 }}</h4>
+                                <small class="text-muted">NF-es este mês</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <h4 class="text-success mb-1">{{ ctes_mes|default:0 }}</h4>
+                                <small class="text-muted">CT-es este mês</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <h4 class="text-warning mb-1">{{ speds_mes|default:0 }}</h4>
+                                <small class="text-muted">SPEDs importados</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 text-center">
+                                <h4 class="text-info mb-1">{{ consultas_gtin|default:0 }}</h4>
+                                <small class="text-muted">Consultas GTIN</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

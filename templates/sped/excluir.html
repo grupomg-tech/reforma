@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Excluir SPED{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header text-center bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-trash me-2"></i>
+                        Excluir Dados SPED
+                    </h5>
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Atenção!</strong> Esta ação é irreversível. Todos os dados do período selecionado serão excluídos permanentemente.
+                    </div>
+                    
+                    <form method="post" onsubmit="return confirm('Tem certeza que deseja excluir os dados? Esta ação não pode ser desfeita.');">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Empresa *</label>
+                            <select name="empresa" class="form-select" required>
+                                <option value="">Selecione uma empresa</option>
+                                {% for empresa in empresas %}
+                                <option value="{{ empresa.id }}">{{ empresa.razao_social }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Tipo de SPED *</label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tipo" value="fiscal" id="tipoFiscal" required>
+                                    <label class="form-check-label" for="tipoFiscal">SPED Fiscal</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tipo" value="registro" id="tipoContribuicoes" required>
+                                    <label class="form-check-label" for="tipoContribuicoes">SPED Contribuições</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Período Inicial *</label>
+                                <input type="month" name="periodo_inicial" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Período Final *</label>
+                                <input type="month" name="periodo_final" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger py-2">
+                                <i class="bi bi-trash me-2"></i>
+                                Excluir Dados
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

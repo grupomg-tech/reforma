@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Consulta GTIN{% endblock %}
+
+{% block extra_css %}
+<style>
+    .consulta-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .consulta-header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+    .consulta-header p { opacity: 0.9; margin: 0; }
+    
+    .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        position: sticky;
+        top: 0;
+    }
+    
+    .row-correto { background: #d4edda !important; }
+    .row-diferente { background: #f8d7da !important; }
+    
+    .truncate-cell {
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .spinner-overlay {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7);
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .spinner-content {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px; height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="consulta-header">
+        <h1>🔍 Consulta GTIN - SEFAZ</h1>
+        <p>Sistema de Validação de NCM via Código de Barras</p>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <!-- Filtros -->
+            <div class="filters">
+                <div>
+                    <label class="form-label">Empresa (com certificado digital)*</label>
+                    <select id="empresaSelect" class="form-select">
+                        <option value="">Selecione uma empresa</option>
+                        {% for empresa in empresas %}
+                        <option value="{{ empresa.id }}">{{ empresa.razao_social }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label">Fonte de Dados</label>
+                    <select id="fonteSelect" class="form-select" disabled>
+                        <option value="">Selecione a fonte</option>
+                        <option value="fiscal">Fiscal (SPED Fiscal)</option>
+                        <option value="registro">Registro (SPED Contribuições)</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label">Período Inicial</label>
+                    <select id="periodoInicialSelect" class="form-select" disabled>
+                        <option value="">Selecione o período inicial</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label">Período Final</label>
+                    <select id="periodoFinalSelect" class="form-select" disabled>
+                        <option value="">Selecione o período final</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Ações -->
+            <div class="actions">
+                <button class="btn btn-primary" id="btnBuscarSPED" disabled>
+                    <i class="fas fa-database me-1"></i> Buscar do SPED
+                </button>
+                <button class="btn btn-success" id="btnBuscarXML" disabled>
+                    <i class="fas fa-file-code me-1"></i> Buscar do XML
+                </button>
+                <button class="btn btn-secondary" id="btnExportar" disabled>
+                    <i class="fas fa-file-excel me-1"></i> Exportar Excel
+                </button>
+                <button class="btn btn-info" id="btnProcessar" disabled>
+                    <i class="fas fa-search me-1"></i> Consultar Produtos
+                </button>
+                <button class="btn btn-warning" id="btnCorrigir" disabled>
+                    <i class="fas fa-wrench me-1"></i> Corrigir Selecionados
+                </button>
+            </div>
+            
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="filtroDiferentes">
+                <label class="form-check-label" for="filtroDiferentes">
+                    Mostrar apenas NCMs divergentes
+                </label>
+            </div>
+            
+            <!-- Área de Resultados -->
+            <div id="resultsContainer" style="display: none;">
+                <div class="table-wrapper">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" class="form-check-input" id="checkAll"></th>
+                                <th>Código</th>
+                                <th>Cód. Barras</th>
+                                <th>Descrição</th>
+                                <th>Descrição Consulta</th>
+                                <th>Unidade</th>
+                                <th>NCM Cadastro</th>
+                                <th>NCM Consulta</th>
+                                <th>Retorno SEFAZ</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Paginação -->
+                <div id="paginacao" class="mt-3 d-flex justify-content-center align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary" id="btnAnterior" disabled>
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span>Página <span id="paginaAtual">1</span> de <span id="totalPaginas">1</span></span>
+                    <button class="btn btn-sm btn-outline-secondary" id="btnProximo" disabled>
+                        Próximo <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mensagem inicial -->
+            <div id="mensagemInicial" class="text-center py-5 text-muted">
+                <i class="fas fa-search fa-3x mb-3"></i>
+                <p>Selecione uma empresa e a fonte de dados para iniciar a consulta.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal XML -->
+<div class="modal fade" id="xmlModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Importar Arquivos XML</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="border border-2 border-dashed rounded p-4 text-center" id="dropArea">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                    <p class="mb-2">Arraste arquivos XML aqui</p>
+                    <p class="text-muted small mb-3">ou</p>
+                    <input type="file" id="fileInput" multiple accept=".xml" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Selecionar Arquivos
+                    </button>
+                </div>
+                <div id="fileList" class="mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnProcessarXML">Processar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Spinner -->
+<div class="spinner-overlay" id="spinnerOverlay">
+    <div class="spinner-content">
+        <div class="spinner"></div>
+        <div id="spinnerText">Carregando...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Habilitar campos ao selecionar empresa
+    document.getElementById('empresaSelect').addEventListener('change', function() {
+        const hasValue = this.value !== '';
+        document.getElementById('fonteSelect').disabled = !hasValue;
+        document.getElementById('btnBuscarXML').disabled = !hasValue;
+    });
+    
+    document.getElementById('fonteSelect').addEventListener('change', function() {
+        const hasValue = this.value !== '';
+        document.getElementById('periodoInicialSelect').disabled = !hasValue;
+        document.getElementById('periodoFinalSelect').disabled = !hasValue;
+        document.getElementById('btnBuscarSPED').disabled = !hasValue;
+    });
+    
+    // Mostrar spinner
+    function showSpinner(text = 'Carregando...') {
+        document.getElementById('spinnerText').textContent = text;
+        document.getElementById('spinnerOverlay').style.display = 'flex';
+    }
+    
+    function hideSpinner() {
+        document.getElementById('spinnerOverlay').style.display = 'none';
+    }
+    
+    // Selecionar todos
+    document.getElementById('checkAll')?.addEventListener('change', function() {
+        document.querySelectorAll('#tableBody input[type="checkbox"]').forEach(cb => {
+            cb.checked = this.checked;
+        });
+    });
+</script>
+{% endblock %}

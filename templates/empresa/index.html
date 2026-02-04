@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Empresas{% endblock %}
+
+{% block extra_css %}
+<style>
+    .btn-acoes {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        border: none;
+        background: transparent;
+        color: #6c757d;
+    }
+    .btn-acoes:hover {
+        color: var(--primary-color);
+    }
+    .badge { 
+        display: inline-block; 
+        padding: 4px 10px; 
+        border-radius: 12px; 
+        font-size: 12px; 
+        font-weight: 500; 
+    }
+    .badge.success { background: #d5f4e6; color: #27ae60; }
+    .badge.danger { background: #fadbd8; color: #e74c3c; }
+    .badge.warning { background: #fff3cd; color: #856404; }
+    .badge.secondary { background: #e9ecef; color: #495057; }
+    td.truncate {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-0">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="mb-0">
+                                <i class="fas fa-building me-2"></i>
+                                Gestão de Empresas
+                            </h4>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#createEmpresaModal">
+                                <i class="fas fa-plus-circle me-1"></i> Cadastrar
+                            </button>
+                            <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#importEmpresaModal">
+                                <i class="fas fa-file-excel me-1"></i> Importar
+                            </button>
+                            <a href="{% url 'empresa:export_excel' %}" class="btn btn-light btn-sm">
+                                <i class="fas fa-download me-1"></i> Exportar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="card-body border-bottom">
+                    <form method="get" action="{% url 'empresa:list' %}" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="razao_social" class="form-label mb-1"><small>Razão Social</small></label>
+                            <input type="text" name="razao_social" id="razao_social" class="form-control form-control-sm" style="text-transform: uppercase;" value="{{ request.GET.razao_social }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="cnpj_cpf" class="form-label mb-1"><small>CNPJ/CPF</small></label>
+                            <input type="text" name="cnpj_cpf" id="cnpj_cpf" class="form-control form-control-sm" value="{{ request.GET.cnpj_cpf }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="uf" class="form-label mb-1"><small>UF</small></label>
+                            <select name="uf" id="uf" class="form-select form-select-sm">
+                                <option value="">Todas</option>
+                                {% for estado in ufs %}
+                                <option value="{{ estado.codigo }}" {% if request.GET.uf == estado.codigo|stringformat:"s" %}selected{% endif %}>{{ estado.sigla }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status_empresa" class="form-label mb-1"><small>Status Empresa</small></label>
+                            <select name="status_empresa" id="status_empresa" class="form-select form-select-sm">
+                                <option value="">Todos</option>
+                                <option value="true" {% if request.GET.status_empresa == 'true' %}selected{% endif %}>Ativo</option>
+                                <option value="false" {% if request.GET.status_empresa == 'false' %}selected{% endif %}>Inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status_certificado" class="form-label mb-1"><small>Status Certificado</small></label>
+                            <select name="status_certificado" id="status_certificado" class="form-select form-select-sm">
+                                <option value="">Todos</option>
+                                <option value="true" {% if request.GET.status_certificado == 'true' %}selected{% endif %}>Ativo</option>
+                                <option value="false" {% if request.GET.status_certificado == 'false' %}selected{% endif %}>Inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-sm" title="Filtrar">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <a href="{% url 'empresa:list' %}" class="btn btn-secondary btn-sm" title="Limpar Filtros">
+                                    <i class="fas fa-eraser"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabela -->
+                <div class="card-body p-0">
+                    <div class="table-container">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Razão Social</th>
+                                    <th class="text-center">CNPJ/CPF</th>
+                                    <th class="text-center">UF</th>
+                                    <th class="text-center">Status Empresa</th>
+                                    <th class="text-center">Status Certificado</th>
+                                    <th class="text-center">Regime</th>
+                                    <th class="text-center">Validade Cert.</th>
+                                    <th class="text-center" style="width: 80px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for empresa in empresas %}
+                                <tr>
+                                    <td class="text-center" style="text-transform: uppercase;">{{ empresa.razao_social }}</td>
+                                    <td class="text-center">{{ empresa.cnpj_cpf }}</td>
+                                    <td class="text-center">{{ empresa.uf.sigla }}</td>
+                                    <td class="text-center">
+                                        {% if empresa.ativo %}
+                                        <span class="badge success">Ativo</span>
+                                        {% else %}
+                                        <span class="badge danger">Inativo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if empresa.certificado_digital %}
+                                        <span class="badge success">Ativo</span>
+                                        {% else %}
+                                        <span class="badge danger">Inativo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge secondary">{{ empresa.get_regime_tributario_display|default:"-" }}</span>
+                                    </td>
+                                    <td class="text-center">{{ empresa.data_validade_certificado|date:"d/m/Y"|default:"-" }}</td>
+                                    <td class="text-center">
+                                        <button type="button" title="Editar" class="btn btn-acoes edit-btn" data-id="{{ empresa.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" title="Excluir" class="btn btn-acoes delete-btn text-danger" data-id="{{ empresa.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">
+                                        <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                        Nenhuma empresa cadastrada
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Paginação -->
+                {% if empresas.has_other_pages %}
+                <div class="card-footer">
+                    <nav aria-label="Paginação">
+                        <ul class="pagination pagination-sm mb-0 justify-content-center">
+                            {% if empresas.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ empresas.previous_page_number }}">Anterior</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in empresas.paginator.page_range %}
+                            <li class="page-item {% if empresas.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            
+                            {% if empresas.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ empresas.next_page_number }}">Próximo</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cadastrar Empresa -->
+<div class="modal fade" id="createEmpresaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formCadastrarEmpresa" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-building me-2"></i>
+                        Cadastrar Nova Empresa
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">CNPJ/CPF *</label>
+                            <input type="text" name="cnpj_cpf" class="form-control" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Razão Social *</label>
+                            <input type="text" name="razao_social" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">UF *</label>
+                            <select name="uf" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                {% for estado in ufs %}
+                                <option value="{{ estado.codigo }}">{{ estado.sigla }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Inscrição Estadual</label>
+                            <input type="text" name="inscricao_estadual" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Regime Tributário</label>
+                            <select name="regime_tributario" class="form-select">
+                                <option value="">Selecione...</option>
+                                <option value="1">Simples Nacional</option>
+                                <option value="2">Simples Nacional - Excesso</option>
+                                <option value="3">Regime Normal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Certificado Digital (.pfx)</label>
+                            <input type="file" name="certificado_digital" class="form-control" accept=".pfx,.p12">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Senha do Certificado</label>
+                            <input type="password" name="senha_certificado" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Importar -->
+<div class="modal fade" id="importEmpresaModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formImportarEmpresa" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-excel me-2"></i>
+                        Importar Empresas
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Arquivo Excel (.xlsx)</label>
+                        <input type="file" name="arquivo" class="form-control" accept=".xlsx,.xls" required>
+                    </div>
+                    <small class="text-muted">
+                        O arquivo deve conter as colunas: CNPJ/CPF, Razão Social, UF, IE
+                    </small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-upload me-1"></i> Importar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
