@@ -196,6 +196,10 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 
+# Cria diretório de logs se não existir
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
 # Logging
 LOGGING = {
     'version': 1,
@@ -209,6 +213,11 @@ LOGGING = {
             'format': '{levelname} {asctime} {message}',
             'style': '{',
         },
+        'sped_format': {
+            'format': '[{asctime}] [{levelname}] {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
     },
     'handlers': {
         'file': {
@@ -216,10 +225,25 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'logs' / 'django.log',
             'formatter': 'verbose',
+            'encoding': 'utf-8',
         },
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
+        },
+        'sped_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'sped_importacao.log',
+            'formatter': 'sped_format',
+            'encoding': 'utf-8',
+        },
+        'sped_processamento': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'sped_processamento.log',
+            'formatter': 'sped_format',
+            'encoding': 'utf-8',
         },
     },
     'root': {
@@ -230,6 +254,16 @@ LOGGING = {
         'django': {
             'handlers': ['console', 'file'],
             'level': config('DJANGO_LOG_LEVEL', default='INFO'),
+            'propagate': False,
+        },
+        'sped.importacao': {
+            'handlers': ['console', 'sped_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'sped.processamento': {
+            'handlers': ['console', 'sped_processamento'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
