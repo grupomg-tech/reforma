@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from apps.empresa.models import Empresa
 
@@ -404,21 +406,254 @@ def relatorio_fiscal(request):
     return render(request, 'dashboards/relatorio_fiscal.html', context)
 @login_required
 def api_periodos(request):
-    from django.http import JsonResponse
-    from apps.sped.models import Registro0000
-    
     empresa_id = request.GET.get('empresa')
     if not empresa_id:
         return JsonResponse({'periodos': []})
     
+    from apps.sped.models import Registro0000
     periodos = Registro0000.objects.filter(
         empresa_id=empresa_id,
         processado=True
     ).values_list('periodo', flat=True).distinct().order_by('periodo')
     
-    periodos_formatados = [p.strftime('%Y-%m') for p in periodos]
+    return JsonResponse({'periodos': [p.strftime('%Y-%m') for p in periodos]})
+
+
+@login_required
+def api_listar_chaves_saida(request):
+    """Retorna lista de chaves de acesso das notas de saída do período selecionado"""
+    from apps.sped.models import Registro0000, RegistroC100
     
-    return JsonResponse({'periodos': periodos_formatados})
+    empresa_id = request.GET.get('empresa')
+    periodo_inicial = request.GET.get('periodo_inicial')
+    periodo_final = request.GET.get('periodo_final')
+    
+    if not empresa_id or not periodo_inicial or not periodo_final:
+        return JsonResponse({'success': False, 'message': 'Parâmetros incompletos', 'chaves': []})
+    
+    registros_0000 = Registro0000.objects.filter(
+        empresa_id=empresa_id,
+        processado=True,
+        periodo__gte=periodo_inicial + '-01',
+        periodo__lte=periodo_final + '-28'
+    )
+    
+# Buscar TODOS os documentos C100 de saída (ind_oper='1') com chave válida
+    documentos_saida = RegistroC100.objects.filter(
+        registro_0000__in=registros_0000,
+        ind_oper='1'
+    ).exclude(chv_nfe__isnull=True).exclude(chv_nfe='')
+    
+    chaves_nfe = []  # NF-e para buscar
+    chaves_nfce = []  # NFC-e ignoradas
+    
+    for doc in documentos_saida:
+        if doc.chv_nfe and len(doc.chv_nfe) >= 44:
+            modelo = doc.cod_mod or '55'
+            dados_doc = {
+                'chave_nfe': doc.chv_nfe,
+                'numero': doc.num_doc,
+                'modelo': modelo,
+                'modelo_desc': 'NF-e' if modelo == '55' else 'NFC-e',
+                'valor': float(doc.vl_doc) if doc.vl_doc else 0,
+                'data': doc.dt_doc.strftime('%d/%m/%Y') if doc.dt_doc else '',
+            }
+            
+            if modelo == '55':
+                chaves_nfe.append(dados_doc)
+            else:
+                chaves_nfce.append(dados_doc)
+    
+    return JsonResponse({
+        'success': True,
+        'total': len(chaves_nfe),
+        'total_nfe': len(chaves_nfe),
+        'total_nfce': len(chaves_nfce),
+        'chaves': chaves_nfe,  # Apenas NF-e para buscar
+        'nfce_ignoradas': chaves_nfce  # NFC-e para relatório
+    })
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+import logging
+logger = logging.getLogger('dashboards.api')
+
+@csrf_exempt
+@login_required
+def api_buscar_xml_produto(request):
+    """Busca XML de uma NFe via API MeuDanfe e extrai dados dos produtos"""
+    import requests
+    import base64
+    import xml.etree.ElementTree as ET
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+    
+    import json
+    data = json.loads(request.body)
+    chave_acesso = data.get('chave_acesso', '')
+    
+    if not chave_acesso:
+        logger.warning("[API-XML] Chave de acesso não informada")
+        return JsonResponse({'success': False, 'message': 'Chave de acesso não informada'})
+    
+    # Limpar chave
+    chave_acesso = ''.join(filter(str.isdigit, chave_acesso))
+    num_nota = chave_acesso[25:34].lstrip('0') if len(chave_acesso) >= 34 else '?'
+    
+    if len(chave_acesso) != 44:
+        logger.warning(f"[API-XML] NF {num_nota} - Chave inválida: {len(chave_acesso)} dígitos")
+        return JsonResponse({'success': False, 'message': f'Chave inválida: {len(chave_acesso)} dígitos'})
+    
+    logger.info(f"[API-XML] Buscando NF {num_nota} - Chave: {chave_acesso[:20]}...")
+    
+    # API Key do MeuDanfe
+    api_key = '167af6d1-a260-4a6b-bc48-729064cc4efd'
+    
+    headers = {
+        'Api-Key': api_key,
+        'Content-Type': 'application/json'
+    }
+    
+    # Identificar modelo pela chave (posição 20-21 da chave = modelo)
+    modelo = chave_acesso[20:22] if len(chave_acesso) >= 22 else '55'
+    logger.info(f"[API-XML] NF {num_nota} - Modelo: {modelo} ({'NFC-e' if modelo == '65' else 'NF-e'})")
+    
+    try:
+        # Passo 1: Adicionar chave para busca
+        # NFC-e (65) usa endpoint diferente
+        if modelo == '65':
+            url_add = f'https://api.meudanfe.com.br/v2/nfce/add/{chave_acesso}'
+        else:
+            url_add = f'https://api.meudanfe.com.br/v2/fd/add/{chave_acesso}'
+        response = requests.put(url_add, headers=headers, timeout=30)
+        
+        if response.status_code == 200:
+            data_resp = response.json()
+            search_status = data_resp.get('SearchStatus') or data_resp.get('searchStatus') or data_resp.get('status')
+            logger.info(f"[API-XML] NF {num_nota} - Status: {search_status}")
+            
+            if search_status in ['FOUND', 'Found', 'found', 'OK', 'ok', 'SUCCESS', 'success']:
+# Passo 2: Buscar XML
+                if modelo == '65':
+                    url_xml = f'https://api.meudanfe.com.br/v2/nfce/get/xml/{chave_acesso}'
+                else:
+                    url_xml = f'https://api.meudanfe.com.br/v2/fd/get/xml/{chave_acesso}'
+                response_xml = requests.get(url_xml, headers=headers, timeout=30)
+                
+                if response_xml.status_code == 200:
+                    data_xml = response_xml.json()
+                    xml_content = None
+                    
+                    if data_xml.get('data') and data_xml.get('data').startswith('<?xml'):
+                        xml_content = data_xml.get('data')
+                    elif data_xml.get('Base64') or data_xml.get('base64'):
+                        xml_base64 = data_xml.get('Base64') or data_xml.get('base64')
+                        xml_content = base64.b64decode(xml_base64).decode('utf-8')
+                    
+                    if xml_content:
+                        # Extrair dados dos produtos
+                        produtos = extrair_produtos_xml(xml_content, chave_acesso)
+                        logger.info(f"[API-XML] NF {num_nota} - ✅ SUCESSO! {len(produtos)} produtos extraídos")
+                        return JsonResponse({
+                            'success': True,
+                            'chave': chave_acesso,
+                            'produtos': produtos,
+                            'qtd_produtos': len(produtos)
+                        })
+
+                    else:
+                        return JsonResponse({'success': False, 'message': 'XML não retornado pela API'})
+                else:
+                    return JsonResponse({'success': False, 'message': f'Erro ao buscar XML: {response_xml.status_code}'})
+            else:
+                logger.warning(f"[API-XML] NF {num_nota} - Não encontrada: {search_status}")
+                return JsonResponse({'success': False, 'message': f'NFe não encontrada: {search_status}'})
+        elif response.status_code == 402:
+            logger.error(f"[API-XML] NF {num_nota} - Saldo insuficiente")
+            return JsonResponse({'success': False, 'message': 'Saldo insuficiente na API'})
+        elif response.status_code == 401:
+            logger.error(f"[API-XML] NF {num_nota} - API Key inválida")
+            return JsonResponse({'success': False, 'message': 'API Key inválida'})
+        else:
+            logger.error(f"[API-XML] NF {num_nota} - Erro HTTP: {response.status_code}")
+            return JsonResponse({'success': False, 'message': f'Erro na API: {response.status_code}'})
+    
+    except Exception as e:
+        logger.error(f"[API-XML] NF {num_nota} - Exceção: {str(e)}")
+        return JsonResponse({'success': False, 'message': f'Erro: {str(e)}'})
+
+
+def extrair_produtos_xml(xml_content, chave_acesso):
+    """Extrai dados dos produtos de um XML de NFe"""
+    import xml.etree.ElementTree as ET
+    from decimal import Decimal
+    
+    produtos = []
+    
+    try:
+        root = ET.fromstring(xml_content)
+        ns = {'nfe': 'http://www.portalfiscal.inf.br/nfe'}
+        
+        # Buscar itens (det)
+        for det in root.findall('.//nfe:det', ns):
+            prod = det.find('nfe:prod', ns)
+            imposto = det.find('nfe:imposto', ns)
+            
+            if prod is None:
+                continue
+            
+            item = {
+                'chave_nfe': chave_acesso,
+                'num_item': det.get('nItem', ''),
+                'codigo': prod.findtext('nfe:cProd', '', ns),
+                'ean': prod.findtext('nfe:cEAN', '', ns),
+                'descricao': prod.findtext('nfe:xProd', '', ns),
+                'ncm': prod.findtext('nfe:NCM', '', ns),
+                'cest': prod.findtext('nfe:CEST', '', ns),
+                'cfop': prod.findtext('nfe:CFOP', '', ns),
+                'unidade': prod.findtext('nfe:uCom', '', ns),
+                'quantidade': float(prod.findtext('nfe:qCom', '0', ns) or 0),
+                'valor_unitario': float(prod.findtext('nfe:vUnCom', '0', ns) or 0),
+                'valor_total': float(prod.findtext('nfe:vProd', '0', ns) or 0),
+            }
+            
+            # Impostos
+            if imposto:
+                # ICMS
+                icms = imposto.find('.//nfe:ICMS', ns)
+                if icms:
+                    for icms_tipo in icms:
+                        item['icms_cst'] = icms_tipo.findtext('nfe:CST', '', ns) or icms_tipo.findtext('nfe:CSOSN', '', ns)
+                        item['icms_aliq'] = float(icms_tipo.findtext('nfe:pICMS', '0', ns) or 0)
+                        item['icms_valor'] = float(icms_tipo.findtext('nfe:vICMS', '0', ns) or 0)
+                        break
+                
+                # PIS
+                pis = imposto.find('.//nfe:PIS', ns)
+                if pis:
+                    for pis_tipo in pis:
+                        item['pis_cst'] = pis_tipo.findtext('nfe:CST', '', ns)
+                        item['pis_aliq'] = float(pis_tipo.findtext('nfe:pPIS', '0', ns) or 0)
+                        item['pis_valor'] = float(pis_tipo.findtext('nfe:vPIS', '0', ns) or 0)
+                        break
+                
+                # COFINS
+                cofins = imposto.find('.//nfe:COFINS', ns)
+                if cofins:
+                    for cofins_tipo in cofins:
+                        item['cofins_cst'] = cofins_tipo.findtext('nfe:CST', '', ns)
+                        item['cofins_aliq'] = float(cofins_tipo.findtext('nfe:pCOFINS', '0', ns) or 0)
+                        item['cofins_valor'] = float(cofins_tipo.findtext('nfe:vCOFINS', '0', ns) or 0)
+                        break
+            
+            produtos.append(item)
+    
+    except Exception as e:
+        print(f"Erro ao extrair produtos do XML: {e}")
+    
+    return produtos
 @login_required
 def debug_sped(request):
     from django.http import JsonResponse

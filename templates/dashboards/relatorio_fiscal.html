@@ -579,6 +579,171 @@
         color: white;
     }
 
+    .btn-buscar-api {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-buscar-api:hover {
+        background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+        transform: translateY(-1px);
+    }
+
+    .btn-buscar-api:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Modal de Progresso API */
+    .modal-progresso-api {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-progresso-api.active {
+        display: flex;
+    }
+
+    .modal-progresso-content {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .progresso-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .progresso-header h3 {
+        color: #1f2937;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .progresso-header p {
+        color: #6b7280;
+        margin: 10px 0 0;
+    }
+
+    .progresso-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .stat-box {
+        background: #f3f4f6;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .stat-box.success { background: #d1fae5; }
+    .stat-box.error { background: #fee2e2; }
+    .stat-box.produtos { background: #dbeafe; }
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #1f2937;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        margin-top: 5px;
+    }
+
+    .progresso-barra-container {
+        margin-bottom: 20px;
+    }
+
+    .progresso-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        color: #4b5563;
+    }
+
+    .progresso-barra {
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .progresso-barra-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #059669, #10b981);
+        border-radius: 6px;
+        transition: width 0.3s ease;
+        width: 0%;
+    }
+
+    .progresso-nota-atual {
+        background: #f9fafb;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    .progresso-nota-atual strong {
+        color: #059669;
+    }
+
+    .progresso-acoes {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .btn-cancelar-busca {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .btn-fechar-progresso {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        display: none;
+    }
+
     @media (max-width: 768px) {
         .grafico-grid {
             grid-template-columns: 1fr;
@@ -1291,12 +1456,18 @@
                     <div class="table-container full-width">
                         <div class="table-header-container">
                             <h2>📦 Produtos Vendidos</h2>
-                            <a href="#" class="btn-export">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Exportar Excel
-                            </a>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn-buscar-api" onclick="iniciarBuscaProdutosAPI()" id="btnBuscarAPI">
+                                    <i class="bi bi-cloud-download me-1"></i>
+                                    Buscar via API
+                                </button>
+                                <a href="#" class="btn-export">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Exportar Excel
+                                </a>
+                            </div>
                         </div>
                         <div class="table-scroll">
                             {% if produtos_saidas %}
@@ -1343,9 +1514,13 @@
                                 </tfoot>
                             </table>
                             {% else %}
-                            <div class="empty-state">
+                            <div class="empty-state" id="emptyStateSaidas">
                                 <i class="bi bi-inbox-fill empty-state-icon"></i>
                                 <div class="empty-state-text">Nenhum produto de saída encontrado</div>
+                                <button type="button" class="btn btn-primary mt-3" onclick="iniciarBuscaProdutosAPI()">
+                                    <i class="bi bi-cloud-download me-1"></i>
+                                    Buscar Produtos via API
+                                </button>
                             </div>
                             {% endif %}
                         </div>
@@ -1772,6 +1947,59 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Progresso da Busca API -->
+<div class="modal-progresso-api" id="modalProgressoAPI">
+    <div class="modal-progresso-content">
+        <div class="progresso-header">
+            <h3><i class="bi bi-cloud-download me-2"></i>Buscando Produtos via API</h3>
+            <p>Aguarde enquanto buscamos os XMLs e extraímos as classificações tributárias...</p>
+        </div>
+        
+        <div class="progresso-stats">
+            <div class="stat-box">
+                <div class="stat-number" id="statTotal">0</div>
+                <div class="stat-label">Total de Notas</div>
+            </div>
+            <div class="stat-box success">
+                <div class="stat-number" id="statSucesso">0</div>
+                <div class="stat-label">✅ Encontradas</div>
+            </div>
+            <div class="stat-box error">
+                <div class="stat-number" id="statErro">0</div>
+                <div class="stat-label">❌ Erros</div>
+            </div>
+            <div class="stat-box produtos">
+                <div class="stat-number" id="statProdutos">0</div>
+                <div class="stat-label">📦 Produtos</div>
+            </div>
+        </div>
+        
+        <div class="progresso-barra-container">
+            <div class="progresso-info">
+                <span id="progressoStatus">Iniciando...</span>
+                <span id="progressoContador">0/0</span>
+            </div>
+            <div class="progresso-barra">
+                <div class="progresso-barra-fill" id="progressoBarraFill"></div>
+            </div>
+        </div>
+        
+        <div class="progresso-nota-atual" id="progressoNotaAtual">
+            <strong>Preparando busca...</strong>
+        </div>
+        
+        <div class="progresso-acoes">
+            <button class="btn-cancelar-busca" id="btnCancelarBusca" onclick="cancelarBuscaAPI()">
+                <i class="bi bi-x-circle me-1"></i> Cancelar
+            </button>
+            <button class="btn-fechar-progresso" id="btnFecharProgresso" onclick="fecharModalProgresso()">
+                <i class="bi bi-check-circle me-1"></i> Concluído
+            </button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -1892,6 +2120,527 @@
         cofinsSaidas: Number({{ cofins_saidas|default:"0" }}),
         ibsCbsSaidas: Number({{ ibs_cbs_saidas|default:"0" }})
     };
+
+    // ============================================
+    // BUSCA DE PRODUTOS VIA API MEUDANFE
+    // ============================================
+    
+    let buscaCancelada = false;
+    let produtosEncontrados = [];
+    
+    async function iniciarBuscaProdutosAPI() {
+        const empresaId = document.getElementById('empresaSelect').value;
+        const periodoInicial = document.getElementById('periodoInicialSelect').value;
+        const periodoFinal = document.getElementById('periodoFinalSelect').value;
+        
+        if (!empresaId || !periodoInicial || !periodoFinal) {
+            alert('Selecione a empresa e o período antes de buscar os produtos.');
+            return;
+        }
+        
+        // Resetar variáveis
+        buscaCancelada = false;
+        produtosEncontrados = [];
+        notasComErro = [];
+        nfceIgnoradas = [];
+        
+        // Mostrar modal
+        document.getElementById('modalProgressoAPI').classList.add('active');
+        document.getElementById('btnCancelarBusca').style.display = 'inline-block';
+        document.getElementById('btnFecharProgresso').style.display = 'none';
+        const btnBuscar = document.getElementById('btnBuscarAPI');
+        if (btnBuscar) btnBuscar.disabled = true;
+        
+        // Resetar estatísticas
+        document.getElementById('statTotal').textContent = '0';
+        document.getElementById('statSucesso').textContent = '0';
+        document.getElementById('statErro').textContent = '0';
+        document.getElementById('statProdutos').textContent = '0';
+        document.getElementById('progressoBarraFill').style.width = '0%';
+        document.getElementById('progressoStatus').textContent = 'Buscando lista de notas...';
+        document.getElementById('progressoContador').textContent = '0/0';
+        document.getElementById('progressoNotaAtual').innerHTML = '<strong>Carregando chaves de acesso...</strong>';
+        
+        try {
+            // Passo 1: Buscar lista de chaves
+            const urlChaves = `/dashboards/api/listar-chaves-saida/?empresa=${empresaId}&periodo_inicial=${periodoInicial}&periodo_final=${periodoFinal}`;
+            const respChaves = await fetch(urlChaves);
+            const dataChaves = await respChaves.json();
+            
+// Guardar NFC-e ignoradas para o relatório
+            if (dataChaves.nfce_ignoradas && dataChaves.nfce_ignoradas.length > 0) {
+                nfceIgnoradas = dataChaves.nfce_ignoradas;
+                document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#f59e0b;">⚠️ ${nfceIgnoradas.length} NFC-e serão ignoradas (não disponíveis via API)</strong>`;
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+            
+            if (!dataChaves.success || dataChaves.chaves.length === 0) {
+                document.getElementById('progressoNotaAtual').innerHTML = '<strong style="color:#ef4444;">Nenhuma NF-e encontrada com chave de acesso válida.</strong>';
+                if (nfceIgnoradas.length > 0) {
+                    exibirRelatorioErros();
+                }
+                finalizarBusca();
+                return;
+            }
+            
+            const chaves = dataChaves.chaves;
+            const total = chaves.length;
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('progressoContador').textContent = `0/${total}`;
+            document.getElementById('progressoStatus').textContent = 'Buscando XMLs...';
+            
+            let sucesso = 0;
+            let erros = 0;
+            let totalProdutos = 0;
+            
+            // Passo 2: Buscar cada XML
+            for (let i = 0; i < chaves.length; i++) {
+                if (buscaCancelada) {
+                    document.getElementById('progressoNotaAtual').innerHTML = '<strong style="color:#f59e0b;">Busca cancelada pelo usuário.</strong>';
+                    break;
+                }
+                
+                const nota = chaves[i];
+                const numNota = nota.numero || nota.chave_nfe.substring(25, 34);
+                
+                document.getElementById('progressoNotaAtual').innerHTML = `<strong>Buscando NF ${numNota}...</strong> (Chave: ${nota.chave_nfe.substring(0, 20)}...)`;
+                
+// Função auxiliar para buscar com retry
+                async function buscarComRetry(chaveAcesso, maxTentativas = 3) {
+                    let ultimoErro = null;
+                    for (let tentativa = 1; tentativa <= maxTentativas; tentativa++) {
+                        try {
+                            const response = await fetch('/api/buscar-xml-nfe', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ chave_acesso: chaveAcesso })
+                            });
+                            if (!response.ok) {
+                                throw new Error('HTTP ' + response.status);
+                            }
+                            return await response.json();
+                        } catch (err) {
+                            ultimoErro = err;
+                            console.log('[RETRY] Tentativa ' + tentativa + '/' + maxTentativas + ' falhou: ' + err.message);
+                            if (tentativa < maxTentativas) {
+                                await new Promise(r => setTimeout(r, 1000 * tentativa));
+                            }
+                        }
+                    }
+                    throw ultimoErro;
+                }
+                
+                try {
+                    const data = await buscarComRetry(nota.chave_nfe, 3);
+                    
+                    if (data.success && data.dados && data.dados.itens && data.dados.itens.length > 0) {
+                        sucesso++;
+                        const qtdProdutos = data.dados.itens.length;
+                        totalProdutos += qtdProdutos;
+                        
+                        // Converter formato dos itens
+                        data.dados.itens.forEach(item => {
+                            produtosEncontrados.push({
+                                codigo: item.cProd || '',
+                                descricao: item.xProd || '',
+                                ncm: item.NCM || '',
+                                cfop: item.CFOP || '',
+                                quantidade: parseFloat(item.qCom || 0),
+                                valor_total: parseFloat(item.vProd || 0),
+                                valor_unitario: parseFloat(item.vUnCom || 0),
+                                icms_cst: item.ICMS_CST || '',
+                                icms_valor: parseFloat(item.ICMS_vICMS || 0),
+                                icms_st_valor: parseFloat(item.ICMS_vICMSST || 0),
+                                ipi_valor: parseFloat(item.IPI_vIPI || 0),
+                                pis_cst: item.PIS_CST || '',
+                                pis_valor: parseFloat(item.PIS_vPIS || 0),
+                                cofins_cst: item.COFINS_CST || '',
+                                cofins_valor: parseFloat(item.COFINS_vCOFINS || 0)
+                            });
+                        });
+                        
+                        document.getElementById('statSucesso').textContent = sucesso;
+                        document.getElementById('statProdutos').textContent = totalProdutos;
+                    } else {
+                        erros++;
+                        notasComErro.push({
+                            ...nota,
+                            erro: data.message || 'XML não encontrado'
+                        });
+                        document.getElementById('statErro').textContent = erros;
+                    }
+                } catch (e) {
+                    erros++;
+                    notasComErro.push({
+                        ...nota,
+                        erro: 'Falha após 3 tentativas: ' + e.message
+                    });
+                    document.getElementById('statErro').textContent = erros;
+                }
+                
+                // Atualizar progresso
+                const pct = Math.round(((i + 1) / total) * 100);
+                document.getElementById('progressoBarraFill').style.width = pct + '%';
+                document.getElementById('progressoContador').textContent = `${i + 1}/${total}`;
+                
+                // Delay de 600ms entre requisições
+                await new Promise(resolve => setTimeout(resolve, 600));
+            }
+            
+// Finalizar
+            if (!buscaCancelada) {
+                document.getElementById('progressoStatus').textContent = 'Busca concluída!';
+                document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#059669;">✅ Busca finalizada! ${sucesso} notas processadas, ${totalProdutos} produtos encontrados.</strong>`;
+                
+                // Atualizar tabela de produtos se houver resultados
+                if (produtosEncontrados.length > 0) {
+                    atualizarTabelaProdutosSaida(produtosEncontrados);
+                }
+                
+                // Exibir relatório de erros e NFC-e ignoradas
+                exibirRelatorioErros();
+            }
+            
+            finalizarBusca();
+            
+        } catch (e) {
+            console.error('Erro na busca:', e);
+            document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#ef4444;">Erro: ${e.message}</strong>`;
+            finalizarBusca();
+        }
+    }
+    
+    function cancelarBuscaAPI() {
+        buscaCancelada = true;
+        document.getElementById('progressoStatus').textContent = 'Cancelando...';
+    }
+    
+    function finalizarBusca() {
+        document.getElementById('btnCancelarBusca').style.display = 'none';
+        document.getElementById('btnFecharProgresso').style.display = 'inline-block';
+        const btnBuscar = document.getElementById('btnBuscarAPI');
+        if (btnBuscar) btnBuscar.disabled = false;
+    }
+    
+    function fecharModalProgresso() {
+        document.getElementById('modalProgressoAPI').classList.remove('active');
+    }
+    
+// Variáveis globais para relatório de erros
+    let notasComErro = [];
+    let nfceIgnoradas = [];
+    
+    function atualizarTabelaProdutosSaida(produtos) {
+        // Agrupar produtos por código + NCM
+        const agrupado = {};
+        
+        produtos.forEach(prod => {
+            const chave = `${prod.codigo}_${prod.ncm}`;
+            if (!agrupado[chave]) {
+                agrupado[chave] = {
+                    codigo: prod.codigo,
+                    ncm: prod.ncm,
+                    descricao: prod.descricao,
+                    quantidade: 0,
+                    valor_bruto: 0,
+                    icms: 0,
+                    icms_st: 0,
+                    ipi: 0,
+                    pis: 0,
+                    cofins: 0
+                };
+            }
+            agrupado[chave].quantidade += prod.quantidade || 0;
+            agrupado[chave].valor_bruto += prod.valor_total || 0;
+            agrupado[chave].icms += prod.icms_valor || 0;
+            agrupado[chave].icms_st += prod.icms_st_valor || 0;
+            agrupado[chave].ipi += prod.ipi_valor || 0;
+            agrupado[chave].pis += prod.pis_valor || 0;
+            agrupado[chave].cofins += prod.cofins_valor || 0;
+        });
+        
+        // Converter para array e ordenar por valor
+        const produtosAgrupados = Object.values(agrupado).sort((a, b) => b.valor_bruto - a.valor_bruto);
+        
+        // Ocultar empty-state
+        const emptyState = document.getElementById('emptyStateSaidas');
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+        
+        // Alíquota IBS/CBS (27%)
+        const aliqIbsCbs = 0.27;
+        const pctReducao = 0; // % Redução (pode ser parametrizado)
+        
+        // Construir HTML da tabela
+        let html = `
+            <table class="table-relatorio">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th>NCM</th>
+                        <th>Quant.</th>
+                        <th>% Red.</th>
+                        <th>Aliq. IBS/CBS</th>
+                        <th>Valor Bruto Unit.</th>
+                        <th>Valor Bruto Tot.</th>
+                        <th>ICMS</th>
+                        <th>ICMS ST</th>
+                        <th>IPI</th>
+                        <th>PIS</th>
+                        <th>COFINS</th>
+                        <th>Total Tributos</th>
+                        <th class="reforma">Valor Líq. Unit.</th>
+                        <th class="reforma">Valor Líq. Tot.</th>
+                        <th class="reforma">IBS/CBS Unit.</th>
+                        <th class="reforma">IBS/CBS Tot.</th>
+                        <th class="reforma">Total Reforma Unit.</th>
+                        <th class="reforma">Total Reforma</th>
+                        <th class="reforma">Dif. Unit.</th>
+                        <th class="reforma">Dif. Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        let totais = {
+            quantidade: 0,
+            valor_bruto: 0,
+            icms: 0,
+            icms_st: 0,
+            ipi: 0,
+            pis: 0,
+            cofins: 0,
+            total_tributos: 0,
+            valor_liq: 0,
+            ibs_cbs: 0,
+            total_reforma: 0,
+            diferenca: 0
+        };
+        
+        produtosAgrupados.forEach(prod => {
+            const totalTributos = prod.icms + prod.icms_st + prod.ipi + prod.pis + prod.cofins;
+            const valorLiqTot = prod.valor_bruto - totalTributos;
+            const valorLiqUnit = prod.quantidade > 0 ? valorLiqTot / prod.quantidade : 0;
+            const valorBrutoUnit = prod.quantidade > 0 ? prod.valor_bruto / prod.quantidade : 0;
+            
+            const aliqEfetiva = aliqIbsCbs * (1 - pctReducao / 100);
+            const ibsCbsTot = valorLiqTot * aliqEfetiva;
+            const ibsCbsUnit = prod.quantidade > 0 ? ibsCbsTot / prod.quantidade : 0;
+            
+            const totalReformaTot = valorLiqTot + ibsCbsTot;
+            const totalReformaUnit = prod.quantidade > 0 ? totalReformaTot / prod.quantidade : 0;
+            
+            const difTotal = totalReformaTot - prod.valor_bruto;
+            const difUnit = prod.quantidade > 0 ? difTotal / prod.quantidade : 0;
+            
+            // Acumular totais
+            totais.quantidade += prod.quantidade;
+            totais.valor_bruto += prod.valor_bruto;
+            totais.icms += prod.icms;
+            totais.icms_st += prod.icms_st;
+            totais.ipi += prod.ipi;
+            totais.pis += prod.pis;
+            totais.cofins += prod.cofins;
+            totais.total_tributos += totalTributos;
+            totais.valor_liq += valorLiqTot;
+            totais.ibs_cbs += ibsCbsTot;
+            totais.total_reforma += totalReformaTot;
+            totais.diferenca += difTotal;
+            
+            html += `
+                <tr>
+                    <td>${prod.codigo}</td>
+                    <td>${prod.descricao.substring(0, 35)}</td>
+                    <td>${prod.ncm}</td>
+                    <td>${prod.quantidade.toFixed(2)}</td>
+                    <td>${pctReducao.toFixed(2)}%</td>
+                    <td>${(aliqEfetiva * 100).toFixed(2)}%</td>
+                    <td>R$ ${valorBrutoUnit.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${prod.valor_bruto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${prod.icms.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${prod.icms_st.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${prod.ipi.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${prod.pis.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${prod.cofins.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${totalTributos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="reforma">R$ ${valorLiqUnit.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="reforma">R$ ${valorLiqTot.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="reforma">R$ ${ibsCbsUnit.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="reforma">R$ ${ibsCbsTot.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="reforma">R$ ${totalReformaUnit.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="reforma">R$ ${totalReformaTot.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="reforma ${difUnit >= 0 ? 'text-danger' : 'text-success'}">R$ ${difUnit.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="reforma ${difTotal >= 0 ? 'text-danger' : 'text-success'}">R$ ${difTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3"><strong>TOTAL (${produtosAgrupados.length} produtos)</strong></td>
+                        <td><strong>${totais.quantidade.toFixed(2)}</strong></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td><strong>R$ ${totais.valor_bruto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td><strong>R$ ${totais.icms.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td><strong>R$ ${totais.icms_st.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td><strong>R$ ${totais.ipi.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td><strong>R$ ${totais.pis.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td><strong>R$ ${totais.cofins.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td><strong>R$ ${totais.total_tributos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td class="reforma">-</td>
+                        <td class="reforma"><strong>R$ ${totais.valor_liq.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td class="reforma">-</td>
+                        <td class="reforma"><strong>R$ ${totais.ibs_cbs.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td class="reforma">-</td>
+                        <td class="reforma"><strong>R$ ${totais.total_reforma.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                        <td class="reforma">-</td>
+                        <td class="reforma ${totais.diferenca >= 0 ? 'text-danger' : 'text-success'}"><strong>R$ ${totais.diferenca.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+        
+        // Inserir tabela no container
+        const container = document.querySelector('#saidas .table-container.full-width .table-scroll');
+        if (container) {
+            container.innerHTML = html;
+        }
+        
+        // Atualizar cards de métricas
+        atualizarMetricasSaidas(totais);
+    }
+    
+    function atualizarMetricasSaidas(totais) {
+        // Atualizar cards do Sistema Tributário Atual
+        const vendaBruta = totais.valor_bruto;
+        const debitos = totais.total_tributos;
+        const vendaLiquida = totais.valor_liq;
+        const cargaTributaria = vendaBruta > 0 ? (debitos / vendaBruta * 100) : 0;
+        
+        // Atualizar cards da Reforma
+        const vendaLiquidaReforma = totais.valor_liq;
+        const debitosIbsCbs = totais.ibs_cbs;
+        const vendaTotalReforma = totais.total_reforma;
+        const cargaReforma = vendaLiquidaReforma > 0 ? (debitosIbsCbs / vendaLiquidaReforma * 100) : 0;
+        
+        // Encontrar e atualizar os cards na seção de Saídas
+        const saidasTab = document.getElementById('saidas');
+        if (saidasTab) {
+            const metricCards = saidasTab.querySelectorAll('.metrics-section');
+            
+            // Primeira seção - Sistema Atual
+            if (metricCards[0]) {
+                const values = metricCards[0].querySelectorAll('.value');
+                if (values[0]) values[0].textContent = `R$ ${vendaBruta.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                if (values[1]) values[1].textContent = `R$ ${debitos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                if (values[2]) values[2].textContent = `R$ ${vendaLiquida.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                if (values[3]) values[3].textContent = `${cargaTributaria.toFixed(2).replace('.', ',')}%`;
+            }
+            
+            // Segunda seção - Reforma
+            if (metricCards[1]) {
+                const values = metricCards[1].querySelectorAll('.value');
+                if (values[0]) values[0].textContent = `R$ ${vendaLiquidaReforma.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                if (values[1]) values[1].textContent = `R$ ${debitosIbsCbs.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                if (values[2]) values[2].textContent = `R$ ${vendaTotalReforma.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                if (values[3]) values[3].textContent = `${cargaReforma.toFixed(2).replace('.', ',')}%`;
+            }
+        }
+    }
+    
+    function exibirRelatorioErros() {
+        if (notasComErro.length === 0 && nfceIgnoradas.length === 0) {
+            return;
+        }
+        
+        let html = `
+            <div class="table-container full-width mt-4">
+                <div class="table-header-container">
+                    <h2>⚠️ Relatório de Pendências</h2>
+                </div>
+                <div class="table-scroll">
+        `;
+        
+        // NFC-e Ignoradas
+        if (nfceIgnoradas.length > 0) {
+            html += `
+                <h5 class="mt-3 mb-2">📋 NFC-e Não Pesquisadas (${nfceIgnoradas.length})</h5>
+                <p class="text-muted small">NFC-e (modelo 65) não são consultadas via API externa.</p>
+                <table class="table-relatorio">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Chave de Acesso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            nfceIgnoradas.forEach(nota => {
+                html += `
+                    <tr>
+                        <td>${nota.numero}</td>
+                        <td>${nota.data}</td>
+                        <td>R$ ${nota.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td><small>${nota.chave_nfe}</small></td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+        }
+        
+        // Notas com Erro
+        if (notasComErro.length > 0) {
+            html += `
+                <h5 class="mt-4 mb-2">❌ NF-e com Erro na Busca (${notasComErro.length})</h5>
+                <table class="table-relatorio">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Erro</th>
+                            <th>Chave de Acesso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            notasComErro.forEach(nota => {
+                html += `
+                    <tr>
+                        <td>${nota.numero}</td>
+                        <td>${nota.data}</td>
+                        <td>R$ ${nota.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td><span class="badge bg-danger">${nota.erro}</span></td>
+                        <td><small>${nota.chave_nfe}</small></td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+        }
+        
+        html += `</div></div>`;
+        
+        // Inserir após a tabela de produtos
+        const tablesSection = document.querySelector('#saidas .tables-section');
+        if (tablesSection) {
+            // Remover relatório anterior se existir
+            const relatorioAnterior = document.getElementById('relatorioErrosAPI');
+            if (relatorioAnterior) relatorioAnterior.remove();
+            
+            const div = document.createElement('div');
+            div.id = 'relatorioErrosAPI';
+            div.innerHTML = html;
+            tablesSection.appendChild(div);
+        }
+    }
     
     // Gráfico Carga Tributária - Compras
     const ctxCargaCompras = document.getElementById('chartCargaCompras');
