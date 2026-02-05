@@ -4,7 +4,7 @@ import logging
 from io import BytesIO
 from datetime import datetime
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -311,10 +311,59 @@ def exportar_sped(request):
 
 @login_required
 def excluir_sped(request):
+    from django.db.models import Count
+    
+    # Busca SPEDs importados agrupados
+    speds_importados = Registro0000.objects.select_related('empresa').order_by(
+        'empresa__razao_social', '-periodo', 'tipo'
+    )
+    
+    if request.method == 'POST':
+        empresa_id = request.POST.get('empresa')
+        tipo = request.POST.get('tipo')
+        periodo_inicial = request.POST.get('periodo_inicial')
+        periodo_final = request.POST.get('periodo_final')
+        
+        if empresa_id and tipo and periodo_inicial and periodo_final:
+            from datetime import datetime
+            dt_ini = datetime.strptime(periodo_inicial, '%Y-%m').date()
+            dt_fim = datetime.strptime(periodo_final, '%Y-%m').date()
+            
+            # Exclui registros do período
+            deletados = Registro0000.objects.filter(
+                empresa_id=empresa_id,
+                tipo=tipo,
+                periodo__gte=dt_ini,
+                periodo__lte=dt_fim
+            ).delete()
+            
+            messages.success(request, f'Excluídos {deletados[0]} registro(s) SPED com sucesso.')
+            return redirect('sped_excluir:excluir')
+    
     context = {
         'empresas': Empresa.objects.filter(ativo=True),
+        'speds_importados': speds_importados,
     }
     return render(request, 'sped/excluir.html', context)
+
+
+@login_required
+def api_periodos_importados(request):
+    """API para retornar períodos importados por empresa e tipo"""
+    empresa_id = request.GET.get('empresa')
+    tipo = request.GET.get('tipo')
+    
+    if not empresa_id or not tipo:
+        return JsonResponse({'periodos': []})
+    
+    periodos = Registro0000.objects.filter(
+        empresa_id=empresa_id,
+        tipo=tipo
+    ).values_list('periodo', flat=True).distinct().order_by('periodo')
+    
+    periodos_formatados = [p.strftime('%Y-%m') for p in periodos]
+    
+    return JsonResponse({'periodos': periodos_formatados})
 
 
 @login_required
@@ -384,3 +433,106 @@ def status_participantes(request, registro_id):
         })
     except Registro0000.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Registro não encontrado.'}, status=404)
+
+
+@login_required
+def consultar_participante_individual(request, registro_id, participante_id):
+    """API para consultar um participante individual"""
+    from apps.sped.models import Registro0150
+    from apps.sped.consulta_participantes import consultar_participante
+    
+    try:
+        participante = Registro0150.objects.get(id=participante_id, registro_0000_id=registro_id)
+        
+        resultado = consultar_participante(participante)
+        
+        # Recarrega do banco
+        participante.refresh_from_db()
+        
+        return JsonResponse({
+            'success': resultado.get('sucesso', False),
+            'participante': {
+                'id': participante.id,
+                'cod_part': participante.cod_part,
+                'cnpj': participante.cnpj,
+                'nome': participante.nome,
+                'regime': participante.regime_tributario,
+                'optante_simples': participante.optante_simples,
+                'optante_mei': participante.optante_mei,
+                'situacao': participante.situacao_cadastral,
+                'consultado': participante.consultado,
+                'erro': participante.erro_consulta,
+            },
+            'erro': resultado.get('erro', ''),
+        })
+    except Registro0150.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Participante não encontrado.'}, status=404)
+
+
+@login_required
+def listar_participantes_pendentes(request, registro_id):
+    """API para listar participantes pendentes de consulta"""
+    from apps.sped.models import Registro0150
+    
+    try:
+        participantes = Registro0150.objects.filter(
+            registro_0000_id=registro_id,
+            consultado=False
+        ).exclude(cnpj='').exclude(cnpj__isnull=True).values(
+            'id', 'cod_part', 'cnpj', 'nome'
+        )
+        
+        # Filtra apenas CNPJs válidos (14 dígitos)
+        participantes_validos = [p for p in participantes if len(p['cnpj']) == 14]
+        
+        return JsonResponse({
+            'success': True,
+            'participantes': list(participantes_validos),
+            'total': len(participantes_validos),
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+
+@login_required
+def listar_participantes_consultados(request, registro_id):
+    """API para listar participantes já consultados"""
+    from apps.sped.models import Registro0150
+    
+    try:
+        participantes = Registro0150.objects.filter(
+            registro_0000_id=registro_id,
+            consultado=True
+        ).values(
+            'id', 'cod_part', 'cnpj', 'nome', 'optante_simples', 'optante_mei',
+            'situacao_cadastral', 'erro_consulta'
+        )
+        
+        resultado = []
+        for p in participantes:
+            if p['optante_mei']:
+                regime = 'MEI'
+            elif p['optante_simples']:
+                regime = 'SIMPLES NACIONAL'
+            elif p['cnpj']:
+                regime = 'LUCRO REAL/PRESUMIDO'
+            else:
+                regime = 'PESSOA FÍSICA'
+            
+            resultado.append({
+                'id': p['id'],
+                'cod_part': p['cod_part'],
+                'cnpj': p['cnpj'],
+                'nome': p['nome'],
+                'regime': regime,
+                'situacao': p['situacao_cadastral'],
+                'erro': p['erro_consulta'],
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'participantes': resultado,
+            'total': len(resultado),
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

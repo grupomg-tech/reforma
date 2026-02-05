@@ -5,8 +5,76 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+    <div class="row">
+        <!-- Tabela de SPEDs Importados -->
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-file-earmark-code me-2"></i>
+                        SPEDs Importados
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if speds_importados %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th>Tipo</th>
+                                    <th>Competência</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sped in speds_importados %}
+                                <tr>
+                                    <td>
+                                        <small class="text-muted d-block">{{ sped.empresa.cnpj_cpf }}</small>
+                                        {{ sped.empresa.razao_social|truncatechars:30 }}
+                                    </td>
+                                    <td>
+                                        {% if sped.tipo == 'fiscal' %}
+                                        <span class="badge bg-info">Fiscal</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">Contribuições</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ sped.periodo|date:"m/Y" }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if sped.processado %}
+                                        <span class="badge bg-success">Processado</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Pendente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                onclick="selecionarParaExcluir('{{ sped.empresa.id }}', '{{ sped.tipo }}', '{{ sped.periodo|date:'Y-m' }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        Nenhum SPED importado
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulário de Exclusão -->
+        <div class="col-lg-5">
             <div class="card shadow">
                 <div class="card-header text-center bg-danger text-white">
                     <h5 class="mb-0">
@@ -26,7 +94,7 @@
                         
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Empresa *</label>
-                            <select name="empresa" class="form-select" required>
+                            <select name="empresa" id="empresaSelect" class="form-select" required onchange="carregarPeriodos()">
                                 <option value="">Selecione uma empresa</option>
                                 {% for empresa in empresas %}
                                 <option value="{{ empresa.id }}">{{ empresa.razao_social }}</option>
@@ -38,29 +106,41 @@
                             <label class="form-label fw-semibold">Tipo de SPED *</label>
                             <div class="d-flex gap-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="tipo" value="fiscal" id="tipoFiscal" required>
+                                    <input class="form-check-input" type="radio" name="tipo" value="fiscal" id="tipoFiscal" required onchange="carregarPeriodos()">
                                     <label class="form-check-label" for="tipoFiscal">SPED Fiscal</label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="tipo" value="registro" id="tipoContribuicoes" required>
+                                    <input class="form-check-input" type="radio" name="tipo" value="registro" id="tipoContribuicoes" required onchange="carregarPeriodos()">
                                     <label class="form-check-label" for="tipoContribuicoes">SPED Contribuições</label>
                                 </div>
                             </div>
                         </div>
                         
+                        <div id="periodosDisponiveis" class="mb-3" style="display: none;">
+                            <label class="form-label fw-semibold text-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Períodos disponíveis para exclusão:
+                            </label>
+                            <div id="listaPeriodos" class="d-flex flex-wrap gap-2"></div>
+                        </div>
+                        
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Período Inicial *</label>
-                                <input type="month" name="periodo_inicial" class="form-control" required>
+                                <select name="periodo_inicial" id="periodoInicial" class="form-select" required>
+                                    <option value="">Selecione</option>
+                                </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Período Final *</label>
-                                <input type="month" name="periodo_final" class="form-control" required>
+                                <select name="periodo_final" id="periodoFinal" class="form-select" required>
+                                    <option value="">Selecione</option>
+                                </select>
                             </div>
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-danger py-2">
+                            <button type="submit" class="btn btn-danger py-2" id="btnExcluir" disabled>
                                 <i class="bi bi-trash me-2"></i>
                                 Excluir Dados
                             </button>
@@ -71,4 +151,84 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function carregarPeriodos() {
+    const empresa = document.getElementById('empresaSelect').value;
+    const tipoFiscal = document.getElementById('tipoFiscal').checked;
+    const tipoContribuicoes = document.getElementById('tipoContribuicoes').checked;
+    
+    const tipo = tipoFiscal ? 'fiscal' : (tipoContribuicoes ? 'registro' : '');
+    
+    const periodoInicial = document.getElementById('periodoInicial');
+    const periodoFinal = document.getElementById('periodoFinal');
+    const periodosDiv = document.getElementById('periodosDisponiveis');
+    const listaPeriodos = document.getElementById('listaPeriodos');
+    const btnExcluir = document.getElementById('btnExcluir');
+    
+    // Limpa selects
+    periodoInicial.innerHTML = '<option value="">Selecione</option>';
+    periodoFinal.innerHTML = '<option value="">Selecione</option>';
+    listaPeriodos.innerHTML = '';
+    periodosDiv.style.display = 'none';
+    btnExcluir.disabled = true;
+    
+    if (!empresa || !tipo) return;
+    
+    fetch(`{% url 'sped_excluir:api_periodos' %}?empresa=${empresa}&tipo=${tipo}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.periodos && data.periodos.length > 0) {
+                periodosDiv.style.display = 'block';
+                
+                data.periodos.forEach(periodo => {
+                    // Formata para exibição (MM/YYYY)
+                    const [ano, mes] = periodo.split('-');
+                    const periodoFormatado = `${mes}/${ano}`;
+                    
+                    // Adiciona badge
+                    listaPeriodos.innerHTML += `<span class="badge bg-primary">${periodoFormatado}</span>`;
+                    
+                    // Adiciona nos selects
+                    periodoInicial.innerHTML += `<option value="${periodo}">${periodoFormatado}</option>`;
+                    periodoFinal.innerHTML += `<option value="${periodo}">${periodoFormatado}</option>`;
+                });
+                
+                btnExcluir.disabled = false;
+            } else {
+                listaPeriodos.innerHTML = '<span class="text-muted">Nenhum período encontrado</span>';
+                periodosDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar períodos:', error);
+        });
+}
+
+function selecionarParaExcluir(empresaId, tipo, periodo) {
+    // Seleciona empresa
+    document.getElementById('empresaSelect').value = empresaId;
+    
+    // Seleciona tipo
+    if (tipo === 'fiscal') {
+        document.getElementById('tipoFiscal').checked = true;
+    } else {
+        document.getElementById('tipoContribuicoes').checked = true;
+    }
+    
+    // Carrega períodos e depois seleciona
+    carregarPeriodos();
+    
+    // Aguarda carregar e seleciona o período
+    setTimeout(() => {
+        document.getElementById('periodoInicial').value = periodo;
+        document.getElementById('periodoFinal').value = periodo;
+    }, 500);
+    
+    // Scroll para o formulário
+    document.querySelector('.card.shadow .bg-danger').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
 {% endblock %}
