@@ -536,3 +536,22 @@ def listar_participantes_consultados(request, registro_id):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
+@login_required
+def status_participantes(request, registro_id):
+    """API para verificar status dos participantes"""
+    from apps.sped.models import Registro0150
+    
+    try:
+        total = Registro0150.objects.filter(registro_0000_id=registro_id).count()
+        consultados = Registro0150.objects.filter(registro_0000_id=registro_id, consultado=True).count()
+        pendentes = total - consultados
+        
+        return JsonResponse({
+            'success': True,
+            'total': total,
+            'consultados': consultados,
+            'pendentes': pendentes,
+            'percentual': round((consultados / total * 100) if total > 0 else 0, 1),
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)

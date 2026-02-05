@@ -160,6 +160,94 @@ def relatorio_fiscal(request):
         
         produtos_entradas = sorted(produtos_entradas_dict.values(), key=lambda x: x['valor_total'], reverse=True)
         
+        # ========================================
+        # AGREGAR FORNECEDORES DE ENTRADA
+        # ========================================
+        from apps.sped.models import Registro0150
+        
+        # Buscar participantes (fornecedores) dos registros
+        participantes_dict = {}
+        for reg in registros_0000:
+            for part in Registro0150.objects.filter(registro_0000=reg):
+                if part.cod_part not in participantes_dict:
+                    # Determinar regime tributário
+                    if part.optante_mei:
+                        regime = 'MEI'
+                    elif part.optante_simples:
+                        regime = 'SIMPLES NACIONAL'
+                    elif part.cnpj:
+                        if not part.consultado:
+                            regime = 'NÃO CONSULTADO'
+                        else:
+                            regime = 'LUCRO REAL/PRESUMIDO'
+                    else:
+                        regime = 'PESSOA FÍSICA' if part.cpf else '-'
+                    
+                    participantes_dict[part.cod_part] = {
+                        'codigo': part.cod_part,
+                        'cnpj_cpf': part.cnpj or part.cpf or '-',
+                        'nome': part.nome,
+                        'regime': regime,
+                        'uf': part.uf,
+                    }
+        
+        # Agregar valores por fornecedor (documentos de entrada)
+        fornecedores_dict = {}
+        for doc in documentos_entrada:
+            cod_part = doc.cod_part
+            if not cod_part:
+                continue
+            
+            if cod_part not in fornecedores_dict:
+                info_part = participantes_dict.get(cod_part, {})
+                fornecedores_dict[cod_part] = {
+                    'codigo': cod_part,
+                    'cnpj_cpf': info_part.get('cnpj_cpf', '-'),
+                    'nome': info_part.get('nome', 'Não identificado'),
+                    'regime': info_part.get('regime', '-'),
+                    'uf': info_part.get('uf', '-'),
+                    'valor_bruto': Decimal('0'),
+                    'icms': Decimal('0'),
+                    'icms_st': Decimal('0'),
+                    'ipi': Decimal('0'),
+                    'iss': Decimal('0'),
+                    'pis': Decimal('0'),
+                    'cofins': Decimal('0'),
+                }
+            
+            fornecedores_dict[cod_part]['valor_bruto'] += doc.vl_doc or Decimal('0')
+            fornecedores_dict[cod_part]['icms'] += doc.vl_icms or Decimal('0')
+            fornecedores_dict[cod_part]['pis'] += doc.vl_pis or Decimal('0')
+            fornecedores_dict[cod_part]['cofins'] += doc.vl_cofins or Decimal('0')
+        
+        # Calcular tributos totais e valores reforma para fornecedores
+        for cod, forn in fornecedores_dict.items():
+            tributos = forn['icms'] + forn['icms_st'] + forn['ipi'] + forn['iss'] + forn['pis'] + forn['cofins']
+            liquido = forn['valor_bruto'] - tributos
+            aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
+            ibs_cbs_efetivo = (liquido * aliq_total / Decimal('100')).quantize(Decimal('0.01'))
+            total_reforma = liquido + ibs_cbs_efetivo
+            
+            forn['tributos'] = tributos
+            forn['liquido'] = liquido
+            forn['ibs_cbs_efetivo'] = ibs_cbs_efetivo
+            forn['total_reforma'] = total_reforma
+        
+        fornecedores_entradas = sorted(fornecedores_dict.values(), key=lambda x: x['valor_bruto'], reverse=True)
+        
+        # Totais fornecedores
+        total_fornecedores_valor_bruto = sum(f['valor_bruto'] for f in fornecedores_entradas)
+        total_fornecedores_icms = sum(f['icms'] for f in fornecedores_entradas)
+        total_fornecedores_icms_st = sum(f['icms_st'] for f in fornecedores_entradas)
+        total_fornecedores_ipi = sum(f['ipi'] for f in fornecedores_entradas)
+        total_fornecedores_iss = sum(f['iss'] for f in fornecedores_entradas)
+        total_fornecedores_pis = sum(f['pis'] for f in fornecedores_entradas)
+        total_fornecedores_cofins = sum(f['cofins'] for f in fornecedores_entradas)
+        total_fornecedores_tributos = sum(f['tributos'] for f in fornecedores_entradas)
+        total_fornecedores_liquido = sum(f['liquido'] for f in fornecedores_entradas)
+        total_fornecedores_ibs_cbs = sum(f['ibs_cbs_efetivo'] for f in fornecedores_entradas)
+        total_fornecedores_reforma = sum(f['total_reforma'] for f in fornecedores_entradas)
+        
 # Agregar produtos de SAÍDA
         produtos_saidas_dict = {}
         for item in itens_saida:
@@ -297,6 +385,20 @@ def relatorio_fiscal(request):
             'carga_reforma_compras': float(carga_entradas_reforma),
             'carga_atual_vendas': float(carga_saidas),
             'carga_reforma_vendas': float(carga_saidas_reforma),
+            
+            # Fornecedores
+            'fornecedores_entradas': fornecedores_entradas,
+            'total_fornecedores_valor_bruto': total_fornecedores_valor_bruto,
+            'total_fornecedores_icms': total_fornecedores_icms,
+            'total_fornecedores_icms_st': total_fornecedores_icms_st,
+            'total_fornecedores_ipi': total_fornecedores_ipi,
+            'total_fornecedores_iss': total_fornecedores_iss,
+            'total_fornecedores_pis': total_fornecedores_pis,
+            'total_fornecedores_cofins': total_fornecedores_cofins,
+            'total_fornecedores_tributos': total_fornecedores_tributos,
+            'total_fornecedores_liquido': total_fornecedores_liquido,
+            'total_fornecedores_ibs_cbs': total_fornecedores_ibs_cbs,
+            'total_fornecedores_reforma': total_fornecedores_reforma,
         })
     
     return render(request, 'dashboards/relatorio_fiscal.html', context)
