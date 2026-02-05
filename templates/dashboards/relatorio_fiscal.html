@@ -799,17 +799,17 @@
                 <div class="metrics-section">
                     <div class="metric-card">
                         <h3>Compra Bruta</h3>
-                        <div class="value">R$ {{ compra_bruta|default:"0"|floatformat:2 }}</div>
+                        <div class="value">R$ {{ compra_bruta_fmt|default:"0,00" }}</div>
                     </div>
                     
                     <div class="metric-card">
                         <h3>Créditos</h3>
-                        <div class="value">R$ {{ creditos_entradas|default:"0"|floatformat:2 }}</div>
+                        <div class="value">R$ {{ creditos_entradas_fmt|default:"0,00" }}</div>
                     </div>
                     
                     <div class="metric-card">
                         <h3>Compra Líquida</h3>
-                        <div class="value">R$ {{ compra_liquida|default:"0"|floatformat:2 }}</div>
+                        <div class="value">R$ {{ compra_liquida_fmt|default:"0,00" }}</div>
                     </div>
                     
                     <div class="metric-card">
@@ -822,17 +822,17 @@
                 <div class="metrics-section">
                     <div class="metric-card reforma">
                         <h3>Compra Líquida</h3>
-                        <div class="value">R$ {{ compra_liquida_reforma|default:"0"|floatformat:2 }}</div>
+                        <div class="value">R$ {{ compra_liquida_reforma_fmt|default:"0,00" }}</div>
                     </div>
                     
                     <div class="metric-card reforma">
                         <h3>Créditos IBS/CBS</h3>
-                        <div class="value">R$ {{ creditos_ibs_cbs|default:"0"|floatformat:2 }}</div>
+                        <div class="value">R$ {{ creditos_ibs_cbs_fmt|default:"0,00" }}</div>
                     </div>
                     
                     <div class="metric-card reforma">
                         <h3>Compra Total</h3>
-                        <div class="value">R$ {{ compra_total_reforma|default:"0"|floatformat:2 }}</div>
+                        <div class="value">R$ {{ compra_total_reforma_fmt|default:"0,00" }}</div>
                     </div>
                     
                     <div class="metric-card reforma">
@@ -859,30 +859,54 @@
                                 <thead>
                                     <tr>
                                         <th>Código</th>
-                                        <th>NCM</th>
                                         <th>Descrição</th>
-                                        <th>CFOP</th>
-                                        <th>Qtd</th>
-                                        <th>Valor Total</th>
+                                        <th>NCM</th>
+                                        <th>Quant.</th>
+                                        <th>% Red.</th>
+                                        <th>Aliq. IBS/CBS</th>
+                                        <th>Valor Bruto Unit.</th>
+                                        <th>Valor Bruto Tot.</th>
                                         <th>ICMS</th>
+                                        <th>ICMS ST</th>
+                                        <th>IPI</th>
                                         <th>PIS</th>
                                         <th>COFINS</th>
-                                        <th class="reforma">IBS/CBS</th>
+                                        <th>Total Tributos</th>
+                                        <th class="reforma">Valor Líq. Unit.</th>
+                                        <th class="reforma">Valor Líq. Tot.</th>
+                                        <th class="reforma">IBS/CBS Unit.</th>
+                                        <th class="reforma">IBS/CBS Tot.</th>
+                                        <th class="reforma">Total Reforma Unit.</th>
+                                        <th class="reforma">Total Reforma</th>
+                                        <th class="reforma">Dif. Unit.</th>
+                                        <th class="reforma">Dif. Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for produto in produtos_entradas %}
                                     <tr>
                                         <td>{{ produto.codigo }}</td>
+                                        <td>{{ produto.descricao }}</td>
                                         <td>{{ produto.ncm }}</td>
-                                        <td>{{ produto.descricao|truncatechars:40 }}</td>
-                                        <td>{{ produto.cfop }}</td>
-                                        <td>{{ produto.quantidade }}</td>
-                                        <td>R$ {{ produto.valor_total|floatformat:2 }}</td>
-                                        <td>R$ {{ produto.icms|floatformat:2 }}</td>
-                                        <td>R$ {{ produto.pis|floatformat:2 }}</td>
-                                        <td>R$ {{ produto.cofins|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ produto.ibs_cbs|floatformat:2 }}</td>
+                                        <td>{{ produto.quantidade_fmt|default:"0,00" }}</td>
+                                        <td>{{ produto.perc_reducao_fmt|default:"0,00" }}%</td>
+                                        <td>{{ produto.aliq_ibs_cbs_fmt|default:"0,00" }}%</td>
+                                        <td>R$ {{ produto.valor_bruto_unit_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.valor_bruto_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.icms_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.icms_st_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.ipi_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.pis_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.cofins_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.total_tributos_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.valor_liq_unit_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.valor_liq_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.ibs_cbs_unit_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.ibs_cbs_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.total_reforma_unit_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.total_reforma_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.dif_unit_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.dif_total_fmt|default:"0,00" }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -901,6 +925,260 @@
                             <div class="empty-state">
                                 <i class="bi bi-inbox-fill empty-state-icon"></i>
                                 <div class="empty-state-text">Nenhum produto de entrada encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Fornecedores -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>🏭 Fornecedores Detalhados</h2>
+                            <a href="#" class="btn-export">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Excel
+                            </a>
+                        </div>
+                        <div class="table-scroll">
+                            {% if fornecedores_entradas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>CNPJ/CPF</th>
+                                        <th>Nome</th>
+                                        <th>Regime</th>
+                                        <th>Valor Bruto</th>
+                                        <th>ICMS</th>
+                                        <th>ICMS ST</th>
+                                        <th>IPI</th>
+                                        <th>ISS</th>
+                                        <th>PIS</th>
+                                        <th>COFINS</th>
+                                        <th>Tributos</th>
+                                        <th class="reforma">Líquido</th>
+                                        <th class="reforma">IBS/CBS Efetivo</th>
+                                        <th class="reforma">Total Reforma</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fornecedor in fornecedores_entradas %}
+                                    <tr>
+                                        <td>{{ fornecedor.codigo }}</td>
+                                        <td>{{ fornecedor.cnpj_cpf }}</td>
+                                        <td>{{ fornecedor.nome }}</td>
+                                        <td>{{ fornecedor.regime|default:" - " }}</td>
+                                        <td>R$ {{ fornecedor.valor_bruto|floatformat:2 }}</td>
+                                        <td>R$ {{ fornecedor.icms|floatformat:2 }}</td>
+                                        <td>R$ {{ fornecedor.icms_st|floatformat:2 }}</td>
+                                        <td>R$ {{ fornecedor.ipi|floatformat:2 }}</td>
+                                        <td>R$ {{ fornecedor.iss|floatformat:2 }}</td>
+                                        <td>R$ {{ fornecedor.pis|floatformat:2 }}</td>
+                                        <td>R$ {{ fornecedor.cofins|floatformat:2 }}</td>
+                                        <td>R$ {{ fornecedor.tributos|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ fornecedor.liquido|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ fornecedor.ibs_cbs_efetivo|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ fornecedor.total_reforma|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3">TOTAL</td>
+                                        <td></td>
+                                        <td>R$ {{ total_fornecedores_valor_bruto|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_icms|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_icms_st|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_ipi|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_iss|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_pis|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_cofins|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_tributos|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_liquido|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_ibs_cbs|floatformat:2 }}</td>
+                                        <td>R$ {{ total_fornecedores_reforma|floatformat:2 }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum fornecedor encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- CFOPs -->
+                    <div class="table-container">
+                        <div class="table-header-container">
+                            <h2>📋 CFOPs de Entrada</h2>
+                            <a href="#" class="btn-export">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Excel
+                            </a>
+                        </div>
+                        <div class="table-scroll">
+                            {% if cfops_entradas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>CFOP</th>
+                                        <th>Valor Bruto</th>
+                                        <th>ICMS</th>
+                                        <th>ICMS ST</th>
+                                        <th>IPI</th>
+                                        <th>PIS</th>
+                                        <th>COFINS</th>
+                                        <th>Tributos</th>
+                                        <th>Líquido</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cfop in cfops_entradas %}
+                                    <tr>
+                                        <td><strong>{{ cfop.cfop }}</strong></td>
+                                        <td>R$ {{ cfop.valor_bruto|floatformat:2 }}</td>
+                                        <td>R$ {{ cfop.icms|floatformat:2 }}</td>
+                                        <td>R$ {{ cfop.icms_st|floatformat:2 }}</td>
+                                        <td>R$ {{ cfop.ipi|floatformat:2 }}</td>
+                                        <td>R$ {{ cfop.pis|floatformat:2 }}</td>
+                                        <td>R$ {{ cfop.cofins|floatformat:2 }}</td>
+                                        <td>R$ {{ cfop.tributos|floatformat:2 }}</td>
+                                        <td>R$ {{ cfop.liquido|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td>TOTAL</td>
+                                        <td>R$ {{ total_cfops_valor_bruto|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cfops_icms|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cfops_icms_st|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cfops_ipi|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cfops_pis|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cfops_cofins|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cfops_tributos|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cfops_liquido|floatformat:2 }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum CFOP encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- UF -->
+                    <div class="table-container">
+                        <div class="table-header-container">
+                            <h2>🗺️ Distribuição por UF - Entradas</h2>
+                            <a href="#" class="btn-export">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Excel
+                            </a>
+                        </div>
+                        <div class="table-scroll">
+                            {% if ufs_entradas %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>UF</th>
+                                        <th>Valor Bruto</th>
+                                        <th>ICMS</th>
+                                        <th>ICMS ST</th>
+                                        <th>IPI</th>
+                                        <th>ISS</th>
+                                        <th>PIS</th>
+                                        <th>COFINS</th>
+                                        <th>Tributos</th>
+                                        <th>Líquido</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for uf in ufs_entradas %}
+                                    <tr>
+                                        <td><strong>{{ uf.uf }}</strong></td>
+                                        <td>R$ {{ uf.valor_bruto|floatformat:2 }}</td>
+                                        <td>R$ {{ uf.icms|floatformat:2 }}</td>
+                                        <td>R$ {{ uf.icms_st|floatformat:2 }}</td>
+                                        <td>R$ {{ uf.ipi|floatformat:2 }}</td>
+                                        <td>R$ {{ uf.iss|floatformat:2 }}</td>
+                                        <td>R$ {{ uf.pis|floatformat:2 }}</td>
+                                        <td>R$ {{ uf.cofins|floatformat:2 }}</td>
+                                        <td>R$ {{ uf.tributos|floatformat:2 }}</td>
+                                        <td>R$ {{ uf.liquido|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td>TOTAL</td>
+                                        <td>R$ {{ total_ufs_valor_bruto|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ufs_icms|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ufs_icms_st|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ufs_ipi|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ufs_iss|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ufs_pis|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ufs_cofins|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ufs_tributos|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ufs_liquido|floatformat:2 }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhuma UF encontrada</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- APURAÇÃO ICMS -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>Ajustes Apuração ICMS</h2>
+                        </div>
+                        <div class="table-scroll">
+                            {% if ajustes_icms %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Código de Ajuste</th>
+                                        <th>Tipo de Ajuste</th>
+                                        <th>Valor do Ajuste</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ajuste in ajustes_icms %}
+                                    <tr>
+                                        <td>{{ ajuste.codigo }}</td>
+                                        <td>{{ ajuste.descricao }}</td>
+                                        <td>R$ {{ ajuste.valor|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2">TOTAL</td>
+                                        <td>R$ {{ total_ajustes_icms|floatformat:2 }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum ajuste encontrado</div>
                             </div>
                             {% endif %}
                         </div>
