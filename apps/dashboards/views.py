@@ -310,6 +310,7 @@ def relatorio_fiscal(request):
                     chave = f"{prod.codigo}_{prod.ncm}"
                     if chave not in produtos_api_dict:
                         produtos_api_dict[chave] = {
+                            'chave_nfe': prod.chave_nfe,
                             'codigo': prod.codigo,
                             'descricao': prod.descricao,
                             'ncm': prod.ncm,
@@ -524,6 +525,29 @@ def api_periodos(request):
     ).values_list('periodo', flat=True).distinct().order_by('periodo')
     
     return JsonResponse({'periodos': [p.strftime('%Y-%m') for p in periodos]})
+
+
+@login_required
+def api_chaves_processadas(request):
+    """Retorna lista de chaves NF-e já processadas e salvas no banco"""
+    empresa_id = request.GET.get('empresa')
+    periodo_inicial = request.GET.get('periodo_inicial')
+    periodo_final = request.GET.get('periodo_final')
+    
+    if not empresa_id or not periodo_inicial or not periodo_final:
+        return JsonResponse({'chaves_processadas': []})
+    
+    # Buscar chaves já processadas no banco
+    chaves_salvas = ProdutoSaidaAPI.objects.filter(
+        empresa_id=empresa_id,
+        periodo_inicial=periodo_inicial,
+        periodo_final=periodo_final
+    ).values_list('chave_nfe', flat=True).distinct()
+    
+    return JsonResponse({
+        'chaves_processadas': list(chaves_salvas),
+        'total_processadas': len(chaves_salvas)
+    })
 
 
 @login_required

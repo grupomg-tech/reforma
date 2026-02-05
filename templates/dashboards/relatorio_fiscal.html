@@ -1680,6 +1680,7 @@
                             <table class="table-relatorio">
                                 <thead>
                                     <tr>
+                                        <th>Chave NF-e</th>
                                         <th>Código</th>
                                         <th>Descrição</th>
                                         <th>NCM</th>
@@ -2462,16 +2463,27 @@
             
             let chaves = dataChaves.chaves;
             
-            // Filtrar chaves que já foram processadas com sucesso (já estão em produtosEncontrados)
+// Passo 1.5: Buscar chaves já processadas no banco
+            document.getElementById('progressoNotaAtual').innerHTML = '<strong>Verificando chaves já processadas...</strong>';
+            const urlProcessadas = `/dashboards/api/chaves-processadas/?empresa=${empresaId}&periodo_inicial=${periodoInicial}&periodo_final=${periodoFinal}`;
+            const respProcessadas = await fetch(urlProcessadas);
+            const dataProcessadas = await respProcessadas.json();
+            
+            // Filtrar chaves que já foram processadas e salvas no banco
+            const chavesJaSalvas = new Set(dataProcessadas.chaves_processadas || []);
+            
+            // Também filtrar chaves da sessão atual (produtosEncontrados)
             const chavesJaProcessadas = new Set(produtosEncontrados.map(p => p.chave_nfe));
-            if (chavesJaProcessadas.size > 0) {
+            
+            if (chavesJaSalvas.size > 0 || chavesJaProcessadas.size > 0) {
                 const totalAntes = chaves.length;
-                chaves = chaves.filter(c => !chavesJaProcessadas.has(c.chave_nfe));
+                chaves = chaves.filter(c => !chavesJaSalvas.has(c.chave_nfe) && !chavesJaProcessadas.has(c.chave_nfe));
                 const filtradas = totalAntes - chaves.length;
+                
                 if (filtradas > 0) {
-                    console.log(`✅ ${filtradas} chaves já processadas foram ignoradas`);
-                    document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#10b981;">✅ ${filtradas} notas já processadas anteriormente</strong>`;
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    console.log(`✅ ${filtradas} chaves já processadas foram ignoradas (${chavesJaSalvas.size} no banco + ${chavesJaProcessadas.size} na sessão)`);
+                    document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#10b981;">✅ ${filtradas} notas já processadas anteriormente (${chavesJaSalvas.size} salvas + ${chavesJaProcessadas.size} na sessão)</strong>`;
+                    await new Promise(resolve => setTimeout(resolve, 2000));
                 }
             }
             
