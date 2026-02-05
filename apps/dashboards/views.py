@@ -78,7 +78,7 @@ def relatorio_fiscal(request):
                     'ncm': item.cod_ncm,
                 }
         
-        # Agregar produtos de ENTRADA
+# Agregar produtos de ENTRADA
         produtos_entradas_dict = {}
         for item in itens_entrada:
             cod = item.cod_item
@@ -92,23 +92,75 @@ def relatorio_fiscal(request):
                     'quantidade': Decimal('0'),
                     'valor_total': Decimal('0'),
                     'icms': Decimal('0'),
+                    'icms_st': Decimal('0'),
+                    'ipi': Decimal('0'),
                     'pis': Decimal('0'),
                     'cofins': Decimal('0'),
                 }
             produtos_entradas_dict[cod]['quantidade'] += item.qtd or Decimal('0')
             produtos_entradas_dict[cod]['valor_total'] += item.vl_item or Decimal('0')
             produtos_entradas_dict[cod]['icms'] += item.vl_icms or Decimal('0')
+            produtos_entradas_dict[cod]['icms_st'] += getattr(item, 'vl_icms_st', Decimal('0')) or Decimal('0')
+            produtos_entradas_dict[cod]['ipi'] += getattr(item, 'vl_ipi', Decimal('0')) or Decimal('0')
             produtos_entradas_dict[cod]['pis'] += item.vl_pis or Decimal('0')
             produtos_entradas_dict[cod]['cofins'] += item.vl_cofins or Decimal('0')
         
-        # Calcular IBS/CBS para entradas
+# Calcular IBS/CBS e formatar campos para entradas
         for cod, prod in produtos_entradas_dict.items():
-            valor_liquido = prod['valor_total'] - prod['icms'] - prod['pis'] - prod['cofins']
-            prod['ibs_cbs'] = (valor_liquido * (aliquota_ibs + aliquota_cbs + aliquota_is) / Decimal('100')).quantize(Decimal('0.01'))
+            # Valores calculados
+            total_tributos = prod['icms'] + prod['icms_st'] + prod['ipi'] + prod['pis'] + prod['cofins']
+            valor_liquido = prod['valor_total'] - total_tributos
+            aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
+            ibs_cbs = (valor_liquido * aliq_total / Decimal('100')).quantize(Decimal('0.01'))
+            total_reforma = valor_liquido + ibs_cbs
+            dif_total = ibs_cbs - total_tributos
+            
+            # Valores unitários
+            qtd = prod['quantidade'] if prod['quantidade'] > 0 else Decimal('1')
+            valor_bruto_unit = (prod['valor_total'] / qtd).quantize(Decimal('0.01'))
+            valor_liq_unit = (valor_liquido / qtd).quantize(Decimal('0.01'))
+            ibs_cbs_unit = (ibs_cbs / qtd).quantize(Decimal('0.01'))
+            total_reforma_unit = (total_reforma / qtd).quantize(Decimal('0.01'))
+            dif_unit = (dif_total / qtd).quantize(Decimal('0.01'))
+            
+            # Atualiza produto com valores calculados
+            prod['ibs_cbs'] = ibs_cbs
+            prod['valor_liquido'] = valor_liquido
+            prod['total_tributos'] = total_tributos
+            prod['total_reforma'] = total_reforma
+            prod['dif_total'] = dif_total
+            prod['valor_bruto_unit'] = valor_bruto_unit
+            prod['valor_liq_unit'] = valor_liq_unit
+            prod['ibs_cbs_unit'] = ibs_cbs_unit
+            prod['total_reforma_unit'] = total_reforma_unit
+            prod['dif_unit'] = dif_unit
+            prod['aliq_ibs_cbs'] = aliq_total
+            prod['perc_reducao'] = Decimal('0')
+            
+            # Formatar para exibição (padrão brasileiro)
+            prod['quantidade_fmt'] = f"{prod['quantidade']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['perc_reducao_fmt'] = f"{prod['perc_reducao']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['aliq_ibs_cbs_fmt'] = f"{aliq_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['valor_bruto_unit_fmt'] = f"{valor_bruto_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['valor_bruto_fmt'] = f"{prod['valor_total']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['icms_fmt'] = f"{prod['icms']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['icms_st_fmt'] = f"{prod['icms_st']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['ipi_fmt'] = f"{prod['ipi']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['pis_fmt'] = f"{prod['pis']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['cofins_fmt'] = f"{prod['cofins']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['total_tributos_fmt'] = f"{total_tributos:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['valor_liq_unit_fmt'] = f"{valor_liq_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['valor_liq_fmt'] = f"{valor_liquido:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['ibs_cbs_unit_fmt'] = f"{ibs_cbs_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['ibs_cbs_fmt'] = f"{ibs_cbs:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['total_reforma_unit_fmt'] = f"{total_reforma_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['total_reforma_fmt'] = f"{total_reforma:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['dif_unit_fmt'] = f"{dif_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['dif_total_fmt'] = f"{dif_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         
         produtos_entradas = sorted(produtos_entradas_dict.values(), key=lambda x: x['valor_total'], reverse=True)
         
-        # Agregar produtos de SAÍDA
+# Agregar produtos de SAÍDA
         produtos_saidas_dict = {}
         for item in itens_saida:
             cod = item.cod_item
@@ -122,19 +174,29 @@ def relatorio_fiscal(request):
                     'quantidade': Decimal('0'),
                     'valor_total': Decimal('0'),
                     'icms': Decimal('0'),
+                    'icms_st': Decimal('0'),
+                    'ipi': Decimal('0'),
                     'pis': Decimal('0'),
                     'cofins': Decimal('0'),
                 }
             produtos_saidas_dict[cod]['quantidade'] += item.qtd or Decimal('0')
             produtos_saidas_dict[cod]['valor_total'] += item.vl_item or Decimal('0')
             produtos_saidas_dict[cod]['icms'] += item.vl_icms or Decimal('0')
+            produtos_saidas_dict[cod]['icms_st'] += getattr(item, 'vl_icms_st', Decimal('0')) or Decimal('0')
+            produtos_saidas_dict[cod]['ipi'] += getattr(item, 'vl_ipi', Decimal('0')) or Decimal('0')
             produtos_saidas_dict[cod]['pis'] += item.vl_pis or Decimal('0')
             produtos_saidas_dict[cod]['cofins'] += item.vl_cofins or Decimal('0')
         
-        # Calcular IBS/CBS para saídas
+# Calcular IBS/CBS e formatar campos para saídas
         for cod, prod in produtos_saidas_dict.items():
-            valor_liquido = prod['valor_total'] - prod['icms'] - prod['pis'] - prod['cofins']
-            prod['ibs_cbs'] = (valor_liquido * (aliquota_ibs + aliquota_cbs + aliquota_is) / Decimal('100')).quantize(Decimal('0.01'))
+            total_tributos = prod['icms'] + prod['icms_st'] + prod['ipi'] + prod['pis'] + prod['cofins']
+            valor_liquido = prod['valor_total'] - total_tributos
+            aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
+            ibs_cbs = (valor_liquido * aliq_total / Decimal('100')).quantize(Decimal('0.01'))
+            
+            prod['ibs_cbs'] = ibs_cbs
+            prod['valor_liquido'] = valor_liquido
+            prod['total_tributos'] = total_tributos
         
         produtos_saidas = sorted(produtos_saidas_dict.values(), key=lambda x: x['valor_total'], reverse=True)
         
