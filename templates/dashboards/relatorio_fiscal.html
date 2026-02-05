@@ -605,6 +605,175 @@
         transform: none;
     }
 
+    .btn-retomar-api {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-retomar-api:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        transform: translateY(-1px);
+    }
+
+    .btn-retomar-api.visible {
+        display: inline-flex;
+    }
+
+    .btn-ver-pendencias {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ver-pendencias:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        transform: translateY(-1px);
+    }
+
+    .btn-ver-pendencias.visible {
+        display: inline-flex;
+    }
+
+    /* Modal de Pendências */
+    .modal-pendencias {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-pendencias.active {
+        display: flex;
+    }
+
+    .modal-pendencias-content {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        width: 95%;
+        max-width: 900px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        position: relative;
+    }
+
+    .modal-pendencias-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .modal-pendencias-header h3 {
+        margin: 0;
+        color: #1f2937;
+        font-size: 1.3rem;
+    }
+
+    .tabela-pendencias {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .tabela-pendencias th {
+        background: #f3f4f6;
+        padding: 12px 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .tabela-pendencias td {
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        color: #4b5563;
+    }
+
+    .tabela-pendencias tr:hover {
+        background: #f9fafb;
+    }
+
+    .tabela-pendencias .chave-acesso {
+        font-family: monospace;
+        font-size: 11px;
+        word-break: break-all;
+    }
+
+    .badge-erro {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+    }
+
+    .badge-nfce {
+        background: #fef3c7;
+        color: #d97706;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+    }
+
+    .secao-pendencias {
+        margin-bottom: 25px;
+    }
+
+    .secao-pendencias h4 {
+        color: #1f2937;
+        font-size: 1rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .contador-pendencias {
+        background: #ef4444;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .contador-nfce {
+        background: #f59e0b;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
     /* Modal de Progresso API */
     .modal-progresso-api {
         display: none;
@@ -630,6 +799,30 @@
         width: 90%;
         max-width: 600px;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        position: relative;
+    }
+
+    .btn-fechar-modal-x {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #6b7280;
+        color: white;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+        z-index: 10;
+    }
+
+    .btn-fechar-modal-x:hover {
+        background: #4b5563;
     }
 
     .progresso-header {
@@ -1452,7 +1645,7 @@
                 </div>
                 
                 <div class="tables-section">
-                    <!-- Produtos Vendidos -->
+<!-- Produtos Vendidos -->
                     <div class="table-container full-width">
                         <div class="table-header-container">
                             <h2>📦 Produtos Vendidos</h2>
@@ -1460,6 +1653,14 @@
                                 <button type="button" class="btn-buscar-api" onclick="iniciarBuscaProdutosAPI()" id="btnBuscarAPI">
                                     <i class="bi bi-cloud-download me-1"></i>
                                     Buscar via API
+                                </button>
+                                <button type="button" class="btn-retomar-api" onclick="abrirModalRetomar()" id="btnRetomarHeader">
+                                    <i class="bi bi-play-circle me-1"></i>
+                                    Retomar Buscas
+                                </button>
+                                <button type="button" class="btn-ver-pendencias" onclick="abrirModalPendencias()" id="btnVerPendencias">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Ver Pendências
                                 </button>
                                 <a href="#" class="btn-export">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1951,6 +2152,9 @@
 <!-- Modal de Progresso da Busca API -->
 <div class="modal-progresso-api" id="modalProgressoAPI">
     <div class="modal-progresso-content">
+        <button type="button" class="btn-fechar-modal-x" onclick="fecharModalProgresso()" title="Fechar">
+            <i class="bi bi-x"></i>
+        </button>
         <div class="progresso-header">
             <h3><i class="bi bi-cloud-download me-2"></i>Buscando Produtos via API</h3>
             <p>Aguarde enquanto buscamos os XMLs e extraímos as classificações tributárias...</p>
@@ -2001,6 +2205,29 @@
             </button>
             <button class="btn-fechar-progresso" id="btnFecharProgresso" onclick="fecharModalProgresso()">
                 <i class="bi bi-check-circle me-1"></i> Concluído
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pendências (NF com erro e NFC-e não pesquisadas) -->
+<div class="modal-pendencias" id="modalPendencias">
+    <div class="modal-pendencias-content">
+        <div class="modal-pendencias-header">
+            <h3><i class="bi bi-exclamation-triangle me-2"></i>Pendências da Busca</h3>
+            <button type="button" class="btn-fechar-modal-x" onclick="fecharModalPendencias()" title="Fechar">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+        <div id="conteudoPendencias">
+            <p class="text-center text-muted">Nenhuma pendência registrada.</p>
+        </div>
+        <div class="progresso-acoes" style="margin-top: 20px;">
+            <button type="button" onclick="exportarRelatorioErros()" style="background:#3b82f6; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+                <i class="bi bi-file-earmark-excel me-1"></i> Exportar Excel
+            </button>
+            <button type="button" onclick="fecharModalPendencias()" style="background:#6b7280; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">
+                Fechar
             </button>
         </div>
     </div>
@@ -2264,24 +2491,24 @@
                         const qtdProdutos = data.produtos.length;
                         totalProdutos += qtdProdutos;
                         
-                        // Converter formato dos itens
+// Converter formato dos itens - mapeando campos do XML corretamente
                         data.produtos.forEach(item => {
                             produtosEncontrados.push({
-                                codigo: item.cod_item || item.cProd || '',
+                                codigo: item.codigo || item.cod_item || item.cProd || '',
                                 descricao: item.descricao || item.xProd || '',
                                 ncm: item.ncm || item.NCM || '',
                                 cfop: item.cfop || item.CFOP || '',
-                                quantidade: parseFloat(item.qtd || item.qCom || 0),
-                                valor_total: parseFloat(item.vl_item || item.vProd || 0),
-                                valor_unitario: parseFloat(item.vl_unit || item.vUnCom || 0),
-                                icms_cst: item.cst_icms || item.ICMS_CST || '',
-                                icms_valor: parseFloat(item.vl_icms || item.ICMS_vICMS || 0),
-                                icms_st_valor: parseFloat(item.vl_icms_st || item.ICMS_vICMSST || 0),
-                                ipi_valor: parseFloat(item.vl_ipi || item.IPI_vIPI || 0),
-                                pis_cst: item.cst_pis || item.PIS_CST || '',
-                                pis_valor: parseFloat(item.vl_pis || item.PIS_vPIS || 0),
-                                cofins_cst: item.cst_cofins || item.COFINS_CST || '',
-                                cofins_valor: parseFloat(item.vl_cofins || item.COFINS_vCOFINS || 0)
+                                quantidade: parseFloat(item.quantidade || item.qtd || item.qCom || 0),
+                                valor_total: parseFloat(item.valor_total || item.vl_item || item.vProd || 0),
+                                valor_unitario: parseFloat(item.valor_unitario || item.vl_unit || item.vUnCom || 0),
+                                icms_cst: item.icms_cst || item.cst_icms || '',
+                                icms_valor: parseFloat(item.icms_valor || item.vl_icms || 0),
+                                icms_st_valor: parseFloat(item.icms_st_valor || item.vl_icms_st || 0),
+                                ipi_valor: parseFloat(item.ipi_valor || item.vl_ipi || 0),
+                                pis_cst: item.pis_cst || item.cst_pis || '',
+                                pis_valor: parseFloat(item.pis_valor || item.vl_pis || 0),
+                                cofins_cst: item.cofins_cst || item.cst_cofins || '',
+                                cofins_valor: parseFloat(item.cofins_valor || item.vl_cofins || 0)
                             });
                         });
                         
@@ -2385,10 +2612,132 @@
         }
         const btnBuscar = document.getElementById('btnBuscarAPI');
         if (btnBuscar) btnBuscar.disabled = false;
+        
+        // Atualizar botões no header da seção
+        atualizarBotoesHeader();
     }
     
     function fecharModalProgresso() {
         document.getElementById('modalProgressoAPI').classList.remove('active');
+        // Atualizar visibilidade dos botões no header
+        atualizarBotoesHeader();
+    }
+    
+    function atualizarBotoesHeader() {
+        const btnRetomar = document.getElementById('btnRetomarHeader');
+        const btnPendencias = document.getElementById('btnVerPendencias');
+        
+        // Mostrar botão Retomar se há busca pausada
+        if (buscaPausadaPorSaldo && chavesParaBuscar.length > 0 && indiceBuscaAtual < chavesParaBuscar.length) {
+            btnRetomar.classList.add('visible');
+        } else {
+            btnRetomar.classList.remove('visible');
+        }
+        
+        // Mostrar botão Ver Pendências se há erros ou NFC-e
+        if (notasComErro.length > 0 || nfceIgnoradas.length > 0) {
+            btnPendencias.classList.add('visible');
+        } else {
+            btnPendencias.classList.remove('visible');
+        }
+    }
+    
+    function abrirModalRetomar() {
+        document.getElementById('modalProgressoAPI').classList.add('active');
+        document.getElementById('btnFecharProgresso').style.display = 'none';
+        document.getElementById('btnRetomar').style.display = 'inline-block';
+        document.getElementById('btnCancelarBusca').style.display = 'none';
+    }
+    
+    function abrirModalPendencias() {
+        renderizarPendencias();
+        document.getElementById('modalPendencias').classList.add('active');
+    }
+    
+    function fecharModalPendencias() {
+        document.getElementById('modalPendencias').classList.remove('active');
+    }
+    
+    function renderizarPendencias() {
+        const container = document.getElementById('conteudoPendencias');
+        
+        if (notasComErro.length === 0 && nfceIgnoradas.length === 0) {
+            container.innerHTML = '<p class="text-center text-muted">Nenhuma pendência registrada.</p>';
+            return;
+        }
+        
+        let html = '';
+        
+        // NF-e com Erro
+        if (notasComErro.length > 0) {
+            html += `
+                <div class="secao-pendencias">
+                    <h4>
+                        <i class="bi bi-x-circle" style="color:#dc2626;"></i>
+                        NF-e com Erro na Busca
+                        <span class="contador-pendencias">${notasComErro.length}</span>
+                    </h4>
+                    <table class="tabela-pendencias">
+                        <thead>
+                            <tr>
+                                <th style="width:80px;">Número</th>
+                                <th style="width:90px;">Data</th>
+                                <th style="width:100px;">Valor</th>
+                                <th>Chave de Acesso</th>
+                                <th style="width:150px;">Erro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            notasComErro.forEach(nota => {
+                html += `
+                    <tr>
+                        <td><strong>${nota.numero || '-'}</strong></td>
+                        <td>${nota.data || '-'}</td>
+                        <td>R$ ${(nota.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td class="chave-acesso">${nota.chave_nfe || '-'}</td>
+                        <td><span class="badge-erro">${nota.erro || 'Erro desconhecido'}</span></td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table></div>';
+        }
+        
+        // NFC-e Não Pesquisadas
+        if (nfceIgnoradas.length > 0) {
+            html += `
+                <div class="secao-pendencias">
+                    <h4>
+                        <i class="bi bi-receipt" style="color:#d97706;"></i>
+                        NFC-e Não Pesquisadas (modelo 65)
+                        <span class="contador-nfce">${nfceIgnoradas.length}</span>
+                    </h4>
+                    <p style="font-size:12px; color:#6b7280; margin-bottom:10px;">NFC-e (modelo 65) não são consultadas via API externa.</p>
+                    <table class="tabela-pendencias">
+                        <thead>
+                            <tr>
+                                <th style="width:80px;">Número</th>
+                                <th style="width:90px;">Data</th>
+                                <th style="width:100px;">Valor</th>
+                                <th>Chave de Acesso</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            nfceIgnoradas.forEach(nota => {
+                html += `
+                    <tr>
+                        <td><strong>${nota.numero || '-'}</strong></td>
+                        <td>${nota.data || '-'}</td>
+                        <td>R$ ${(nota.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td class="chave-acesso">${nota.chave_nfe || '-'}</td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table></div>';
+        }
+        
+        container.innerHTML = html;
     }
     
     async function retomarBuscaAPI() {
@@ -2445,21 +2794,21 @@
                     
                     data.produtos.forEach(item => {
                         produtosEncontrados.push({
-                            codigo: item.cod_item || item.cProd || '',
+                            codigo: item.codigo || item.cod_item || item.cProd || '',
                             descricao: item.descricao || item.xProd || '',
                             ncm: item.ncm || item.NCM || '',
                             cfop: item.cfop || item.CFOP || '',
-                            quantidade: parseFloat(item.qtd || item.qCom || 0),
-                            valor_total: parseFloat(item.vl_item || item.vProd || 0),
-                            valor_unitario: parseFloat(item.vl_unit || item.vUnCom || 0),
-                            icms_cst: item.cst_icms || item.ICMS_CST || '',
-                            icms_valor: parseFloat(item.vl_icms || item.ICMS_vICMS || 0),
-                            icms_st_valor: parseFloat(item.vl_icms_st || item.ICMS_vICMSST || 0),
-                            ipi_valor: parseFloat(item.vl_ipi || item.IPI_vIPI || 0),
-                            pis_cst: item.cst_pis || item.PIS_CST || '',
-                            pis_valor: parseFloat(item.vl_pis || item.PIS_vPIS || 0),
-                            cofins_cst: item.cst_cofins || item.COFINS_CST || '',
-                            cofins_valor: parseFloat(item.vl_cofins || item.COFINS_vCOFINS || 0)
+                            quantidade: parseFloat(item.quantidade || item.qtd || item.qCom || 0),
+                            valor_total: parseFloat(item.valor_total || item.vl_item || item.vProd || 0),
+                            valor_unitario: parseFloat(item.valor_unitario || item.vl_unit || item.vUnCom || 0),
+                            icms_cst: item.icms_cst || item.cst_icms || '',
+                            icms_valor: parseFloat(item.icms_valor || item.vl_icms || 0),
+                            icms_st_valor: parseFloat(item.icms_st_valor || item.vl_icms_st || 0),
+                            ipi_valor: parseFloat(item.ipi_valor || item.vl_ipi || 0),
+                            pis_cst: item.pis_cst || item.cst_pis || '',
+                            pis_valor: parseFloat(item.pis_valor || item.vl_pis || 0),
+                            cofins_cst: item.cofins_cst || item.cst_cofins || '',
+                            cofins_valor: parseFloat(item.cofins_valor || item.vl_cofins || 0)
                         });
                     });
                     
