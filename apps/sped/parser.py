@@ -69,22 +69,21 @@ def parse_sped_file(file_content, encoding='latin-1'):
         
         if registro == '0000':
             registros['0000'] = {
-                'cod_ver': campos[2] if len(campos) > 2 else '',
-                'cod_fin': campos[3] if len(campos) > 3 else '',
-                'dt_ini': parse_date(campos[4]) if len(campos) > 4 else None,
-                'dt_fin': parse_date(campos[5]) if len(campos) > 5 else None,
-                'nome': campos[6] if len(campos) > 6 else '',
-                'cnpj': campos[7] if len(campos) > 7 else '',
-                'cpf': campos[8] if len(campos) > 8 else '',
-                'uf': campos[9] if len(campos) > 9 else '',
-                'ie': campos[10] if len(campos) > 10 else '',
-                'cod_mun': campos[11] if len(campos) > 11 else '',
-                'im': campos[12] if len(campos) > 12 else '',
-                'suframa': campos[13] if len(campos) > 13 else '',
-                'ind_perfil': campos[14] if len(campos) > 14 else '',
-                'ind_ativ': campos[15] if len(campos) > 15 else '',
-            }
-        
+                'cod_ver': campos[1] if len(campos) > 1 else '',
+                'cod_fin': campos[2] if len(campos) > 2 else '',
+                'dt_ini': parse_date(campos[3]) if len(campos) > 3 else None,
+                'dt_fin': parse_date(campos[4]) if len(campos) > 4 else None,
+                'nome': campos[5] if len(campos) > 5 else '',
+                'cnpj': campos[6] if len(campos) > 6 else '',
+                'cpf': campos[7] if len(campos) > 7 else '',
+                'uf': campos[8] if len(campos) > 8 else '',
+                'ie': campos[9] if len(campos) > 9 else '',
+                'cod_mun': campos[10] if len(campos) > 10 else '',
+                'im': campos[11] if len(campos) > 11 else '',
+                'suframa': campos[12] if len(campos) > 12 else '',
+                'ind_perfil': campos[13] if len(campos) > 13 else '',
+                'ind_ativ': campos[14] if len(campos) > 14 else '',
+            }     
         elif registro == '0150':
             registros['0150'].append({
                 'cod_part': campos[1] if len(campos) > 1 else '',

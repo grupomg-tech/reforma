@@ -203,11 +203,18 @@ def processar_arquivo_sped(nome_arquivo, conteudo, tipo, sobrescrever):
         resultado['cnpj'] = cnpj
         resultado['periodo'] = dt_ini.strftime('%m/%Y') if dt_ini else ''
         
-        # Busca empresa pelo CNPJ
+# Busca empresa pelo CNPJ completo
         cnpj_limpo = ''.join(filter(str.isdigit, cnpj))
+        
+        # Primeiro tenta buscar pelo CNPJ exato
         empresa = Empresa.objects.filter(
-            cnpj_cpf__contains=cnpj_limpo[-8:-2]
+            cnpj_cpf__contains=cnpj_limpo
         ).first()
+        
+        # Se não encontrar, tenta pelo CNPJ formatado
+        if not empresa:
+            cnpj_formatado = formatar_cnpj(cnpj_limpo)
+            empresa = Empresa.objects.filter(cnpj_cpf=cnpj_formatado).first()
         
         if not empresa:
             # Tenta criar empresa

@@ -1053,6 +1053,16 @@
                                     </tr>
                                     {% endfor %}
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5"><strong>TOTAL</strong></td>
+                                        <td>R$ {{ total_valor_saidas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_icms_saidas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_pis_saidas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_cofins_saidas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_ibs_cbs_saidas|floatformat:2 }}</td>
+                                    </tr>
+                                </tfoot>
                             </table>
                             {% else %}
                             <div class="empty-state">
