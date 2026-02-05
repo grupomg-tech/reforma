@@ -228,6 +228,10 @@ def relatorio_fiscal(request):
         carga_atual = (resultado_atual / total_valor_saidas * 100) if total_valor_saidas else Decimal('0')
         carga_reforma = (resultado_reforma / venda_liquida * 100) if venda_liquida else Decimal('0')
         
+# Função para formatar valores monetários no padrão brasileiro
+        def formatar_valor(valor):
+            return f"{valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+        
         # Atualizar contexto
         context.update({
             # Produtos
@@ -241,12 +245,18 @@ def relatorio_fiscal(request):
             'total_cofins_entradas': total_cofins_entradas,
             'total_ibs_cbs_entradas': total_ibs_cbs_entradas,
             'compra_bruta': total_valor_entradas,
+            'compra_bruta_fmt': formatar_valor(total_valor_entradas),
             'creditos_entradas': creditos_entradas,
+            'creditos_entradas_fmt': formatar_valor(creditos_entradas),
             'compra_liquida': compra_liquida,
+            'compra_liquida_fmt': formatar_valor(compra_liquida),
             'carga_entradas': f"{carga_entradas:.2f}".replace('.', ','),
             'compra_liquida_reforma': compra_liquida,
+            'compra_liquida_reforma_fmt': formatar_valor(compra_liquida),
             'creditos_ibs_cbs': total_ibs_cbs_entradas,
+            'creditos_ibs_cbs_fmt': formatar_valor(total_ibs_cbs_entradas),
             'compra_total_reforma': compra_liquida + total_ibs_cbs_entradas,
+            'compra_total_reforma_fmt': formatar_valor(compra_liquida + total_ibs_cbs_entradas),
             'carga_entradas_reforma': f"{carga_entradas_reforma:.2f}".replace('.', ','),
             
             # Totais Saídas

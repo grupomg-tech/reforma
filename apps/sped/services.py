@@ -260,8 +260,8 @@ def processar_documentos_c100(registro_0000, docs_data):
             num_doc=doc['num_doc'],
             ser=doc.get('ser', ''),
             cod_mod=doc['cod_mod'],
+            ind_oper=doc['ind_oper'],
             defaults={
-                'ind_oper': doc['ind_oper'],
                 'ind_emit': doc['ind_emit'],
                 'cod_part': doc.get('cod_part', ''),
                 'cod_sit': doc.get('cod_sit', ''),
