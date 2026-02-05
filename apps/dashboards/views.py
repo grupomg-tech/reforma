@@ -672,3 +672,97 @@ def debug_sped(request):
         'empresas': empresas,
         'registros_sped': registros
     }, json_dumps_params={'default': str})
+@csrf_exempt
+@login_required
+def api_exportar_relatorio_erros(request):
+    """Exporta relatório de NF-e com erro e NFC-e ignoradas para Excel"""
+    import json
+    from io import BytesIO
+    from django.http import HttpResponse
+    
+    try:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    except ImportError:
+        return JsonResponse({'success': False, 'message': 'openpyxl não instalado'})
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+    
+    data = json.loads(request.body)
+    nfe_erros = data.get('nfe_erros', [])
+    nfce_ignoradas = data.get('nfce_ignoradas', [])
+    
+    wb = openpyxl.Workbook()
+    
+    # Estilos
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill_erro = PatternFill(start_color='DC2626', end_color='DC2626', fill_type='solid')
+    header_fill_nfce = PatternFill(start_color='F59E0B', end_color='F59E0B', fill_type='solid')
+    border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    # Aba NF-e com Erro
+    ws_erros = wb.active
+    ws_erros.title = 'NF-e com Erro'
+    headers_erro = ['Número', 'Chave de Acesso', 'Data', 'Valor', 'Erro']
+    for col, header in enumerate(headers_erro, 1):
+        cell = ws_erros.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill_erro
+        cell.border = border
+        cell.alignment = Alignment(horizontal='center')
+    
+    for row, nfe in enumerate(nfe_erros, 2):
+        ws_erros.cell(row=row, column=1, value=nfe.get('numero', '')).border = border
+        ws_erros.cell(row=row, column=2, value=nfe.get('chave_nfe', '')).border = border
+        ws_erros.cell(row=row, column=3, value=nfe.get('data', '')).border = border
+        ws_erros.cell(row=row, column=4, value=nfe.get('valor', 0)).border = border
+        ws_erros.cell(row=row, column=5, value=nfe.get('erro', '')).border = border
+    
+    # Ajustar largura das colunas
+    ws_erros.column_dimensions['A'].width = 12
+    ws_erros.column_dimensions['B'].width = 50
+    ws_erros.column_dimensions['C'].width = 12
+    ws_erros.column_dimensions['D'].width = 15
+    ws_erros.column_dimensions['E'].width = 40
+    
+    # Aba NFC-e Ignoradas
+    ws_nfce = wb.create_sheet('NFC-e Ignoradas')
+    headers_nfce = ['Número', 'Chave de Acesso', 'Data', 'Valor', 'Motivo']
+    for col, header in enumerate(headers_nfce, 1):
+        cell = ws_nfce.cell(row=1, column=col, value=header)
+        cell.font = header_font
+        cell.fill = header_fill_nfce
+        cell.border = border
+        cell.alignment = Alignment(horizontal='center')
+    
+    for row, nfce in enumerate(nfce_ignoradas, 2):
+        ws_nfce.cell(row=row, column=1, value=nfce.get('numero', '')).border = border
+        ws_nfce.cell(row=row, column=2, value=nfce.get('chave_nfe', '')).border = border
+        ws_nfce.cell(row=row, column=3, value=nfce.get('data', '')).border = border
+        ws_nfce.cell(row=row, column=4, value=nfce.get('valor', 0)).border = border
+        ws_nfce.cell(row=row, column=5, value=nfce.get('motivo', '')).border = border
+    
+    # Ajustar largura das colunas
+    ws_nfce.column_dimensions['A'].width = 12
+    ws_nfce.column_dimensions['B'].width = 50
+    ws_nfce.column_dimensions['C'].width = 12
+    ws_nfce.column_dimensions['D'].width = 15
+    ws_nfce.column_dimensions['E'].width = 40
+    
+    # Salvar em memória
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=relatorio_erros_nfe.xlsx'
+    return response    

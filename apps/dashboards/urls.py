@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/periodos/', views.api_periodos, name='api_periodos'),
     path('api/buscar-xml-produto/', views.api_buscar_xml_produto, name='api_buscar_xml_produto'),
     path('api/listar-chaves-saida/', views.api_listar_chaves_saida, name='api_listar_chaves_saida'),
+    path('api/exportar-relatorio-erros/', views.api_exportar_relatorio_erros, name='api_exportar_relatorio_erros'),
 ]
