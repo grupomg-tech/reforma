@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from apps.empresa.models import Empresa
+from apps.dashboards.models import ProdutoSaidaAPI
 
 
 @login_required
@@ -289,6 +290,112 @@ def relatorio_fiscal(request):
             prod['total_tributos'] = total_tributos
         
         produtos_saidas = sorted(produtos_saidas_dict.values(), key=lambda x: x['valor_total'], reverse=True)
+        
+        # ========================================
+        # BUSCAR PRODUTOS SALVOS VIA API (se não houver do SPED)
+        # ========================================
+        produtos_saidas_api = []
+        if not produtos_saidas:
+            # Buscar produtos salvos via API
+            produtos_api_db = ProdutoSaidaAPI.objects.filter(
+                empresa_id=empresa_id,
+                periodo_inicial=periodo_inicial,
+                periodo_final=periodo_final
+            )
+            
+            if produtos_api_db.exists():
+                # Agrupar produtos por código + NCM
+                produtos_api_dict = {}
+                for prod in produtos_api_db:
+                    chave = f"{prod.codigo}_{prod.ncm}"
+                    if chave not in produtos_api_dict:
+                        produtos_api_dict[chave] = {
+                            'codigo': prod.codigo,
+                            'descricao': prod.descricao,
+                            'ncm': prod.ncm,
+                            'cfop': prod.cfop,
+                            'quantidade': Decimal('0'),
+                            'valor_total': Decimal('0'),
+                            'icms': Decimal('0'),
+                            'icms_st': Decimal('0'),
+                            'ipi': Decimal('0'),
+                            'pis': Decimal('0'),
+                            'cofins': Decimal('0'),
+                        }
+                    produtos_api_dict[chave]['quantidade'] += prod.quantidade or Decimal('0')
+                    produtos_api_dict[chave]['valor_total'] += prod.valor_total or Decimal('0')
+                    produtos_api_dict[chave]['icms'] += prod.icms_valor or Decimal('0')
+                    produtos_api_dict[chave]['icms_st'] += prod.icms_st_valor or Decimal('0')
+                    produtos_api_dict[chave]['ipi'] += prod.ipi_valor or Decimal('0')
+                    produtos_api_dict[chave]['pis'] += prod.pis_valor or Decimal('0')
+                    produtos_api_dict[chave]['cofins'] += prod.cofins_valor or Decimal('0')
+                
+                # Calcular campos adicionais para produtos da API
+                for chave, prod in produtos_api_dict.items():
+                    total_tributos = prod['icms'] + prod['icms_st'] + prod['ipi'] + prod['pis'] + prod['cofins']
+                    valor_liquido = prod['valor_total'] - total_tributos
+                    aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
+                    ibs_cbs = (valor_liquido * aliq_total / Decimal('100')).quantize(Decimal('0.01'))
+                    total_reforma = valor_liquido + ibs_cbs
+                    dif_total = ibs_cbs - total_tributos
+                    
+                    # Valores unitários
+                    qtd = prod['quantidade'] if prod['quantidade'] > 0 else Decimal('1')
+                    valor_bruto_unit = (prod['valor_total'] / qtd).quantize(Decimal('0.01'))
+                    valor_liq_unit = (valor_liquido / qtd).quantize(Decimal('0.01'))
+                    ibs_cbs_unit = (ibs_cbs / qtd).quantize(Decimal('0.01'))
+                    total_reforma_unit = (total_reforma / qtd).quantize(Decimal('0.01'))
+                    dif_unit = (dif_total / qtd).quantize(Decimal('0.01'))
+                    
+                    prod['ibs_cbs'] = ibs_cbs
+                    prod['valor_liquido'] = valor_liquido
+                    prod['total_tributos'] = total_tributos
+                    prod['total_reforma'] = total_reforma
+                    prod['dif_total'] = dif_total
+                    prod['valor_bruto_unit'] = valor_bruto_unit
+                    prod['valor_liq_unit'] = valor_liq_unit
+                    prod['ibs_cbs_unit'] = ibs_cbs_unit
+                    prod['total_reforma_unit'] = total_reforma_unit
+                    prod['dif_unit'] = dif_unit
+                    prod['aliq_ibs_cbs'] = aliq_total
+                    prod['perc_reducao'] = Decimal('0')
+                    
+                    # Formatar para exibição
+                    prod['quantidade_fmt'] = f"{prod['quantidade']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['perc_reducao_fmt'] = f"{prod['perc_reducao']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['aliq_ibs_cbs_fmt'] = f"{aliq_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['valor_bruto_unit_fmt'] = f"{valor_bruto_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['valor_bruto_fmt'] = f"{prod['valor_total']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['icms_fmt'] = f"{prod['icms']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['icms_st_fmt'] = f"{prod['icms_st']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['ipi_fmt'] = f"{prod['ipi']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['pis_fmt'] = f"{prod['pis']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['cofins_fmt'] = f"{prod['cofins']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['total_tributos_fmt'] = f"{total_tributos:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['valor_liq_unit_fmt'] = f"{valor_liq_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['valor_liq_fmt'] = f"{valor_liquido:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['ibs_cbs_unit_fmt'] = f"{ibs_cbs_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['ibs_cbs_fmt'] = f"{ibs_cbs:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['total_reforma_unit_fmt'] = f"{total_reforma_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['total_reforma_fmt'] = f"{total_reforma:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['dif_unit_fmt'] = f"{dif_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                    prod['dif_total_fmt'] = f"{dif_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+                
+                produtos_saidas_api = sorted(produtos_api_dict.values(), key=lambda x: x['valor_total'], reverse=True)
+                
+                # Usar produtos da API se não houver do SPED
+                produtos_saidas = produtos_saidas_api
+                
+                # Recalcular totais de saídas com dados da API
+                total_valor_saidas = sum(p['valor_total'] for p in produtos_saidas)
+                total_icms_saidas = sum(p['icms'] for p in produtos_saidas)
+                total_pis_saidas = sum(p['pis'] for p in produtos_saidas)
+                total_cofins_saidas = sum(p['cofins'] for p in produtos_saidas)
+                total_ibs_cbs_saidas = sum(p['ibs_cbs'] for p in produtos_saidas)
+                debitos_saidas = total_icms_saidas + total_pis_saidas + total_cofins_saidas
+                venda_liquida = total_valor_saidas - debitos_saidas
+                carga_saidas = (debitos_saidas / total_valor_saidas * 100) if total_valor_saidas else Decimal('0')
+                carga_saidas_reforma = (total_ibs_cbs_saidas / venda_liquida * 100) if venda_liquida else Decimal('0')
         
         # Totais ENTRADAS
         total_valor_entradas = sum(p['valor_total'] for p in produtos_entradas)
@@ -619,7 +726,7 @@ def extrair_produtos_xml(xml_content, chave_acesso):
                 'valor_total': float(prod.findtext('nfe:vProd', '0', ns) or 0),
             }
             
-            # Impostos
+# Impostos
             if imposto:
                 # ICMS
                 icms = imposto.find('.//nfe:ICMS', ns)
@@ -628,7 +735,23 @@ def extrair_produtos_xml(xml_content, chave_acesso):
                         item['icms_cst'] = icms_tipo.findtext('nfe:CST', '', ns) or icms_tipo.findtext('nfe:CSOSN', '', ns)
                         item['icms_aliq'] = float(icms_tipo.findtext('nfe:pICMS', '0', ns) or 0)
                         item['icms_valor'] = float(icms_tipo.findtext('nfe:vICMS', '0', ns) or 0)
+                        # ICMS ST
+                        item['icms_st_valor'] = float(icms_tipo.findtext('nfe:vICMSST', '0', ns) or 0)
+                        item['icms_st_bc'] = float(icms_tipo.findtext('nfe:vBCST', '0', ns) or 0)
                         break
+                
+                # IPI
+                ipi = imposto.find('.//nfe:IPI', ns)
+                if ipi:
+                    for ipi_tipo in ipi:
+                        item['ipi_cst'] = ipi_tipo.findtext('nfe:CST', '', ns)
+                        item['ipi_aliq'] = float(ipi_tipo.findtext('nfe:pIPI', '0', ns) or 0)
+                        item['ipi_valor'] = float(ipi_tipo.findtext('nfe:vIPI', '0', ns) or 0)
+                        break
+                else:
+                    item['ipi_cst'] = ''
+                    item['ipi_aliq'] = 0
+                    item['ipi_valor'] = 0
                 
                 # PIS
                 pis = imposto.find('.//nfe:PIS', ns)
@@ -765,4 +888,75 @@ def api_exportar_relatorio_erros(request):
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = 'attachment; filename=relatorio_erros_nfe.xlsx'
-    return response    
+    return response
+@csrf_exempt
+@login_required
+def api_salvar_produtos_api(request):
+    """Salva os produtos buscados via API no banco de dados"""
+    import json
+    from decimal import Decimal
+    from .models import ProdutoSaidaAPI
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        empresa_id = data.get('empresa_id')
+        periodo_inicial = data.get('periodo_inicial')
+        periodo_final = data.get('periodo_final')
+        produtos = data.get('produtos', [])
+        
+        if not empresa_id or not periodo_inicial or not periodo_final:
+            return JsonResponse({'success': False, 'message': 'Parâmetros obrigatórios não informados'})
+        
+        if not produtos:
+            return JsonResponse({'success': False, 'message': 'Nenhum produto para salvar'})
+        
+        # Remover produtos anteriores do mesmo período
+        ProdutoSaidaAPI.objects.filter(
+            empresa_id=empresa_id,
+            periodo_inicial=periodo_inicial,
+            periodo_final=periodo_final
+        ).delete()
+        
+        # Salvar novos produtos
+        produtos_criados = 0
+        for prod in produtos:
+            ProdutoSaidaAPI.objects.create(
+                empresa_id=empresa_id,
+                periodo_inicial=periodo_inicial,
+                periodo_final=periodo_final,
+                chave_nfe=prod.get('chave_nfe', ''),
+                codigo=prod.get('codigo', ''),
+                descricao=prod.get('descricao', ''),
+                ncm=prod.get('ncm', ''),
+                cfop=prod.get('cfop', ''),
+                unidade=prod.get('unidade', ''),
+                quantidade=Decimal(str(prod.get('quantidade', 0) or 0)),
+                valor_unitario=Decimal(str(prod.get('valor_unitario', 0) or 0)),
+                valor_total=Decimal(str(prod.get('valor_total', 0) or 0)),
+                icms_cst=prod.get('icms_cst', ''),
+                icms_aliq=Decimal(str(prod.get('icms_aliq', 0) or 0)),
+                icms_valor=Decimal(str(prod.get('icms_valor', 0) or 0)),
+                icms_st_valor=Decimal(str(prod.get('icms_st_valor', 0) or 0)),
+                ipi_cst=prod.get('ipi_cst', ''),
+                ipi_aliq=Decimal(str(prod.get('ipi_aliq', 0) or 0)),
+                ipi_valor=Decimal(str(prod.get('ipi_valor', 0) or 0)),
+                pis_cst=prod.get('pis_cst', ''),
+                pis_aliq=Decimal(str(prod.get('pis_aliq', 0) or 0)),
+                pis_valor=Decimal(str(prod.get('pis_valor', 0) or 0)),
+                cofins_cst=prod.get('cofins_cst', ''),
+                cofins_aliq=Decimal(str(prod.get('cofins_aliq', 0) or 0)),
+                cofins_valor=Decimal(str(prod.get('cofins_valor', 0) or 0)),
+            )
+            produtos_criados += 1
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{produtos_criados} produtos salvos com sucesso',
+            'qtd_salvos': produtos_criados
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': f'Erro ao salvar: {str(e)}'})    

@@ -1216,6 +1216,7 @@
                             <table class="table-relatorio">
                                 <thead>
                                     <tr>
+                                        <th>Chave NF-e</th>
                                         <th>Código</th>
                                         <th>Descrição</th>
                                         <th>NCM</th>
@@ -1648,11 +1649,15 @@
 <!-- Produtos Vendidos -->
                     <div class="table-container full-width">
                         <div class="table-header-container">
-                            <h2>📦 Produtos Vendidos</h2>
+                            <h2>📦 Produtos Vendidos {% if produtos_fonte_api %}<span class="badge bg-info ms-2" style="font-size: 0.6em; vertical-align: middle;">Dados da API</span>{% endif %}</h2>
                             <div class="d-flex gap-2">
                                 <button type="button" class="btn-buscar-api" onclick="iniciarBuscaProdutosAPI()" id="btnBuscarAPI">
                                     <i class="bi bi-cloud-download me-1"></i>
-                                    Buscar via API
+                                    {% if produtos_fonte_api %}Atualizar via API{% else %}Buscar via API{% endif %}
+                                </button>
+                                <button type="button" class="btn btn-warning" onclick="buscarProdutosFaltantes()" id="btnBuscarFaltantesHeader" style="display:none;">
+                                    <i class="bi bi-arrow-repeat me-1"></i>
+                                    Buscar Faltantes
                                 </button>
                                 <button type="button" class="btn-retomar-api" onclick="abrirModalRetomar()" id="btnRetomarHeader">
                                     <i class="bi bi-play-circle me-1"></i>
@@ -1676,41 +1681,76 @@
                                 <thead>
                                     <tr>
                                         <th>Código</th>
-                                        <th>NCM</th>
                                         <th>Descrição</th>
-                                        <th>CFOP</th>
-                                        <th>Qtd</th>
-                                        <th>Valor Total</th>
+                                        <th>NCM</th>
+                                        <th>Quant.</th>
+                                        <th>% Red.</th>
+                                        <th>Aliq. IBS/CBS</th>
+                                        <th>Valor Bruto Unit.</th>
+                                        <th>Valor Bruto Tot.</th>
                                         <th>ICMS</th>
+                                        <th>ICMS ST</th>
+                                        <th>IPI</th>
                                         <th>PIS</th>
                                         <th>COFINS</th>
-                                        <th class="reforma">IBS/CBS</th>
+                                        <th>Total Tributos</th>
+                                        <th class="reforma">Valor Líq. Unit.</th>
+                                        <th class="reforma">Valor Líq. Tot.</th>
+                                        <th class="reforma">IBS/CBS Unit.</th>
+                                        <th class="reforma">IBS/CBS Tot.</th>
+                                        <th class="reforma">Total Reforma Unit.</th>
+                                        <th class="reforma">Total Reforma</th>
+                                        <th class="reforma">Dif. Unit.</th>
+                                        <th class="reforma">Dif. Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for produto in produtos_saidas %}
                                     <tr>
+                                        <td><small title="{{ produto.chave_nfe|default:'-' }}">{{ produto.chave_nfe|default:'-'|truncatechars:20 }}</small></td>
                                         <td>{{ produto.codigo }}</td>
+                                        <td>{{ produto.descricao|truncatechars:35 }}</td>
                                         <td>{{ produto.ncm }}</td>
-                                        <td>{{ produto.descricao|truncatechars:40 }}</td>
-                                        <td>{{ produto.cfop }}</td>
-                                        <td>{{ produto.quantidade }}</td>
-                                        <td>R$ {{ produto.valor_total|floatformat:2 }}</td>
-                                        <td>R$ {{ produto.icms|floatformat:2 }}</td>
-                                        <td>R$ {{ produto.pis|floatformat:2 }}</td>
-                                        <td>R$ {{ produto.cofins|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ produto.ibs_cbs|floatformat:2 }}</td>
+                                        <td>{{ produto.quantidade_fmt|default:"0,00" }}</td>
+                                        <td>{{ produto.perc_reducao_fmt|default:"0,00" }}%</td>
+                                        <td>{{ produto.aliq_ibs_cbs_fmt|default:"0,00" }}%</td>
+                                        <td>R$ {{ produto.valor_bruto_unit_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.valor_bruto_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.icms_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.icms_st_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.ipi_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.pis_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.cofins_fmt|default:"0,00" }}</td>
+                                        <td>R$ {{ produto.total_tributos_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.valor_liq_unit_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.valor_liq_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.ibs_cbs_unit_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.ibs_cbs_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.total_reforma_unit_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.total_reforma_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.dif_unit_fmt|default:"0,00" }}</td>
+                                        <td class="reforma">R$ {{ produto.dif_total_fmt|default:"0,00" }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="5"><strong>TOTAL</strong></td>
+                                        <td colspan="8"><strong>TOTAL</strong></td>
                                         <td>R$ {{ total_valor_saidas|floatformat:2 }}</td>
                                         <td>R$ {{ total_icms_saidas|floatformat:2 }}</td>
+                                        <td>-</td>
+                                        <td>-</td>
                                         <td>R$ {{ total_pis_saidas|floatformat:2 }}</td>
                                         <td>R$ {{ total_cofins_saidas|floatformat:2 }}</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
                                         <td class="reforma">R$ {{ total_ibs_cbs_saidas|floatformat:2 }}</td>
+                                        <td class="reforma">-</td>
+                                        <td class="reforma">-</td>
+                                        <td class="reforma">-</td>
+                                        <td class="reforma">-</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -1721,6 +1761,10 @@
                                 <button type="button" class="btn btn-primary mt-3" onclick="iniciarBuscaProdutosAPI()">
                                     <i class="bi bi-cloud-download me-1"></i>
                                     Buscar Produtos via API
+                                </button>
+                                <button type="button" class="btn btn-warning mt-3 ms-2" onclick="buscarProdutosFaltantes()" id="btnBuscarFaltantes" style="display:none;">
+                                    <i class="bi bi-arrow-repeat me-1"></i>
+                                    Buscar Produtos que Faltam
                                 </button>
                             </div>
                             {% endif %}
@@ -2416,7 +2460,21 @@
                 return;
             }
             
-            const chaves = dataChaves.chaves;
+            let chaves = dataChaves.chaves;
+            
+            // Filtrar chaves que já foram processadas com sucesso (já estão em produtosEncontrados)
+            const chavesJaProcessadas = new Set(produtosEncontrados.map(p => p.chave_nfe));
+            if (chavesJaProcessadas.size > 0) {
+                const totalAntes = chaves.length;
+                chaves = chaves.filter(c => !chavesJaProcessadas.has(c.chave_nfe));
+                const filtradas = totalAntes - chaves.length;
+                if (filtradas > 0) {
+                    console.log(`✅ ${filtradas} chaves já processadas foram ignoradas`);
+                    document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#10b981;">✅ ${filtradas} notas já processadas anteriormente</strong>`;
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+            
             const total = chaves.length;
             chavesParaBuscar = chaves; // Salvar para possível retomada
             indiceBuscaAtual = 0; // Resetar índice
@@ -2492,8 +2550,10 @@
                         totalProdutos += qtdProdutos;
                         
 // Converter formato dos itens - mapeando campos do XML corretamente
+                        const chaveAtual = nota.chave_nfe || data.chave || '';
                         data.produtos.forEach(item => {
                             produtosEncontrados.push({
+                                chave_nfe: chaveAtual,
                                 codigo: item.codigo || item.cod_item || item.cProd || '',
                                 descricao: item.descricao || item.xProd || '',
                                 ncm: item.ncm || item.NCM || '',
@@ -2613,8 +2673,197 @@
         const btnBuscar = document.getElementById('btnBuscarAPI');
         if (btnBuscar) btnBuscar.disabled = false;
         
+        // Mostrar botão de buscar faltantes se houver notas pendentes
+        const btnFaltantes = document.getElementById('btnBuscarFaltantes');
+        if (btnFaltantes && (notasComErro.length > 0 || (indiceBuscaAtual > 0 && indiceBuscaAtual < chavesParaBuscar.length))) {
+            btnFaltantes.style.display = 'inline-block';
+        }
+        
         // Atualizar botões no header da seção
         atualizarBotoesHeader();
+    }
+    
+    async function buscarProdutosFaltantes() {
+        // Filtrar apenas as notas que deram erro ou não foram processadas
+        const chavesFaltantes = [];
+        
+        // Adicionar notas com erro
+        notasComErro.forEach(nota => {
+            chavesFaltantes.push({
+                chave_nfe: nota.chave_nfe,
+                numero: nota.numero,
+                data: nota.data,
+                valor: nota.valor
+            });
+        });
+        
+        // Adicionar notas não processadas (a partir do índice atual)
+        if (indiceBuscaAtual > 0 && indiceBuscaAtual < chavesParaBuscar.length) {
+            for (let i = indiceBuscaAtual; i < chavesParaBuscar.length; i++) {
+                const nota = chavesParaBuscar[i];
+                // Verificar se já não está na lista de faltantes
+                const jaExiste = chavesFaltantes.some(c => c.chave_nfe === nota.chave_nfe);
+                if (!jaExiste) {
+                    chavesFaltantes.push(nota);
+                }
+            }
+        }
+        
+        if (chavesFaltantes.length === 0) {
+            alert('Não há produtos faltantes para buscar.');
+            return;
+        }
+        
+        // Resetar variáveis para nova busca
+        buscaCancelada = false;
+        notasComErro = [];
+        indiceBuscaAtual = 0;
+        chavesParaBuscar = chavesFaltantes;
+        consultasNoLoteAtual = 0;
+        buscaPausadaPorSaldo = false;
+        
+        // Mostrar modal
+        document.getElementById('modalProgressoAPI').classList.add('active');
+        document.getElementById('btnCancelarBusca').style.display = 'inline-block';
+        document.getElementById('btnFecharProgresso').style.display = 'none';
+        document.getElementById('btnRetomar').style.display = 'none';
+        
+        const btnBuscar = document.getElementById('btnBuscarAPI');
+        if (btnBuscar) btnBuscar.disabled = true;
+        
+        const btnFaltantes = document.getElementById('btnBuscarFaltantes');
+        if (btnFaltantes) btnFaltantes.style.display = 'none';
+        
+        // Atualizar estatísticas
+        const total = chavesFaltantes.length;
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statSucesso').textContent = '0';
+        document.getElementById('statErro').textContent = '0';
+        document.getElementById('progressoBarraFill').style.width = '0%';
+        document.getElementById('progressoStatus').textContent = 'Buscando notas faltantes...';
+        document.getElementById('progressoContador').textContent = `0/${total}`;
+        
+        let sucesso = 0;
+        let erros = 0;
+        let totalProdutos = parseInt(document.getElementById('statProdutos').textContent) || 0;
+        
+        for (let i = 0; i < chavesFaltantes.length; i++) {
+            if (buscaCancelada) {
+                document.getElementById('progressoNotaAtual').innerHTML = '<strong style="color:#f59e0b;">Busca cancelada pelo usuário.</strong>';
+                break;
+            }
+            
+            const nota = chavesFaltantes[i];
+            const numNota = nota.numero || nota.chave_nfe.substring(25, 34);
+            
+            document.getElementById('progressoNotaAtual').innerHTML = `<strong>Buscando NF ${numNota}...</strong> (Faltante ${i + 1}/${total})`;
+            
+            try {
+                const response = await fetch('/dashboards/api/buscar-xml-produto/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chave_acesso: nota.chave_nfe })
+                });
+                const data = await response.json();
+                
+                consultasNoLoteAtual++;
+                
+                if (!data.success && data.message && data.message.toLowerCase().includes('saldo insuficiente')) {
+                    buscaPausadaPorSaldo = true;
+                    indiceBuscaAtual = i;
+                    chavesParaBuscar = chavesFaltantes;
+                    if (produtosEncontrados.length > 0) {
+                        atualizarTabelaProdutosSaida(produtosEncontrados);
+                    }
+                    document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#f59e0b;">⚠️ Saldo insuficiente. Busca pausada em ${i}/${total}.</strong>`;
+                    document.getElementById('progressoStatus').textContent = 'Busca pausada - Aguardando recarga de saldo';
+                    document.getElementById('btnRetomar').style.display = 'inline-block';
+                    document.getElementById('btnCancelarBusca').style.display = 'none';
+                    return;
+                }
+                
+                if (data.success && data.produtos && data.produtos.length > 0) {
+                    sucesso++;
+                    totalProdutos += data.produtos.length;
+                    
+                    data.produtos.forEach(item => {
+                        produtosEncontrados.push({
+                            codigo: item.codigo || item.cod_item || item.cProd || '',
+                            descricao: item.descricao || item.xProd || '',
+                            ncm: item.ncm || item.NCM || '',
+                            cfop: item.cfop || item.CFOP || '',
+                            quantidade: parseFloat(item.quantidade || item.qtd || item.qCom || 0),
+                            valor_total: parseFloat(item.valor_total || item.vl_item || item.vProd || 0),
+                            valor_unitario: parseFloat(item.valor_unitario || item.vl_unit || item.vUnCom || 0),
+                            icms_cst: item.icms_cst || item.cst_icms || '',
+                            icms_valor: parseFloat(item.icms_valor || item.vl_icms || 0),
+                            icms_st_valor: parseFloat(item.icms_st_valor || item.vl_icms_st || 0),
+                            ipi_valor: parseFloat(item.ipi_valor || item.vl_ipi || 0),
+                            pis_cst: item.pis_cst || item.cst_pis || '',
+                            pis_valor: parseFloat(item.pis_valor || item.vl_pis || 0),
+                            cofins_cst: item.cofins_cst || item.cst_cofins || '',
+                            cofins_valor: parseFloat(item.cofins_valor || item.vl_cofins || 0)
+                        });
+                    });
+                    
+                    document.getElementById('statSucesso').textContent = sucesso;
+                    document.getElementById('statProdutos').textContent = totalProdutos;
+                    
+                    if (sucesso % 5 === 0 || sucesso === 1) {
+                        atualizarTabelaProdutosSaida(produtosEncontrados);
+                    }
+                } else {
+                    erros++;
+                    notasComErro.push({
+                        ...nota,
+                        erro: data.message || 'XML não encontrado'
+                    });
+                    document.getElementById('statErro').textContent = erros;
+                }
+                
+                if (consultasNoLoteAtual >= LIMITE_PESQUISAS_POR_LOTE) {
+                    buscaPausadaPorSaldo = true;
+                    indiceBuscaAtual = i + 1;
+                    chavesParaBuscar = chavesFaltantes;
+                    if (produtosEncontrados.length > 0) {
+                        atualizarTabelaProdutosSaida(produtosEncontrados);
+                    }
+                    document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#3b82f6;">🔄 Limite de ${LIMITE_PESQUISAS_POR_LOTE} consultas atingido. Busca pausada em ${i + 1}/${total}.</strong>`;
+                    document.getElementById('progressoStatus').textContent = `Lote concluído - ${total - i - 1} notas restantes`;
+                    document.getElementById('btnRetomar').style.display = 'inline-block';
+                    document.getElementById('btnCancelarBusca').style.display = 'none';
+                    consultasNoLoteAtual = 0;
+                    return;
+                }
+                
+            } catch (e) {
+                erros++;
+                notasComErro.push({
+                    ...nota,
+                    erro: 'Falha: ' + e.message
+                });
+                document.getElementById('statErro').textContent = erros;
+            }
+            
+            const pct = Math.round(((i + 1) / total) * 100);
+            document.getElementById('progressoBarraFill').style.width = pct + '%';
+            document.getElementById('progressoContador').textContent = `${i + 1}/${total} (Lote: ${consultasNoLoteAtual}/${LIMITE_PESQUISAS_POR_LOTE})`;
+            
+            await new Promise(resolve => setTimeout(resolve, 600));
+        }
+        
+        if (!buscaCancelada && !buscaPausadaPorSaldo) {
+            document.getElementById('progressoStatus').textContent = 'Busca de faltantes concluída!';
+            document.getElementById('progressoNotaAtual').innerHTML = `<strong style="color:#059669;">✅ Busca finalizada! ${sucesso} notas processadas, ${totalProdutos} produtos encontrados.</strong>`;
+            
+            if (produtosEncontrados.length > 0) {
+                atualizarTabelaProdutosSaida(produtosEncontrados);
+            }
+            
+            exibirRelatorioErros();
+        }
+        
+        finalizarBusca();
     }
     
     function fecharModalProgresso() {
@@ -2626,6 +2875,8 @@
     function atualizarBotoesHeader() {
         const btnRetomar = document.getElementById('btnRetomarHeader');
         const btnPendencias = document.getElementById('btnVerPendencias');
+        const btnFaltantesHeader = document.getElementById('btnBuscarFaltantesHeader');
+        const btnFaltantes = document.getElementById('btnBuscarFaltantes');
         
         // Mostrar botão Retomar se há busca pausada
         if (buscaPausadaPorSaldo && chavesParaBuscar.length > 0 && indiceBuscaAtual < chavesParaBuscar.length) {
@@ -2639,6 +2890,19 @@
             btnPendencias.classList.add('visible');
         } else {
             btnPendencias.classList.remove('visible');
+        }
+        
+        // Mostrar botão Buscar Faltantes se há notas com erro (para rebuscar)
+        const temFaltantes = notasComErro.length > 0;
+        if (btnFaltantesHeader) {
+            if (temFaltantes) {
+                btnFaltantesHeader.classList.add('visible');
+            } else {
+                btnFaltantesHeader.classList.remove('visible');
+            }
+        }
+        if (btnFaltantes) {
+            btnFaltantes.style.display = temFaltantes ? 'inline-block' : 'none';
         }
     }
     
@@ -2939,36 +3203,23 @@
     let consultasNoLoteAtual = 0;
     
     function atualizarTabelaProdutosSaida(produtos) {
-        // Agrupar produtos por código + NCM
-        const agrupado = {};
+        // NÃO agrupar - manter cada produto individual com sua chave
+        const produtosProcessados = produtos.map(prod => ({
+            chave_nfe: prod.chave_nfe || '',
+            codigo: prod.codigo || '',
+            ncm: prod.ncm || '',
+            descricao: prod.descricao || '',
+            quantidade: prod.quantidade || 0,
+            valor_bruto: prod.valor_total || 0,
+            icms: prod.icms_valor || 0,
+            icms_st: prod.icms_st_valor || 0,
+            ipi: prod.ipi_valor || 0,
+            pis: prod.pis_valor || 0,
+            cofins: prod.cofins_valor || 0
+        }));
         
-        produtos.forEach(prod => {
-            const chave = `${prod.codigo}_${prod.ncm}`;
-            if (!agrupado[chave]) {
-                agrupado[chave] = {
-                    codigo: prod.codigo,
-                    ncm: prod.ncm,
-                    descricao: prod.descricao,
-                    quantidade: 0,
-                    valor_bruto: 0,
-                    icms: 0,
-                    icms_st: 0,
-                    ipi: 0,
-                    pis: 0,
-                    cofins: 0
-                };
-            }
-            agrupado[chave].quantidade += prod.quantidade || 0;
-            agrupado[chave].valor_bruto += prod.valor_total || 0;
-            agrupado[chave].icms += prod.icms_valor || 0;
-            agrupado[chave].icms_st += prod.icms_st_valor || 0;
-            agrupado[chave].ipi += prod.ipi_valor || 0;
-            agrupado[chave].pis += prod.pis_valor || 0;
-            agrupado[chave].cofins += prod.cofins_valor || 0;
-        });
-        
-        // Converter para array e ordenar por valor
-        const produtosAgrupados = Object.values(agrupado).sort((a, b) => b.valor_bruto - a.valor_bruto);
+        // Ordenar por valor
+        const produtosAgrupados = produtosProcessados.sort((a, b) => b.valor_bruto - a.valor_bruto);
         
         // Ocultar empty-state
         const emptyState = document.getElementById('emptyStateSaidas');
@@ -2980,11 +3231,12 @@
         const aliqIbsCbs = 0.27;
         const pctReducao = 0; // % Redução (pode ser parametrizado)
         
-        // Construir HTML da tabela
+// Construir HTML da tabela
         let html = `
             <table class="table-relatorio">
                 <thead>
                     <tr>
+                        <th>Chave NF-e</th>
                         <th>Código</th>
                         <th>Descrição</th>
                         <th>NCM</th>
@@ -3059,6 +3311,7 @@
             
             html += `
                 <tr>
+                    <td><small title="${prod.chave_nfe}">${prod.chave_nfe ? prod.chave_nfe.substring(0, 15) + '...' : '-'}</small></td>
                     <td>${prod.codigo}</td>
                     <td>${prod.descricao.substring(0, 35)}</td>
                     <td>${prod.ncm}</td>
@@ -3089,7 +3342,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3"><strong>TOTAL (${produtosAgrupados.length} produtos)</strong></td>
+                        <td colspan="4"><strong>TOTAL (${produtosAgrupados.length} produtos)</strong></td>
                         <td><strong>${totais.quantidade.toFixed(2)}</strong></td>
                         <td>-</td>
                         <td>-</td>
@@ -3114,7 +3367,7 @@
             </table>
         `;
         
-        // Inserir tabela no container
+// Inserir tabela no container
         const container = document.querySelector('#saidas .table-container.full-width .table-scroll');
         if (container) {
             container.innerHTML = html;
@@ -3122,6 +3375,9 @@
         
         // Atualizar cards de métricas
         atualizarMetricasSaidas(totais);
+        
+        // Salvar produtos no banco de dados automaticamente
+        salvarProdutosNoBanco(produtos);
     }
     
     function atualizarMetricasSaidas(totais) {
@@ -3161,7 +3417,37 @@
             }
         }
     }
-    
+    async function salvarProdutosNoBanco(produtos) {
+        const empresaId = document.getElementById('empresaSelect').value;
+        const periodoInicial = document.getElementById('periodoInicialSelect').value;
+        const periodoFinal = document.getElementById('periodoFinalSelect').value;
+        
+        if (!empresaId || !periodoInicial || !periodoFinal || produtos.length === 0) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/dashboards/api/salvar-produtos-api/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    empresa_id: empresaId,
+                    periodo_inicial: periodoInicial,
+                    periodo_final: periodoFinal,
+                    produtos: produtos
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                console.log(`✅ ${data.qtd_salvos} produtos salvos no banco de dados`);
+            } else {
+                console.error('Erro ao salvar produtos:', data.message);
+            }
+        } catch (e) {
+            console.error('Erro ao salvar produtos no banco:', e);
+        }
+    }    
     function exibirRelatorioErros() {
         if (notasComErro.length === 0 && nfceIgnoradas.length === 0) {
             return;
