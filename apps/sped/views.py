@@ -40,6 +40,7 @@ def processar_importacao_sped(request):
     tipo = request.POST.get('tipo')
     arquivo = request.FILES.get('arquivo_sped')
     sobrescrever = request.POST.get('sobrescrever') == 'on'
+    buscar_produtos_api = request.POST.get('buscar_produtos_api') == 'on'
     
     logger.info("=" * 60)
     logger.info("INÍCIO DA IMPORTAÇÃO SPED")
@@ -48,6 +49,7 @@ def processar_importacao_sped(request):
     logger.info(f"Tipo SPED: {tipo}")
     logger.info(f"Arquivo: {arquivo.name if arquivo else 'Nenhum'}")
     logger.info(f"Sobrescrever: {sobrescrever}")
+    logger.info(f"Buscar Produtos via API: {buscar_produtos_api}")
     
     if not tipo or not arquivo:
         logger.error("Erro: Tipo ou arquivo não informado")
@@ -171,6 +173,7 @@ def processar_importacao_sped(request):
                 'message': f'Importação concluída! {relatorio["sucesso"]} arquivo(s) processado(s). Consulta de regime tributário iniciada em background.',
                 'relatorio': relatorio,
                 'registros_0000_ids': registros_ids,
+                'buscar_produtos_api': buscar_produtos_api,
             })
         
         messages.success(request, f'Importação concluída! {relatorio["sucesso"]} arquivo(s) processado(s). Consulta de regime tributário iniciada em background.')
@@ -587,5 +590,110 @@ def status_participantes(request, registro_id):
             'pendentes': pendentes,
             'percentual': round((consultados / total * 100) if total > 0 else 0, 1),
         })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+@login_required
+def api_listar_chaves_sem_itens_por_registro(request):
+    """Retorna chaves de NF-e (entrada e saída) sem C170, para registros específicos"""
+    from apps.sped.models import RegistroC100, RegistroC170, RegistroC113
+
+    ids = request.GET.getlist('registro_ids')
+    if not ids:
+        ids_str = request.GET.get('registro_ids', '')
+        ids = [i.strip() for i in ids_str.split(',') if i.strip()]
+
+    if not ids:
+        return JsonResponse({'success': False, 'message': 'Nenhum registro informado', 'chaves_entrada': [], 'chaves_saida': []})
+
+    documentos = RegistroC100.objects.filter(
+        registro_0000_id__in=ids
+    ).exclude(chv_nfe__isnull=True).exclude(chv_nfe='')
+
+    chaves_entrada = []
+    chaves_saida = []
+    chaves_nfce_entrada = []
+    chaves_nfce_saida = []
+
+    for doc in documentos:
+        if not doc.chv_nfe or len(doc.chv_nfe) < 44:
+            continue
+
+        modelo = doc.cod_mod or '55'
+        tem_itens = RegistroC170.objects.filter(registro_c100=doc).exists()
+        if tem_itens:
+            continue
+
+        # Verificar se tem C113 (nota referenciada - devolução)
+        chave_ref = ''
+        refs_c113 = RegistroC113.objects.filter(registro_c100=doc)
+        if refs_c113.exists():
+            ref = refs_c113.first()
+            if ref.chv_nfe and len(ref.chv_nfe) >= 44:
+                chave_ref = ref.chv_nfe
+
+        dados_doc = {
+            'chave_nfe': doc.chv_nfe,
+            'chave_referenciada': chave_ref,
+            'numero': doc.num_doc,
+            'modelo': modelo,
+            'modelo_desc': 'NF-e' if modelo == '55' else 'NFC-e',
+            'valor': float(doc.vl_doc) if doc.vl_doc else 0,
+            'data': doc.dt_doc.strftime('%d/%m/%Y') if doc.dt_doc else '',
+            'ind_oper': doc.ind_oper,
+            'empresa_id': doc.registro_0000.empresa_id,
+            'periodo': doc.registro_0000.periodo.strftime('%Y-%m'),
+        }
+
+        if modelo != '55':
+            if doc.ind_oper == '0':
+                chaves_nfce_entrada.append(dados_doc)
+            else:
+                chaves_nfce_saida.append(dados_doc)
+            continue
+
+        if doc.ind_oper == '0':
+            chaves_entrada.append(dados_doc)
+        else:
+            chaves_saida.append(dados_doc)
+
+    return JsonResponse({
+        'success': True,
+        'total_entrada': len(chaves_entrada),
+        'total_saida': len(chaves_saida),
+        'total_nfce_entrada': len(chaves_nfce_entrada),
+        'total_nfce_saida': len(chaves_nfce_saida),
+        'chaves_entrada': chaves_entrada,
+        'chaves_saida': chaves_saida,
+        'nfce_entrada_ignoradas': chaves_nfce_entrada,
+        'nfce_saida_ignoradas': chaves_nfce_saida,
+    })
+@require_POST
+@login_required
+def excluir_sped_direto(request, sped_id):
+    """Exclui um registro SPED diretamente pelo ID"""
+    try:
+        registro = Registro0000.objects.get(id=sped_id)
+        empresa_nome = registro.empresa.razao_social
+        periodo = registro.periodo.strftime('%m/%Y')
+        tipo = registro.tipo
+
+        # Verificar se a empresa ficará sem registros SPED
+        empresa = registro.empresa
+        outros_registros = Registro0000.objects.filter(empresa=empresa).exclude(id=sped_id).count()
+
+        registro.delete()
+
+        msg = f'SPED {tipo} de {periodo} ({empresa_nome}) excluído com sucesso.'
+
+        # Se empresa não tem mais SPEDs e tem dados suspeitos (CNPJ zerado), oferecer exclusão
+        if outros_registros == 0:
+            cnpj_limpo = ''.join(filter(str.isdigit, empresa.cnpj_cpf))
+            if cnpj_limpo == '00000000000000' or not empresa.razao_social or empresa.razao_social == cnpj_limpo:
+                empresa.delete()
+                msg += ' Empresa com dados inválidos também foi removida.'
+
+        return JsonResponse({'success': True, 'message': msg})
+    except Registro0000.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Registro não encontrado.'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=500)

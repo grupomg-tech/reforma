@@ -125,7 +125,7 @@ Serviços para processamento de SPED
 """
 import logging
 from django.db import transaction
-from apps.sped.models import Registro0000, Registro0200, RegistroC100, RegistroC170
+from apps.sped.models import Registro0000, Registro0200, RegistroC100, RegistroC110, RegistroC113, RegistroC170
 from apps.sped.parser import parse_sped_file
 from apps.documentos_fiscais.models import NFe
 from apps.reforma_tributaria.models import ItemNCM
@@ -315,7 +315,37 @@ def processar_documentos_c100(registro_0000, docs_data):
                 }
             )
             count_itens += 1
-    
+
+        # Processa informações complementares C110
+        for compl in doc.get('complementares', []):
+            RegistroC110.objects.update_or_create(
+                registro_c100=c100,
+                cod_inf=compl.get('cod_inf', ''),
+                defaults={
+                    'txt_compl': compl.get('txt_compl', ''),
+                }
+            )
+
+        # Processa documentos referenciados C113
+        for ref in doc.get('referencias', []):
+            chv_ref = ref.get('chv_nfe', '')
+            if chv_ref:
+                RegistroC113.objects.update_or_create(
+                    registro_c100=c100,
+                    chv_nfe=chv_ref,
+                    defaults={
+                        'ind_oper': ref.get('ind_oper', ''),
+                        'ind_emit': ref.get('ind_emit', ''),
+                        'cod_part': ref.get('cod_part', ''),
+                        'cod_mod': ref.get('cod_mod', ''),
+                        'ser': ref.get('ser', ''),
+                        'sub': ref.get('sub', ''),
+                        'num_doc': ref.get('num_doc', ''),
+                        'dt_doc': ref.get('dt_doc'),
+                    }
+                )
+                logger.debug(f"    C113 referência: Doc {ref.get('num_doc', '')} Chave: {chv_ref[:20]}...")
+
     logger.debug(f"  Documentos C100: {count_docs} | Itens C170: {count_itens}")
     return count_docs
 

@@ -53,8 +53,14 @@
                                         {% endif %}
                                     </td>
                                     <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-primary me-1" 
+                                            onclick="selecionarParaExcluir('{{ sped.empresa.id }}', '{{ sped.tipo }}', '{{ sped.periodo|date:'Y-m' }}')"
+                                            title="Preencher formulário">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
                                         <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                onclick="selecionarParaExcluir('{{ sped.empresa.id }}', '{{ sped.tipo }}', '{{ sped.periodo|date:'Y-m' }}')">
+                                            onclick="excluirDireto('{{ sped.id }}')"
+                                            title="Excluir direto">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
@@ -227,8 +233,34 @@ function selecionarParaExcluir(empresaId, tipo, periodo) {
         document.getElementById('periodoFinal').value = periodo;
     }, 500);
     
-    // Scroll para o formulário
+// Scroll para o formulário
     document.querySelector('.card.shadow .bg-danger').scrollIntoView({ behavior: 'smooth' });
+}
+
+function excluirDireto(spedId) {
+    if (!confirm('Tem certeza que deseja excluir este SPED? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+    
+    fetch(`/excluir-sped/api/excluir-direto/${spedId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(err => {
+        alert('Erro de conexão: ' + err.message);
+    });
 }
 </script>
 {% endblock %}

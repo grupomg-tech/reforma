@@ -10,4 +10,5 @@ urlpatterns = [
     path('listar-participantes-pendentes/<int:registro_id>/', views.listar_participantes_pendentes, name='listar_participantes_pendentes'),
     path('listar-participantes-consultados/<int:registro_id>/', views.listar_participantes_consultados, name='listar_participantes_consultados'),
     path('consultar-participante-individual/<int:registro_id>/<int:participante_id>/', views.consultar_participante_individual, name='consultar_participante_individual'),
+    path('api/listar-chaves-sem-itens/', views.api_listar_chaves_sem_itens_por_registro, name='api_listar_chaves_sem_itens'),
 ]

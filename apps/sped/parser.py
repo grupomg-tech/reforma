@@ -50,6 +50,8 @@ def parse_sped_file(file_content, encoding='latin-1'):
         '0200': [],  # Itens
         '0150': [],  # Participantes
         'C100': [],  # Documentos
+        'C110': [],  # Informação Complementar da NF
+        'C113': [],  # Documento Fiscal Referenciado
         'C170': [],  # Itens dos documentos
         'C190': [],  # Analítico do documento
         'E111': [],  # Ajustes de Apuração ICMS
@@ -193,6 +195,33 @@ def parse_sped_file(file_content, encoding='latin-1'):
             current_c100['itens'].append(item)
             registros['C170'].append(item)
         
+        elif registro == 'C110' and current_c100:
+            c110_data = {
+                'cod_inf': campos[1] if len(campos) > 1 else '',
+                'txt_compl': campos[2] if len(campos) > 2 else '',
+            }
+            if 'complementares' not in current_c100:
+                current_c100['complementares'] = []
+            current_c100['complementares'].append(c110_data)
+            registros['C110'].append(c110_data)
+
+        elif registro == 'C113' and current_c100:
+            c113_data = {
+                'ind_oper': campos[1] if len(campos) > 1 else '',
+                'ind_emit': campos[2] if len(campos) > 2 else '',
+                'cod_part': campos[3] if len(campos) > 3 else '',
+                'cod_mod': campos[4] if len(campos) > 4 else '',
+                'ser': campos[5] if len(campos) > 5 else '',
+                'sub': campos[6] if len(campos) > 6 else '',
+                'num_doc': campos[7] if len(campos) > 7 else '',
+                'dt_doc': parse_date(campos[8]) if len(campos) > 8 else None,
+                'chv_nfe': campos[9] if len(campos) > 9 else '',
+            }
+            if 'referencias' not in current_c100:
+                current_c100['referencias'] = []
+            current_c100['referencias'].append(c113_data)
+            registros['C113'].append(c113_data)
+
         elif registro == 'E111':
             registros['E111'].append({
                 'cod_aj_apur': campos[1] if len(campos) > 1 else '',

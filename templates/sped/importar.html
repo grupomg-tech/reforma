@@ -143,10 +143,18 @@
                     <small class="text-muted">Formatos aceitos: .txt ou .zip</small>
                 </div>
                 
-                <div class="form-check mb-4">
+                <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="sobrescrever" name="sobrescrever">
                     <label class="form-check-label" for="sobrescrever">
                         Sobrescrever dados existentes?
+                    </label>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" id="buscarProdutosApi" name="buscar_produtos_api">
+                    <label class="form-check-label" for="buscarProdutosApi">
+                        <i class="bi bi-cloud-download me-1 text-primary"></i>
+                        Buscar produtos via API após importação (entrada e saída sem itens)
                     </label>
                 </div>
                 
@@ -525,13 +533,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Mostrar estado concluído na aba ativa
                     document.getElementById('estado-processando').style.display = 'none';
                     document.getElementById('estado-concluido').style.display = 'block';
-                    
+
+                    // Guardar flag e IDs para busca de produtos após consulta de fornecedores
+                    window._buscarProdutosApi = data.buscar_produtos_api || false;
+                    window._registrosImportados = data.registros_0000_ids || [];
+
                     // Iniciar consulta automática de fornecedores com progresso visual
                     if (data.registros_0000_ids && data.registros_0000_ids.length > 0) {
                         // Fechar modal bootstrap e abrir modal de progresso customizado
                         setTimeout(() => {
                             modalConsultas.hide();
                             window.iniciarConsultaAutomatica(data.registros_0000_ids);
+                        }, 1500);
+                    } else if (window._buscarProdutosApi && window._registrosImportados.length > 0) {
+                        // Sem fornecedores para consultar, mas tem busca API ativa
+                        setTimeout(() => {
+                            modalConsultas.hide();
+                            window.iniciarBuscaProdutosImportacao(window._registrosImportados);
                         }, 1500);
                     } else {
                         setTimeout(() => location.reload(), 3000);
@@ -681,7 +699,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function fecharModalConsulta() {
         consultaAutoAtiva = false;
         document.getElementById('modalProgressoConsulta').classList.remove('active');
-        location.reload();
+        // Se a flag de buscar produtos API está ativa, iniciar busca antes de recarregar
+        if (window._buscarProdutosApi && window._registrosImportados && window._registrosImportados.length > 0) {
+            window._buscarProdutosApi = false; // Evitar re-execução
+            window.iniciarBuscaProdutosImportacao(window._registrosImportados);
+        } else {
+            location.reload();
+        }
     }
     
     function cancelarConsultaAuto() {

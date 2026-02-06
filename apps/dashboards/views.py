@@ -1,4 +1,5 @@
 from decimal import Decimal
+from pydoc import doc
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -1369,15 +1370,27 @@ def api_listar_chaves_entrada_sem_itens(request):
         if tem_itens:
             continue
 
+        # Verificar se tem C113 (nota referenciada - devolução)
+        chave_referenciada = ''
+        try:
+            from apps.sped.models import RegistroC113
+            refs_c113 = RegistroC113.objects.filter(registro_c100=doc)
+            if refs_c113.exists():
+                ref = refs_c113.first()
+                if ref.chv_nfe and len(ref.chv_nfe) >= 44:
+                    chave_referenciada = ref.chv_nfe
+        except Exception:
+            pass
+
         dados_doc = {
             'chave_nfe': doc.chv_nfe,
+            'chave_referenciada': chave_referenciada,
             'numero': doc.num_doc,
             'modelo': modelo,
             'modelo_desc': 'NF-e' if modelo == '55' else 'NFC-e',
             'valor': float(doc.vl_doc) if doc.vl_doc else 0,
             'data': doc.dt_doc.strftime('%d/%m/%Y') if doc.dt_doc else '',
         }
-
         if modelo == '55':
             chaves_sem_itens.append(dados_doc)
         else:

@@ -72,6 +72,41 @@ class RegistroC100(models.Model):
         return f"{self.cod_mod} {self.ser}/{self.num_doc}"
 
 
+class RegistroC110(models.Model):
+    """Informação Complementar da Nota Fiscal (Código 01, 1B, 04, 55)"""
+    registro_c100 = models.ForeignKey(RegistroC100, on_delete=models.CASCADE, related_name='complementares_c110')
+    cod_inf = models.CharField('Código da Informação', max_length=6, blank=True)
+    txt_compl = models.TextField('Texto Complementar', blank=True)
+
+    class Meta:
+        verbose_name = 'Informação Complementar C110'
+        verbose_name_plural = 'Informações Complementares C110'
+
+    def __str__(self):
+        return f"C110 - {self.cod_inf} - {self.txt_compl[:50]}"
+
+
+class RegistroC113(models.Model):
+    """Documento Fiscal Referenciado (Código 01, 1B, 04, 55)"""
+    registro_c100 = models.ForeignKey(RegistroC100, on_delete=models.CASCADE, related_name='referencias_c113')
+    ind_oper = models.CharField('Indicador de Operação', max_length=1, blank=True)
+    ind_emit = models.CharField('Indicador do Emitente', max_length=1, blank=True)
+    cod_part = models.CharField('Código do Participante', max_length=60, blank=True)
+    cod_mod = models.CharField('Código do Modelo', max_length=2, blank=True)
+    ser = models.CharField('Série', max_length=3, blank=True)
+    sub = models.CharField('Subsérie', max_length=3, blank=True)
+    num_doc = models.CharField('Número do Documento', max_length=9, blank=True)
+    dt_doc = models.DateField('Data do Documento', null=True, blank=True)
+    chv_nfe = models.CharField('Chave NF-e Referenciada', max_length=44, blank=True)
+
+    class Meta:
+        verbose_name = 'Documento Referenciado C113'
+        verbose_name_plural = 'Documentos Referenciados C113'
+
+    def __str__(self):
+        return f"C113 - Doc {self.num_doc} - Chave: {self.chv_nfe[:20]}..."
+
+
 class Registro0150(models.Model):
     """Tabela de Cadastro do Participante"""
     registro_0000 = models.ForeignKey(Registro0000, on_delete=models.CASCADE, related_name='participantes')
