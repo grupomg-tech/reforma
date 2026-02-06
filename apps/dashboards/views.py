@@ -336,19 +336,32 @@ def relatorio_fiscal(request):
             fornecedores_dict[cod_part]['valor_bruto'] += doc.vl_doc or Decimal('0')
             # Pessoa Física não aproveita crédito de impostos em entradas
             if fornecedores_dict[cod_part]['regime'] != 'PESSOA FÍSICA':
-                # ICMS só é creditado se o fornecedor for contribuinte de ICMS (possui IE válida)
-                if fornecedores_dict[cod_part].get('is_contribuinte', False):
+                # Verificar se é devolução de venda (possui C113 - nota referenciada)
+                from apps.sped.models import RegistroC113
+                is_devolucao = RegistroC113.objects.filter(registro_c100=doc).exists()
+                # ICMS: creditado se contribuinte de ICMS OU se for devolução com crédito destacado
+                if fornecedores_dict[cod_part].get('is_contribuinte', False) or (is_devolucao and (doc.vl_icms or Decimal('0')) > Decimal('0')):
                     fornecedores_dict[cod_part]['icms'] += doc.vl_icms or Decimal('0')
                 fornecedores_dict[cod_part]['pis'] += doc.vl_pis or Decimal('0')
                 fornecedores_dict[cod_part]['cofins'] += doc.vl_cofins or Decimal('0')
+        
+        # Identificar fornecedores que possuem devoluções com créditos
+        from apps.sped.models import RegistroC113
+        fornecedores_com_devolucao = set()
+        for doc in documentos_entrada:
+            if doc.cod_part and (doc.vl_icms or Decimal('0')) > Decimal('0'):
+                if RegistroC113.objects.filter(registro_c100=doc).exists():
+                    fornecedores_com_devolucao.add(doc.cod_part)
         
 # Calcular tributos totais e valores reforma para fornecedores
         for cod, forn in fornecedores_dict.items():
             tributos = forn['icms'] + forn['icms_st'] + forn['ipi'] + forn['iss'] + forn['pis'] + forn['cofins']
             liquido = forn['valor_bruto'] - tributos
             
-# Pessoa Física e não contribuinte de ICMS não geram crédito de IBS/CBS
-            if forn['regime'] == 'PESSOA FÍSICA' or not forn.get('is_contribuinte', False):
+# Pessoa Física não gera crédito de IBS/CBS; não contribuinte gera se tiver devolução com crédito
+            if forn['regime'] == 'PESSOA FÍSICA':
+                ibs_cbs_efetivo = Decimal('0')
+            elif not forn.get('is_contribuinte', False) and cod not in fornecedores_com_devolucao:
                 ibs_cbs_efetivo = Decimal('0')
             else:
                 aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
@@ -402,6 +415,57 @@ def relatorio_fiscal(request):
             cfops_entrada_dict[cfop_code]['ipi'] += getattr(item, 'vl_ipi', Decimal('0')) or Decimal('0')
             cfops_entrada_dict[cfop_code]['pis'] += item.vl_pis or Decimal('0')
             cfops_entrada_dict[cfop_code]['cofins'] += item.vl_cofins or Decimal('0')
+        
+        # Adicionar CFOPs de documentos sem C170 (devoluções) usando dados C190 do SPED
+        from apps.sped.parser import parse_sped_file as parse_sped_c190
+        from apps.sped.models import RegistroC170 as C170Check
+        
+        docs_entrada_sem_c170 = set()
+        for doc in documentos_entrada:
+            if not C170Check.objects.filter(registro_c100=doc).exists():
+                docs_entrada_sem_c170.add(doc.num_doc)
+        
+        if docs_entrada_sem_c170:
+            for reg in registros_0000:
+                try:
+                    arquivo = reg.arquivo_original
+                    arquivo.open('rb')
+                    conteudo_sped = arquivo.read()
+                    arquivo.close()
+                    dados_c190 = parse_sped_c190(conteudo_sped)
+                    
+                    for doc_sped in dados_c190.get('C100', []):
+                        # Apenas entradas sem itens C170 que estão no nosso conjunto
+                        if doc_sped['ind_oper'] != '0':
+                            continue
+                        if doc_sped.get('num_doc', '') not in docs_entrada_sem_c170:
+                            continue
+                        if doc_sped.get('itens', []):
+                            continue
+                        
+                        # Usar registros C190 (analíticos) para obter CFOP e valores
+                        for c190 in doc_sped.get('analiticos', []):
+                            cfop_code = c190.get('cfop', '')
+                            if not cfop_code:
+                                continue
+                            
+                            if cfop_code not in cfops_entrada_dict:
+                                cfops_entrada_dict[cfop_code] = {
+                                    'cfop': cfop_code,
+                                    'valor_bruto': Decimal('0'),
+                                    'icms': Decimal('0'),
+                                    'icms_st': Decimal('0'),
+                                    'ipi': Decimal('0'),
+                                    'pis': Decimal('0'),
+                                    'cofins': Decimal('0'),
+                                }
+                            
+                            cfops_entrada_dict[cfop_code]['valor_bruto'] += c190.get('vl_opr', Decimal('0'))
+                            cfops_entrada_dict[cfop_code]['icms'] += c190.get('vl_icms', Decimal('0'))
+                            cfops_entrada_dict[cfop_code]['icms_st'] += c190.get('vl_icms_st', Decimal('0'))
+                            cfops_entrada_dict[cfop_code]['ipi'] += c190.get('vl_ipi', Decimal('0'))
+                except Exception as e:
+                    logger.error(f"Erro ao ler C190 do registro {reg.id}: {e}") if 'logger' in dir() else None
         
         # Calcular tributos e líquido para cada CFOP
         for cfop_code, cfop_data in cfops_entrada_dict.items():

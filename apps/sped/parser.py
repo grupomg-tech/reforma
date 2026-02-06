@@ -222,6 +222,25 @@ def parse_sped_file(file_content, encoding='latin-1'):
             current_c100['referencias'].append(c113_data)
             registros['C113'].append(c113_data)
 
+        elif registro == 'C190' and current_c100:
+            c190_data = {
+                'cst_icms': campos[1] if len(campos) > 1 else '',
+                'cfop': campos[2] if len(campos) > 2 else '',
+                'aliq_icms': parse_decimal(campos[3]) if len(campos) > 3 else Decimal(0),
+                'vl_opr': parse_decimal(campos[4]) if len(campos) > 4 else Decimal(0),
+                'vl_bc_icms': parse_decimal(campos[5]) if len(campos) > 5 else Decimal(0),
+                'vl_icms': parse_decimal(campos[6]) if len(campos) > 6 else Decimal(0),
+                'vl_bc_icms_st': parse_decimal(campos[7]) if len(campos) > 7 else Decimal(0),
+                'vl_icms_st': parse_decimal(campos[8]) if len(campos) > 8 else Decimal(0),
+                'vl_red_bc': parse_decimal(campos[9]) if len(campos) > 9 else Decimal(0),
+                'vl_ipi': parse_decimal(campos[10]) if len(campos) > 10 else Decimal(0),
+                'cod_obs': campos[11] if len(campos) > 11 else '',
+            }
+            if 'analiticos' not in current_c100:
+                current_c100['analiticos'] = []
+            current_c100['analiticos'].append(c190_data)
+            registros['C190'].append(c190_data)
+
         elif registro == 'E111':
             registros['E111'].append({
                 'cod_aj_apur': campos[1] if len(campos) > 1 else '',
