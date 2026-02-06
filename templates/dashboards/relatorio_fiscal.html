@@ -975,6 +975,120 @@
             white-space: nowrap;
         }
     }
+
+    /* Filtros multi-coluna para tabelas de produtos */
+    .filtro-coluna-dropdown {
+        position: absolute;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        z-index: 9999;
+        min-width: 220px;
+        max-height: 350px;
+        display: none;
+        padding: 0;
+    }
+    .filtro-coluna-dropdown .filtro-header {
+        padding: 10px 12px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+    }
+    .filtro-coluna-dropdown .filtro-header button {
+        background: none;
+        border: none;
+        color: #667eea;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .filtro-coluna-dropdown .filtro-busca {
+        width: 100%;
+        padding: 8px 12px;
+        border: none;
+        border-bottom: 1px solid #eee;
+        font-size: 13px;
+        outline: none;
+    }
+    .filtro-coluna-dropdown .filtro-lista {
+        max-height: 220px;
+        overflow-y: auto;
+        padding: 6px 0;
+    }
+    .filtro-coluna-dropdown .filtro-lista label {
+        display: flex;
+        align-items: center;
+        padding: 5px 12px;
+        cursor: pointer;
+        font-size: 12px;
+        gap: 8px;
+    }
+    .filtro-coluna-dropdown .filtro-lista label:hover {
+        background: #f0f4ff;
+    }
+    .filtro-coluna-dropdown .filtro-acoes {
+        padding: 8px 12px;
+        border-top: 1px solid #eee;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+    .filtro-coluna-dropdown .filtro-acoes button {
+        padding: 5px 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .filtro-coluna-dropdown .btn-aplicar-filtro {
+        background: #667eea;
+        color: white;
+    }
+    .filtro-coluna-dropdown .btn-limpar-filtro {
+        background: #e5e7eb;
+        color: #4b5563;
+    }
+    .th-filtravel {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+    }
+    .th-filtravel .icone-filtro {
+        font-size: 10px;
+        opacity: 0.4;
+        margin-left: 4px;
+    }
+    .th-filtravel .icone-filtro.ativo {
+        opacity: 1;
+        color: #667eea;
+    }
+    .chips-filtro-tabela {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 8px 0;
+        padding: 0 4px;
+    }
+    .chip-filtro {
+        background: #667eea;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .chip-filtro .chip-fechar {
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 13px;
+    }
 </style>
 {% endblock %}
 
@@ -1240,10 +1354,11 @@
                         <div id="tabRevenda" class="sub-tab-panel active">
                         <div class="table-scroll">
                             {% if produtos_entradas %}
-                            <table class="table-relatorio">
+                            <table class="table-relatorio" id="tabelaProdutosRevenda">
                                 <thead>
                                     <tr>
                                         <th>Código</th>
+                                        <th>CFOP</th>
                                         <th>Descrição</th>
                                         <th>NCM</th>
                                         <th>Quant.</th>
@@ -1271,6 +1386,7 @@
                                     {% for produto in produtos_entradas %}
                                     <tr>
                                         <td>{{ produto.codigo }}</td>
+                                        <td>{{ produto.cfop }}</td>
                                         <td>{{ produto.descricao }}</td>
                                         <td>{{ produto.ncm }}</td>
                                         <td>{{ produto.quantidade_fmt|default:"0,00" }}</td>
@@ -1297,7 +1413,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="6"><strong>TOTAL</strong></td>
+                                        <td colspan="7"><strong>TOTAL</strong></td>
                                         <td>R$ {{ total_valor_bruto_unit_entradas_fmt }}</td>
                                         <td>R$ {{ total_valor_entradas_fmt }}</td>
                                         <td>R$ {{ total_icms_entradas_fmt }}</td>
@@ -2864,7 +2980,7 @@
         };
 
         const headers = [
-            'Código', 'Descrição', 'NCM',
+            'Código', 'CFOP', 'Descrição', 'NCM',
             'Quantidade', '% Redução', 'Alíq. IBS/CBS',
             'Valor Bruto Unit.', 'Valor Bruto',
             'Alíq. ICMS', 'ICMS',
@@ -2882,41 +2998,43 @@
         const rows = table.querySelectorAll('tbody tr');
 
         rows.forEach(row => {
+            if (row.style.display === 'none') return;
             const cells = row.querySelectorAll('td');
-            if (cells.length < 22) return;
+            if (cells.length < 23) return;
 
             const codigo = cells[0].textContent.trim();
-            const descricao = cells[1].textContent.trim();
-            const ncm = cells[2].textContent.trim();
-            const quantidade = parseNum(cells[3].textContent);
-            const percReducao = parseNum(cells[4].textContent);
-            const aliqIbsCbs = parseNum(cells[5].textContent);
-            const valorBrutoUnit = parseNum(cells[6].textContent);
-            const valorBrutoTot = parseNum(cells[7].textContent);
-            const icms = parseNum(cells[8].textContent);
-            // cells[9] = ICMS ST (não vai para o Excel)
-            const ipi = parseNum(cells[10].textContent);
-            const pis = parseNum(cells[11].textContent);
-            const cofins = parseNum(cells[12].textContent);
-            const totalTributos = parseNum(cells[13].textContent);
-            const valorLiqUnit = parseNum(cells[14].textContent);
-            const valorLiqTot = parseNum(cells[15].textContent);
-            const ibsCbsUnit = parseNum(cells[16].textContent);
-            const ibsCbsTot = parseNum(cells[17].textContent);
-            const totalReformaUnit = parseNum(cells[18].textContent);
-            const totalReformaTot = parseNum(cells[19].textContent);
-            const difUnit = parseNum(cells[20].textContent);
-            const difTotal = parseNum(cells[21].textContent);
+            const cfop = cells[1].textContent.trim();
+            const descricao = cells[2].textContent.trim();
+            const ncm = cells[3].textContent.trim();
+            const quantidade = parseNum(cells[4].textContent);
+            const percReducao = parseNum(cells[5].textContent);
+            const aliqIbsCbs = parseNum(cells[6].textContent);
+            const valorBrutoUnit = parseNum(cells[7].textContent);
+            const valorBrutoTot = parseNum(cells[8].textContent);
+            const icms = parseNum(cells[9].textContent);
+            // cells[10] = ICMS ST (não vai para o Excel)
+            const ipi = parseNum(cells[11].textContent);
+            const pis = parseNum(cells[12].textContent);
+            const cofins = parseNum(cells[13].textContent);
+            const totalTributos = parseNum(cells[14].textContent);
+            const valorLiqUnit = parseNum(cells[15].textContent);
+            const valorLiqTot = parseNum(cells[16].textContent);
+            const ibsCbsUnit = parseNum(cells[17].textContent);
+            const ibsCbsTot = parseNum(cells[18].textContent);
+            const totalReformaUnit = parseNum(cells[19].textContent);
+            const totalReformaTot = parseNum(cells[20].textContent);
+            const difUnit = parseNum(cells[21].textContent);
+            const difTotal = parseNum(cells[22].textContent);
 
             // Calcular alíquotas efetivas
             const aliqIcms = valorBrutoTot > 0 ? Math.round(icms / valorBrutoTot * 10000) / 100 : 0;
             const aliqIpi = valorBrutoTot > 0 ? Math.round(ipi / valorBrutoTot * 10000) / 100 : 0;
             const aliqPis = valorBrutoTot > 0 ? Math.round(pis / valorBrutoTot * 10000) / 100 : 0;
             const aliqCofins = valorBrutoTot > 0 ? Math.round(cofins / valorBrutoTot * 10000) / 100 : 0;
-            const difAliquotas = Math.round((aliqIbsCbs - (aliqIcms + aliqIpi + aliqPis + aliqCofins)) * 100) / 100;
+            const difAliquotas = aliqIbsCbs - (aliqIcms + aliqIpi + aliqPis + aliqCofins);
 
             data.push([
-                codigo, descricao, ncm,
+                codigo, cfop, descricao, ncm,
                 quantidade, percReducao, aliqIbsCbs,
                 valorBrutoUnit, valorBrutoTot,
                 aliqIcms, icms,
@@ -2937,7 +3055,7 @@
 
         // Ajustar largura das colunas
         ws['!cols'] = [
-            {wch:12}, {wch:40}, {wch:12},
+            {wch:12}, {wch:8}, {wch:40}, {wch:12},
             {wch:12}, {wch:10}, {wch:12},
             {wch:16}, {wch:16},
             {wch:10}, {wch:14},
@@ -3106,7 +3224,7 @@
         btn.style.color = 'white';
     }
 
-    // Função para abrir tabs
+// Função para abrir tabs
     function openTab(evt, tabName) {
         const tabContents = document.getElementsByClassName('tab-content');
         for (let i = 0; i < tabContents.length; i++) {
@@ -3121,6 +3239,239 @@
         document.getElementById(tabName).classList.add('active');
         evt.currentTarget.classList.add('active');
     }
+
+    // ========================================
+    // SISTEMA DE FILTROS MULTI-COLUNA - REVENDA
+    // ========================================
+    (function() {
+        const tabela = document.getElementById('tabelaProdutosRevenda');
+        if (!tabela) return;
+
+        const filtrosAtivos = {};  // { indiceColuna: Set([valores]) }
+        let dropdownAtual = null;
+
+        // Criar dropdown global
+        const dropdown = document.createElement('div');
+        dropdown.className = 'filtro-coluna-dropdown';
+        dropdown.id = 'filtroColunaProdRevenda';
+        dropdown.innerHTML = `
+            <div class="filtro-header">
+                <span id="fcTitulo">Filtrar</span>
+                <button onclick="filtroRevenda.fechar()">✕</button>
+            </div>
+            <input type="text" class="filtro-busca" id="fcBusca" placeholder="Buscar..." oninput="filtroRevenda.buscar(this.value)">
+            <div class="filtro-lista" id="fcLista"></div>
+            <div class="filtro-acoes">
+                <button class="btn-limpar-filtro" onclick="filtroRevenda.limpar()">Limpar</button>
+                <button class="btn-aplicar-filtro" onclick="filtroRevenda.aplicar()">Aplicar</button>
+            </div>
+        `;
+        document.body.appendChild(dropdown);
+
+        // Container de chips
+        const thRow = tabela.querySelector('thead tr');
+        const tableContainer = tabela.closest('.table-scroll') || tabela.parentElement;
+        let chipsDiv = tableContainer.querySelector('.chips-filtro-tabela');
+        if (!chipsDiv) {
+            chipsDiv = document.createElement('div');
+            chipsDiv.className = 'chips-filtro-tabela';
+            tableContainer.insertBefore(chipsDiv, tabela);
+        }
+
+        // Transformar th em filtráveis
+        const ths = thRow.querySelectorAll('th');
+        ths.forEach((th, idx) => {
+            th.classList.add('th-filtravel');
+            const icone = document.createElement('span');
+            icone.className = 'icone-filtro';
+            icone.innerHTML = ' &#9662;';
+            icone.id = 'icFiltroRev_' + idx;
+            th.appendChild(icone);
+            th.addEventListener('click', function(e) {
+                e.stopPropagation();
+                filtroRevenda.abrir(idx, th);
+            });
+        });
+
+        let colunaAberta = -1;
+        let selecaoTemp = new Set();
+
+        function obterValoresColuna(colIdx) {
+            const valores = new Set();
+            const rows = tabela.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells[colIdx]) {
+                    valores.add(cells[colIdx].textContent.trim());
+                }
+            });
+            return Array.from(valores).sort();
+        }
+
+        function parseNumBR(text) {
+            if (!text) return 0;
+            let clean = text.replace('R$', '').replace('%', '').trim();
+            clean = clean.replace(/\./g, '').replace(',', '.');
+            return parseFloat(clean) || 0;
+        }
+
+        function formatarBR(num) {
+            return num.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        window.filtroRevenda = {
+            abrir: function(colIdx, thEl) {
+                if (dropdown.style.display === 'block' && colunaAberta === colIdx) {
+                    this.fechar();
+                    return;
+                }
+                colunaAberta = colIdx;
+                const rect = thEl.getBoundingClientRect();
+                dropdown.style.display = 'block';
+                dropdown.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+                dropdown.style.left = Math.min(rect.left + window.scrollX, window.innerWidth - 260) + 'px';
+
+                document.getElementById('fcTitulo').textContent = thEl.textContent.replace(/\s*▾/g, '').trim();
+                document.getElementById('fcBusca').value = '';
+
+                const valores = obterValoresColuna(colIdx);
+                selecaoTemp = new Set(filtrosAtivos[colIdx] || []);
+
+                this.renderLista(valores);
+            },
+            renderLista: function(valores, filtro) {
+                const lista = document.getElementById('fcLista');
+                lista.innerHTML = '';
+                valores.forEach(val => {
+                    if (filtro && !val.toLowerCase().includes(filtro.toLowerCase())) return;
+                    const label = document.createElement('label');
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.value = val;
+                    cb.checked = selecaoTemp.has(val);
+                    cb.addEventListener('change', function() {
+                        if (this.checked) selecaoTemp.add(val);
+                        else selecaoTemp.delete(val);
+                    });
+                    label.appendChild(cb);
+                    label.appendChild(document.createTextNode(val));
+                    lista.appendChild(label);
+                });
+            },
+            buscar: function(texto) {
+                const valores = obterValoresColuna(colunaAberta);
+                this.renderLista(valores, texto);
+            },
+            aplicar: function() {
+                if (selecaoTemp.size > 0) {
+                    filtrosAtivos[colunaAberta] = new Set(selecaoTemp);
+                } else {
+                    delete filtrosAtivos[colunaAberta];
+                }
+                this.fechar();
+                this.filtrar();
+                this.atualizarChips();
+                this.atualizarIcones();
+            },
+            limpar: function() {
+                delete filtrosAtivos[colunaAberta];
+                this.fechar();
+                this.filtrar();
+                this.atualizarChips();
+                this.atualizarIcones();
+            },
+            fechar: function() {
+                dropdown.style.display = 'none';
+                colunaAberta = -1;
+            },
+            filtrar: function() {
+                const rows = tabela.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    let visivel = true;
+                    for (const [colStr, valoresSet] of Object.entries(filtrosAtivos)) {
+                        const colIdx = parseInt(colStr);
+                        if (cells[colIdx]) {
+                            const valor = cells[colIdx].textContent.trim();
+                            if (!valoresSet.has(valor)) {
+                                visivel = false;
+                                break;
+                            }
+                        }
+                    }
+                    row.style.display = visivel ? '' : 'none';
+                });
+                this.recalcularTotais();
+            },
+            recalcularTotais: function() {
+                const tfoot = tabela.querySelector('tfoot tr');
+                if (!tfoot) return;
+                const rows = tabela.querySelectorAll('tbody tr');
+                const numCols = tfoot.querySelectorAll('td').length;
+                // Índices das colunas numéricas (após o colspan=7: colunas 7..22 na tabela = índices 0..15 no tfoot após o colspan)
+                // O tfoot tem: td[colspan=7] + 16 tds de valores
+                const footCells = tfoot.querySelectorAll('td');
+                // footCells[0] é o TOTAL (colspan), footCells[1..] são os valores
+                const somas = [];
+                for (let i = 1; i < footCells.length; i++) somas.push(0);
+
+                rows.forEach(row => {
+                    if (row.style.display === 'none') return;
+                    const cells = row.querySelectorAll('td');
+                    // Colunas de valor começam no índice 7 (Valor Bruto Unit.) até 22 (Dif. Total)
+                    for (let i = 7; i < cells.length; i++) {
+                        const footIdx = i - 7;
+                        if (footIdx < somas.length) {
+                            somas[footIdx] += parseNumBR(cells[i].textContent);
+                        }
+                    }
+                });
+
+                for (let i = 0; i < somas.length; i++) {
+                    footCells[i + 1].innerHTML = '<strong>R$ ' + formatarBR(somas[i]) + '</strong>';
+                }
+            },
+            atualizarIcones: function() {
+                ths.forEach((th, idx) => {
+                    const icone = document.getElementById('icFiltroRev_' + idx);
+                    if (icone) {
+                        icone.className = filtrosAtivos[idx] ? 'icone-filtro ativo' : 'icone-filtro';
+                    }
+                });
+            },
+            atualizarChips: function() {
+                chipsDiv.innerHTML = '';
+                for (const [colStr, valoresSet] of Object.entries(filtrosAtivos)) {
+                    const colIdx = parseInt(colStr);
+                    const nomeCol = ths[colIdx].textContent.replace(/\s*▾/g, '').trim();
+                    valoresSet.forEach(val => {
+                        const chip = document.createElement('span');
+                        chip.className = 'chip-filtro';
+                        chip.innerHTML = '<strong>' + nomeCol + ':</strong> ' + val + ' <span class="chip-fechar" data-col="' + colIdx + '" data-val="' + val.replace(/"/g, '&quot;') + '">×</span>';
+                        chip.querySelector('.chip-fechar').addEventListener('click', function() {
+                            const c = parseInt(this.dataset.col);
+                            const v = this.dataset.val;
+                            if (filtrosAtivos[c]) {
+                                filtrosAtivos[c].delete(v);
+                                if (filtrosAtivos[c].size === 0) delete filtrosAtivos[c];
+                            }
+                            filtroRevenda.filtrar();
+                            filtroRevenda.atualizarChips();
+                            filtroRevenda.atualizarIcones();
+                        });
+                        chipsDiv.appendChild(chip);
+                    });
+                }
+            }
+        };
+
+        // Fechar dropdown ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (dropdown.style.display === 'block' && !dropdown.contains(e.target) && !e.target.closest('.th-filtravel')) {
+                filtroRevenda.fechar();
+            }
+        });
+    })();
 
     // Função para carregar períodos via AJAX
     function carregarPeriodos() {

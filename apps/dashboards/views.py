@@ -100,9 +100,11 @@ def relatorio_fiscal(request):
 
         produtos_entradas_dict = {}
         for item in itens_entrada:
-            # Filtrar apenas CFOPs de compra efetiva
+            # Filtrar apenas CFOPs de compra efetiva (1xxx/2xxx)
             cfop_item = (item.cfop or '').replace('.', '').strip()
-            sufixo_cfop = cfop_item[1:] if len(cfop_item) >= 4 else ''
+            if len(cfop_item) < 4 or cfop_item[0] not in ('1', '2'):
+                continue
+            sufixo_cfop = cfop_item[1:]
             if sufixo_cfop not in SUFIXOS_COMPRA_EFETIVA:
                 continue
             cod = item.cod_item
@@ -112,7 +114,7 @@ def relatorio_fiscal(request):
                     'codigo': cod,
                     'descricao': info_item.get('descricao', item.descr_compl or cod),
                     'ncm': item.cod_ncm or info_item.get('ncm', ''),
-                    'cfop': item.cfop,
+                    'cfops': set(),
                     'quantidade': Decimal('0'),
                     'valor_total': Decimal('0'),
                     'icms': Decimal('0'),
@@ -134,6 +136,7 @@ def relatorio_fiscal(request):
             produtos_entradas_dict[cod]['vl_bc_icms'] += item.vl_bc_icms or Decimal('0')
             produtos_entradas_dict[cod]['vl_bc_pis'] += item.vl_bc_pis or Decimal('0')
             produtos_entradas_dict[cod]['vl_bc_cofins'] += item.vl_bc_cofins or Decimal('0')
+            produtos_entradas_dict[cod]['cfops'].add(cfop_item)
         
         # ========================================
         # AGREGAR PRODUTOS DE CONSUMO (ENTRADAS)
@@ -141,7 +144,9 @@ def relatorio_fiscal(request):
         produtos_consumo_dict = {}
         for item in itens_entrada:
             cfop_item = (item.cfop or '').replace('.', '').strip()
-            sufixo_cfop = cfop_item[1:] if len(cfop_item) >= 4 else ''
+            if len(cfop_item) < 4 or cfop_item[0] not in ('1', '2'):
+                continue
+            sufixo_cfop = cfop_item[1:]
             if sufixo_cfop not in SUFIXOS_CONSUMO:
                 continue
             cod = item.cod_item
@@ -151,7 +156,7 @@ def relatorio_fiscal(request):
                     'codigo': cod,
                     'descricao': info_item.get('descricao', item.descr_compl or cod),
                     'ncm': item.cod_ncm or info_item.get('ncm', ''),
-                    'cfop': item.cfop,
+                    'cfops': set(),
                     'quantidade': Decimal('0'),
                     'valor_total': Decimal('0'),
                     'icms': Decimal('0'),
@@ -173,6 +178,7 @@ def relatorio_fiscal(request):
             produtos_consumo_dict[cod]['vl_bc_icms'] += item.vl_bc_icms or Decimal('0')
             produtos_consumo_dict[cod]['vl_bc_pis'] += item.vl_bc_pis or Decimal('0')
             produtos_consumo_dict[cod]['vl_bc_cofins'] += item.vl_bc_cofins or Decimal('0')
+            produtos_consumo_dict[cod]['cfops'].add(cfop_item)
         
 # ========================================
         # NCMs com redução de 60% (LC 214/2025 - Anexo XVII)
@@ -337,7 +343,9 @@ def relatorio_fiscal(request):
             for prod in produtos_entrada_api:
                 # Filtrar apenas CFOPs de compra efetiva nos produtos da API
                 cfop_api = (prod.cfop or '').replace('.', '').strip()
-                sufixo_api = cfop_api[1:] if len(cfop_api) >= 4 else ''
+                if len(cfop_api) < 4 or cfop_api[0] not in ('1', '2'):
+                    continue
+                sufixo_api = cfop_api[1:]
                 if sufixo_api not in SUFIXOS_COMPRA_EFETIVA:
                     continue
                 cod = prod.codigo
@@ -346,7 +354,7 @@ def relatorio_fiscal(request):
                         'codigo': cod,
                         'descricao': prod.descricao,
                         'ncm': prod.ncm,
-                        'cfop': prod.cfop,
+                        'cfops': set(),
                         'quantidade': Decimal('0'),
                         'valor_total': Decimal('0'),
                         'icms': Decimal('0'),
@@ -365,10 +373,12 @@ def relatorio_fiscal(request):
                 produtos_entradas_dict[cod]['ipi'] += prod.ipi_valor or Decimal('0')
                 produtos_entradas_dict[cod]['pis'] += prod.pis_valor or Decimal('0')
                 produtos_entradas_dict[cod]['cofins'] += prod.cofins_valor or Decimal('0')
+                produtos_entradas_dict[cod]['cfops'].add(cfop_api)
 
 # Recalcular campos derivados para todos os produtos (revenda)
             aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
             for cod, prod in produtos_entradas_dict.items():
+                prod['cfop'] = ', '.join(sorted(prod.get('cfops', set())))
                 total_tributos = prod['icms'] + prod['icms_st'] + prod['ipi'] + prod['pis'] + prod['cofins']
                 valor_liquido = prod['valor_total'] - total_tributos
                 qtd = prod['quantidade'] if prod['quantidade'] else Decimal('1')
@@ -919,7 +929,9 @@ def relatorio_fiscal(request):
         if produtos_entrada_api.exists():
             for prod in produtos_entrada_api:
                 cfop_api = (prod.cfop or '').replace('.', '').strip()
-                sufixo_api = cfop_api[1:] if len(cfop_api) >= 4 else ''
+                if len(cfop_api) < 4 or cfop_api[0] not in ('1', '2'):
+                    continue
+                sufixo_api = cfop_api[1:]
                 if sufixo_api not in SUFIXOS_CONSUMO:
                     continue
                 cod = prod.codigo
@@ -928,7 +940,7 @@ def relatorio_fiscal(request):
                         'codigo': cod,
                         'descricao': prod.descricao,
                         'ncm': prod.ncm,
-                        'cfop': prod.cfop,
+                        'cfops': set(),
                         'quantidade': Decimal('0'),
                         'valor_total': Decimal('0'),
                         'icms': Decimal('0'),
@@ -947,12 +959,14 @@ def relatorio_fiscal(request):
                 produtos_consumo_dict[cod]['ipi'] += prod.ipi_valor or Decimal('0')
                 produtos_consumo_dict[cod]['pis'] += prod.pis_valor or Decimal('0')
                 produtos_consumo_dict[cod]['cofins'] += prod.cofins_valor or Decimal('0')
+                produtos_consumo_dict[cod]['cfops'].add(cfop_api)
             
             # Recalcular campos derivados para produtos de consumo da API
             aliq_total_c = aliquota_ibs + aliquota_cbs + aliquota_is
             for cod, prod in produtos_consumo_dict.items():
                 if 'ibs_cbs' in prod:
                     continue
+                prod['cfop'] = ', '.join(sorted(prod.get('cfops', set())))
                 total_tributos = prod['icms'] + prod['icms_st'] + prod['ipi'] + prod['pis'] + prod['cofins']
                 valor_liquido = prod['valor_total'] - total_tributos
                 qtd = prod['quantidade'] if prod['quantidade'] else Decimal('1')
