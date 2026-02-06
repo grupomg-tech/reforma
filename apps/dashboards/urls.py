@@ -12,4 +12,7 @@ urlpatterns = [
     path('api/chaves-processadas/', views.api_chaves_processadas, name='api_chaves_processadas'),
     path('api/exportar-relatorio-erros/', views.api_exportar_relatorio_erros, name='api_exportar_relatorio_erros'),
     path('api/salvar-produtos-api/', views.api_salvar_produtos_api, name='api_salvar_produtos_api'),
+    path('api/importar-ajustes-manuais-icms/', views.api_importar_ajustes_manuais_icms, name='api_importar_ajustes_manuais_icms'),
+    path('api/excluir-ajustes-manuais-icms/', views.api_excluir_ajustes_manuais_icms, name='api_excluir_ajustes_manuais_icms'),
+    path('api/excluir-ajuste-manual-icms/<int:ajuste_id>/', views.api_excluir_ajuste_manual_icms, name='api_excluir_ajuste_manual_icms'),
 ]

@@ -46,3 +46,22 @@ class ProdutoSaidaAPI(models.Model):
     
     def __str__(self):
         return f"{self.codigo} - {self.descricao[:30]}"
+
+
+class AjusteManualICMS(models.Model):
+    """Ajustes manuais de apuração ICMS importados via planilha"""
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='ajustes_manuais_icms')
+    periodo_inicial = models.CharField('Período Inicial', max_length=7)
+    periodo_final = models.CharField('Período Final', max_length=7)
+    codigo = models.CharField('Código de Ajuste', max_length=20)
+    descricao = models.CharField('Tipo de Ajuste', max_length=200)
+    valor = models.DecimalField('Valor do Ajuste', max_digits=15, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Ajuste Manual ICMS'
+        verbose_name_plural = 'Ajustes Manuais ICMS'
+        ordering = ['codigo']
+
+    def __str__(self):
+        return f"{self.codigo} - R$ {self.valor}"

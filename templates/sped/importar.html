@@ -280,22 +280,28 @@
                                 <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
                                 <h4 class="mt-3">Consulta Concluída!</h4>
                                 <div class="row g-3 mt-3">
-                                    <div class="col-4">
+                                    <div class="col-3">
                                         <div class="stats-card">
                                             <div class="stat-number text-success" id="stat-simples">0</div>
                                             <div class="stat-label">Simples Nacional</div>
                                         </div>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-3">
                                         <div class="stats-card">
                                             <div class="stat-number text-primary" id="stat-normal">0</div>
                                             <div class="stat-label">Regime Normal</div>
                                         </div>
                                     </div>
-                                    <div class="col-4">
+                                    <div class="col-3">
                                         <div class="stats-card">
                                             <div class="stat-number text-warning" id="stat-mei">0</div>
                                             <div class="stat-label">MEI</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="stats-card">
+                                            <div class="stat-number text-danger" id="stat-erros">0</div>
+                                            <div class="stat-label">Erros</div>
                                         </div>
                                     </div>
                                 </div>
@@ -420,6 +426,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     erros++;
                     addLog(`✗ ${part.nome.substring(0, 30)} - ${data.erro || 'Erro'}`, 'error');
+                    
+                    // Se rate limit, aguarda 10s antes de continuar
+                    if (data.erro && data.erro.toLowerCase().includes('rate limit')) {
+                        addLog(`⏳ Rate limit detectado - aguardando 10s...`, 'info');
+                        await new Promise(resolve => setTimeout(resolve, 10000));
+                    }
                 }
             } catch (e) {
                 erros++;
@@ -431,18 +443,21 @@ document.addEventListener('DOMContentLoaded', function() {
             progressCnpj.style.width = `${percentual}%`;
             progressCnpj.textContent = `${percentual}%`;
             
-            // Delay de 1.5s para respeitar rate limit das APIs
+            // Delay de 2.5s para respeitar rate limit das APIs
             if (processados < total) {
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, 2500));
             }
         }
         
-        // Consulta concluída
+// Consulta concluída
         consultaEmAndamento.style.display = 'none';
         consultaConcluida.style.display = 'block';
         document.getElementById('stat-simples').textContent = simples;
         document.getElementById('stat-normal').textContent = normal;
         document.getElementById('stat-mei').textContent = mei;
+        if (document.getElementById('stat-erros')) {
+            document.getElementById('stat-erros').textContent = erros;
+        }
     });
     
     function addLog(message, type) {

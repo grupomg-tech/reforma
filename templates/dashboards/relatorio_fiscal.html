@@ -1553,6 +1553,67 @@
                         </div>
                     </div>
 
+                    <!-- Ajustes Manuais ICMS -->
+                    <div class="table-container full-width">
+                        <div class="table-header-container">
+                            <h2>📝 Ajustes Manuais - Apuração ICMS</h2>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn-export" id="btnImportarAjusteManualICMS" {% if not request.GET.empresa %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    Importar Planilha
+                                </button>
+                                <button type="button" class="btn-export" id="btnExcluirTodosAjustesICMS" style="background: linear-gradient(135deg, rgb(239, 68, 68) 0%, rgb(220, 38, 38) 100%);" {% if not request.GET.empresa %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Excluir Todos
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-scroll">
+                            {% if ajustes_manuais_icms %}
+                            <table class="table-relatorio">
+                                <thead>
+                                    <tr>
+                                        <th>Código de Ajuste</th>
+                                        <th>Tipo de Ajuste</th>
+                                        <th>Valor do Ajuste</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ajuste in ajustes_manuais_icms %}
+                                    <tr>
+                                        <td>{{ ajuste.codigo }}</td>
+                                        <td>{{ ajuste.descricao }}</td>
+                                        <td>R$ {{ ajuste.valor|floatformat:2 }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger" onclick="excluirAjusteManualICMS({{ ajuste.id }})">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2">TOTAL</td>
+                                        <td>R$ {{ total_ajustes_manuais_icms|floatformat:2 }}</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="bi bi-inbox-fill empty-state-icon"></i>
+                                <div class="empty-state-text">Nenhum ajuste manual encontrado</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
                     <!-- Lançamentos Manuais -->
                     <div class="table-container full-width">
                         <div class="table-header-container">
@@ -2417,6 +2478,125 @@
         nomeArquivo += '.xlsx';
 
         XLSX.writeFile(wb, nomeArquivo);
+    }
+
+    // ========================================
+    // AJUSTES MANUAIS ICMS - Importar/Excluir
+    // ========================================
+    const btnImportarAjusteICMS = document.getElementById('btnImportarAjusteManualICMS');
+    if (btnImportarAjusteICMS) {
+        btnImportarAjusteICMS.addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx,.xls,.csv';
+            input.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = async function(evt) {
+                    try {
+                        const data = new Uint8Array(evt.target.result);
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                        
+                        if (rows.length < 2) {
+                            alert('Planilha vazia ou sem dados.');
+                            return;
+                        }
+                        
+                        const ajustes = [];
+                        for (let i = 1; i < rows.length; i++) {
+                            const row = rows[i];
+                            if (!row[0] && !row[1] && !row[2]) continue;
+                            ajustes.push({
+                                codigo: String(row[0] || '').trim(),
+                                descricao: String(row[1] || '').trim(),
+                                valor: parseFloat(String(row[2] || '0').replace(',', '.')) || 0
+                            });
+                        }
+                        
+                        if (ajustes.length === 0) {
+                            alert('Nenhum ajuste encontrado na planilha.');
+                            return;
+                        }
+                        
+                        const empresaId = document.querySelector('[name="empresa"]').value;
+                        const periodoIni = document.querySelector('[name="periodo_inicial"]').value;
+                        const periodoFim = document.querySelector('[name="periodo_final"]').value;
+                        
+                        const response = await fetch('/dashboards/api/importar-ajustes-manuais-icms/', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                empresa_id: empresaId,
+                                periodo_inicial: periodoIni,
+                                periodo_final: periodoFim,
+                                ajustes: ajustes
+                            })
+                        });
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            alert(result.message);
+                            location.reload();
+                        } else {
+                            alert('Erro: ' + result.message);
+                        }
+                    } catch (err) {
+                        alert('Erro ao processar planilha: ' + err.message);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            };
+            input.click();
+        });
+    }
+
+    const btnExcluirTodosAjustesICMS = document.getElementById('btnExcluirTodosAjustesICMS');
+    if (btnExcluirTodosAjustesICMS) {
+        btnExcluirTodosAjustesICMS.addEventListener('click', async function() {
+            if (!confirm('Deseja excluir TODOS os ajustes manuais ICMS deste período?')) return;
+            
+            const empresaId = document.querySelector('[name="empresa"]').value;
+            const periodoIni = document.querySelector('[name="periodo_inicial"]').value;
+            const periodoFim = document.querySelector('[name="periodo_final"]').value;
+            
+            const response = await fetch('/dashboards/api/excluir-ajustes-manuais-icms/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    empresa_id: empresaId,
+                    periodo_inicial: periodoIni,
+                    periodo_final: periodoFim
+                })
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message);
+                location.reload();
+            } else {
+                alert('Erro: ' + result.message);
+            }
+        });
+    }
+
+    async function excluirAjusteManualICMS(ajusteId) {
+        if (!confirm('Deseja excluir este ajuste manual?')) return;
+        
+        const response = await fetch(`/dashboards/api/excluir-ajuste-manual-icms/${ajusteId}/`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Erro: ' + result.message);
+        }
     }
 
     // Função para abrir tabs

@@ -15,7 +15,9 @@ logger = logging.getLogger('sped.processamento')
 BRASIL_API_URL = "https://brasilapi.com.br/api/cnpj/v1/{cnpj}"
 RECEITAWS_URL = "https://www.receitaws.com.br/v1/cnpj/{cnpj}"
 TIMEOUT = 30
-DELAY_ENTRE_CONSULTAS = 1  # segundos (respeitar rate limit)
+DELAY_ENTRE_CONSULTAS = 2  # segundos (respeitar rate limit)
+MAX_RETRIES = 3  # tentativas em caso de rate limit
+DELAY_RATE_LIMIT = 10  # segundos de espera extra em caso de rate limit
 
 
 def consultar_cnpj_brasilapi(cnpj):
@@ -34,15 +36,19 @@ def consultar_cnpj_brasilapi(cnpj):
         
         if response.status_code == 200:
             dados = response.json()
+# Garantir que None vira False para campos booleanos
+            opt_simples = dados.get('opcao_pelo_simples')
+            opt_mei = dados.get('opcao_pelo_mei')
+            
             return {
                 'sucesso': True,
                 'razao_social': dados.get('razao_social', ''),
                 'nome_fantasia': dados.get('nome_fantasia', ''),
                 'situacao_cadastral': dados.get('descricao_situacao_cadastral', ''),
-                'optante_simples': dados.get('opcao_pelo_simples', False),
+                'optante_simples': bool(opt_simples) if opt_simples is not None else False,
                 'data_opcao_simples': parse_data(dados.get('data_opcao_pelo_simples')),
                 'data_exclusao_simples': parse_data(dados.get('data_exclusao_do_simples')),
-                'optante_mei': dados.get('opcao_pelo_mei', False),
+                'optante_mei': bool(opt_mei) if opt_mei is not None else False,
                 'natureza_juridica': dados.get('natureza_juridica', ''),
                 'porte': dados.get('porte', ''),
                 'cnae_principal': dados.get('cnae_fiscal', ''),
@@ -86,15 +92,20 @@ def consultar_cnpj_receitaws(cnpj):
             if dados.get('status') == 'ERROR':
                 return {'erro': dados.get('message', 'Erro desconhecido'), 'sucesso': False}
             
+# Garantir que None vira False para campos booleanos
+            simples_data = dados.get('simples') or {}
+            opt_simples_rws = simples_data.get('optante')
+            opt_mei_rws = simples_data.get('mei')
+            
             return {
                 'sucesso': True,
                 'razao_social': dados.get('nome', ''),
                 'nome_fantasia': dados.get('fantasia', ''),
                 'situacao_cadastral': dados.get('situacao', ''),
-                'optante_simples': dados.get('simples', {}).get('optante', False) if dados.get('simples') else False,
-                'data_opcao_simples': parse_data(dados.get('simples', {}).get('data_opcao')) if dados.get('simples') else None,
-                'data_exclusao_simples': parse_data(dados.get('simples', {}).get('data_exclusao')) if dados.get('simples') else None,
-                'optante_mei': dados.get('simples', {}).get('mei', False) if dados.get('simples') else False,
+                'optante_simples': bool(opt_simples_rws) if opt_simples_rws is not None else False,
+                'data_opcao_simples': parse_data(simples_data.get('data_opcao')) if simples_data else None,
+                'data_exclusao_simples': parse_data(simples_data.get('data_exclusao')) if simples_data else None,
+                'optante_mei': bool(opt_mei_rws) if opt_mei_rws is not None else False,
                 'natureza_juridica': dados.get('natureza_juridica', ''),
                 'porte': dados.get('porte', ''),
                 'cnae_principal': dados.get('atividade_principal', [{}])[0].get('code', '') if dados.get('atividade_principal') else '',
@@ -138,23 +149,32 @@ def consultar_participante(participante, usar_receitaws=False):
         participante.save()
         return {'sucesso': False, 'erro': 'CNPJ inválido'}
     
-    # Tenta BrasilAPI primeiro, depois ReceitaWS se falhar
+# Tenta BrasilAPI primeiro com retry em caso de rate limit
     if usar_receitaws:
         resultado = consultar_cnpj_receitaws(participante.cnpj)
     else:
         resultado = consultar_cnpj_brasilapi(participante.cnpj)
         
-        # Se BrasilAPI falhar, tenta ReceitaWS
+        # Se rate limit, espera e retenta
+        if not resultado.get('sucesso') and 'Rate limit' in resultado.get('erro', ''):
+            for tentativa in range(1, MAX_RETRIES + 1):
+                logger.info(f"    ⏳ Rate limit - aguardando {DELAY_RATE_LIMIT}s (tentativa {tentativa}/{MAX_RETRIES})...")
+                time.sleep(DELAY_RATE_LIMIT)
+                resultado = consultar_cnpj_brasilapi(participante.cnpj)
+                if resultado.get('sucesso') or 'Rate limit' not in resultado.get('erro', ''):
+                    break
+        
+        # Se BrasilAPI falhar (não rate limit), tenta ReceitaWS
         if not resultado.get('sucesso') and 'Rate limit' not in resultado.get('erro', ''):
             time.sleep(DELAY_ENTRE_CONSULTAS)
             resultado = consultar_cnpj_receitaws(participante.cnpj)
     
     if resultado.get('sucesso'):
         participante.situacao_cadastral = resultado.get('situacao_cadastral', '')
-        participante.optante_simples = resultado.get('optante_simples', False)
+        participante.optante_simples = bool(resultado.get('optante_simples', False))
         participante.data_opcao_simples = resultado.get('data_opcao_simples')
         participante.data_exclusao_simples = resultado.get('data_exclusao_simples')
-        participante.optante_mei = resultado.get('optante_mei', False)
+        participante.optante_mei = bool(resultado.get('optante_mei', False))
         participante.natureza_juridica = resultado.get('natureza_juridica', '')
         participante.porte = resultado.get('porte', '')
         participante.cnae_principal = resultado.get('cnae_principal', '')

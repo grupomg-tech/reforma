@@ -115,9 +115,9 @@ class Registro0150(models.Model):
     @property
     def regime_tributario(self):
         """Retorna o regime tributário baseado nos dados consultados"""
-        if self.optante_mei:
+        if self.optante_mei is True:
             return 'MEI'
-        elif self.optante_simples:
+        elif self.optante_simples is True:
             return 'Simples Nacional'
         elif self.cnpj:
             return 'Regime Normal'

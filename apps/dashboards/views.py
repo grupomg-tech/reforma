@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from apps.empresa.models import Empresa
-from apps.dashboards.models import ProdutoSaidaAPI
+from apps.dashboards.models import ProdutoSaidaAPI, AjusteManualICMS
 
 
 @login_required
@@ -436,6 +436,16 @@ def relatorio_fiscal(request):
         ajustes_icms = sorted(ajustes_icms_dict.values(), key=lambda x: x['codigo'])
         total_ajustes_icms = sum(a['valor'] for a in ajustes_icms)
         
+        # ========================================
+        # AJUSTES MANUAIS ICMS
+        # ========================================
+        ajustes_manuais_icms = AjusteManualICMS.objects.filter(
+            empresa_id=empresa_id,
+            periodo_inicial=periodo_inicial,
+            periodo_final=periodo_final
+        ).order_by('codigo')
+        total_ajustes_manuais_icms = sum(a.valor for a in ajustes_manuais_icms)
+        
 # Agregar produtos de SAÍDA
         produtos_saidas_dict = {}
         for item in itens_saida:
@@ -744,9 +754,13 @@ def relatorio_fiscal(request):
             'total_ufs_tributos': total_ufs_tributos,
             'total_ufs_liquido': total_ufs_liquido,
             
-            # Ajustes Apuração ICMS
+# Ajustes Apuração ICMS
             'ajustes_icms': ajustes_icms,
             'total_ajustes_icms': total_ajustes_icms,
+            
+            # Ajustes Manuais ICMS
+            'ajustes_manuais_icms': ajustes_manuais_icms,
+            'total_ajustes_manuais_icms': total_ajustes_manuais_icms,
         })
     
     return render(request, 'dashboards/relatorio_fiscal.html', context)
@@ -1221,4 +1235,79 @@ def api_salvar_produtos_api(request):
         })
         
     except Exception as e:
-        return JsonResponse({'success': False, 'message': f'Erro ao salvar: {str(e)}'})    
+        return JsonResponse({'success': False, 'message': f'Erro ao salvar: {str(e)}'})
+@csrf_exempt
+@login_required
+def api_importar_ajustes_manuais_icms(request):
+    """Importa ajustes manuais ICMS via planilha (JSON)"""
+    import json
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        empresa_id = data.get('empresa_id')
+        periodo_inicial = data.get('periodo_inicial')
+        periodo_final = data.get('periodo_final')
+        ajustes = data.get('ajustes', [])
+        
+        if not empresa_id or not periodo_inicial or not periodo_final:
+            return JsonResponse({'success': False, 'message': 'Parâmetros obrigatórios ausentes'})
+        
+        criados = 0
+        for aj in ajustes:
+            AjusteManualICMS.objects.create(
+                empresa_id=empresa_id,
+                periodo_inicial=periodo_inicial,
+                periodo_final=periodo_final,
+                codigo=aj.get('codigo', ''),
+                descricao=aj.get('descricao', ''),
+                valor=Decimal(str(aj.get('valor', 0)).replace(',', '.')),
+            )
+            criados += 1
+        
+        return JsonResponse({'success': True, 'message': f'{criados} ajuste(s) importado(s) com sucesso'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+
+@csrf_exempt
+@login_required
+def api_excluir_ajustes_manuais_icms(request):
+    """Exclui todos os ajustes manuais ICMS de um período"""
+    import json
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+        empresa_id = data.get('empresa_id')
+        periodo_inicial = data.get('periodo_inicial')
+        periodo_final = data.get('periodo_final')
+        
+        deletados = AjusteManualICMS.objects.filter(
+            empresa_id=empresa_id,
+            periodo_inicial=periodo_inicial,
+            periodo_final=periodo_final
+        ).delete()
+        
+        return JsonResponse({'success': True, 'message': f'{deletados[0]} ajuste(s) excluído(s)'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+
+@csrf_exempt
+@login_required
+def api_excluir_ajuste_manual_icms(request, ajuste_id):
+    """Exclui um ajuste manual ICMS individual"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+    
+    try:
+        ajuste = AjusteManualICMS.objects.get(id=ajuste_id)
+        ajuste.delete()
+        return JsonResponse({'success': True, 'message': 'Ajuste excluído com sucesso'})
+    except AjusteManualICMS.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Ajuste não encontrado'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})    
