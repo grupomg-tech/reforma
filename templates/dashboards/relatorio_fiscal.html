@@ -1219,6 +1219,16 @@
                                 </a>
                             </div>
                         </div>
+                        <!-- Sub-abas Revenda / Consumo -->
+                        <div style="display:flex; gap:0; border-bottom:2px solid #e5e7eb; margin:0 0 0 0;">
+                            <button class="sub-tab-prod active" onclick="openSubTabProd(this,'tabRevenda')" style="padding:10px 20px; border:none; background:#667eea; color:white; font-weight:600; font-size:13px; cursor:pointer; border-radius:8px 8px 0 0; margin-right:4px;">
+                                📦 Revenda ({{ produtos_entradas|length }})
+                            </button>
+                            <button class="sub-tab-prod" onclick="openSubTabProd(this,'tabConsumo')" style="padding:10px 20px; border:none; background:#e5e7eb; color:#4b5563; font-weight:600; font-size:13px; cursor:pointer; border-radius:8px 8px 0 0;">
+                                🧹 Consumo ({{ produtos_consumo|length }})
+                            </button>
+                        </div>
+                        <div id="tabRevenda" class="sub-tab-panel">
                         <div class="table-scroll">
                             {% if produtos_entradas %}
                             <table class="table-relatorio">
@@ -2487,7 +2497,10 @@
 
     const SUFIXOS_COMPRA_EFETIVA = new Set([
         '101','102','111','113','116','117','118','120','121','122',
-        '124','125','126','128','401','403','407','408','411',
+        '124','125','126','128','401','403',
+    ]);
+    const SUFIXOS_CONSUMO = new Set([
+        '407','408','556','557',
     ]);
     const SUFIXOS_VENDA_EFETIVA = new Set([
         '101','102','103','104','105','106','109','110','111','112',
