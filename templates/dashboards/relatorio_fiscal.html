@@ -1204,7 +1204,7 @@
                     <div class="table-container full-width">
                         <div class="table-header-container">
                             <h2>🛒 Produtos Adquiridos</h2>
-                            <a href="#" class="btn-export">
+                            <a href="#" class="btn-export" onclick="exportarProdutosEntradas(); return false;">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -1216,7 +1216,6 @@
                             <table class="table-relatorio">
                                 <thead>
                                     <tr>
-                                        <th>Chave NF-e</th>
                                         <th>Código</th>
                                         <th>Descrição</th>
                                         <th>NCM</th>
@@ -1271,12 +1270,23 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="5"><strong>TOTAL</strong></td>
+                                        <td colspan="6"><strong>TOTAL</strong></td>
+                                        <td>R$ {{ total_valor_bruto_unit_entradas|floatformat:2 }}</td>
                                         <td>R$ {{ total_valor_entradas|floatformat:2 }}</td>
                                         <td>R$ {{ total_icms_entradas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_icms_st_entradas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_ipi_entradas|floatformat:2 }}</td>
                                         <td>R$ {{ total_pis_entradas|floatformat:2 }}</td>
                                         <td>R$ {{ total_cofins_entradas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_tributos_entradas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_valor_liq_unit_entradas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_valor_liquido_entradas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_ibs_cbs_unit_entradas|floatformat:2 }}</td>
                                         <td class="reforma">R$ {{ total_ibs_cbs_entradas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_reforma_unit_entradas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_reforma_entradas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_dif_unit_entradas|floatformat:2 }}</td>
+                                        <td class="reforma">R$ {{ total_dif_total_entradas|floatformat:2 }}</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -2282,7 +2292,133 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
+// Função para exportar Produtos Entradas para Excel (formato referência 26 colunas)
+    function exportarProdutosEntradas() {
+        const tabEntradas = document.getElementById('entradas');
+        if (!tabEntradas) { alert('Aba Entradas não encontrada.'); return; }
+        const tables = tabEntradas.querySelectorAll('table.table-relatorio');
+        let table = null;
+        for (let t of tables) {
+            const container = t.closest('.table-container');
+            if (container && container.querySelector('h2') && container.querySelector('h2').textContent.includes('Produtos Adquiridos')) {
+                table = t;
+                break;
+            }
+        }
+        if (!table) { alert('Nenhum dado de produto para exportar.'); return; }
+
+        const parseNum = (text) => {
+            if (!text) return 0;
+            let clean = text.replace('R$', '').replace('%', '').trim();
+            clean = clean.replace(/\./g, '').replace(',', '.');
+            return parseFloat(clean) || 0;
+        };
+
+        const headers = [
+            'Código', 'Descrição', 'NCM',
+            'Quantidade', '% Redução', 'Alíq. IBS/CBS',
+            'Valor Bruto Unit.', 'Valor Bruto',
+            'Alíq. ICMS', 'ICMS',
+            'Alíq. IPI', 'IPI',
+            'Alíq. PIS', 'PIS',
+            'Alíq. COFINS', 'COFINS',
+            'Total Tributos', 'Dif. Alíquotas',
+            'Valor Líquido Unit.', 'Valor Líquido',
+            'IBS/CBS Unit.', 'IBS/CBS',
+            'Dif. Total Unit.', 'Dif. Total',
+            'Total Reforma Unit.', 'Total Reforma'
+        ];
+
+        const data = [headers];
+        const rows = table.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length < 22) return;
+
+            const codigo = cells[0].textContent.trim();
+            const descricao = cells[1].textContent.trim();
+            const ncm = cells[2].textContent.trim();
+            const quantidade = parseNum(cells[3].textContent);
+            const percReducao = parseNum(cells[4].textContent);
+            const aliqIbsCbs = parseNum(cells[5].textContent);
+            const valorBrutoUnit = parseNum(cells[6].textContent);
+            const valorBrutoTot = parseNum(cells[7].textContent);
+            const icms = parseNum(cells[8].textContent);
+            // cells[9] = ICMS ST (não vai para o Excel)
+            const ipi = parseNum(cells[10].textContent);
+            const pis = parseNum(cells[11].textContent);
+            const cofins = parseNum(cells[12].textContent);
+            const totalTributos = parseNum(cells[13].textContent);
+            const valorLiqUnit = parseNum(cells[14].textContent);
+            const valorLiqTot = parseNum(cells[15].textContent);
+            const ibsCbsUnit = parseNum(cells[16].textContent);
+            const ibsCbsTot = parseNum(cells[17].textContent);
+            const totalReformaUnit = parseNum(cells[18].textContent);
+            const totalReformaTot = parseNum(cells[19].textContent);
+            const difUnit = parseNum(cells[20].textContent);
+            const difTotal = parseNum(cells[21].textContent);
+
+            // Calcular alíquotas efetivas
+            const aliqIcms = valorBrutoTot > 0 ? Math.round(icms / valorBrutoTot * 10000) / 100 : 0;
+            const aliqIpi = valorBrutoTot > 0 ? Math.round(ipi / valorBrutoTot * 10000) / 100 : 0;
+            const aliqPis = valorBrutoTot > 0 ? Math.round(pis / valorBrutoTot * 10000) / 100 : 0;
+            const aliqCofins = valorBrutoTot > 0 ? Math.round(cofins / valorBrutoTot * 10000) / 100 : 0;
+            const difAliquotas = Math.round((aliqIbsCbs - (aliqIcms + aliqIpi + aliqPis + aliqCofins)) * 100) / 100;
+
+            data.push([
+                codigo, descricao, ncm,
+                quantidade, percReducao, aliqIbsCbs,
+                valorBrutoUnit, valorBrutoTot,
+                aliqIcms, icms,
+                aliqIpi, ipi,
+                aliqPis, pis,
+                aliqCofins, cofins,
+                totalTributos, difAliquotas,
+                valorLiqUnit, valorLiqTot,
+                ibsCbsUnit, ibsCbsTot,
+                totalReformaUnit, totalReformaTot,
+                difUnit, difTotal
+            ]);
+        });
+
+        if (data.length <= 1) { alert('Nenhum produto encontrado para exportar.'); return; }
+
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        // Ajustar largura das colunas
+        ws['!cols'] = [
+            {wch:12}, {wch:40}, {wch:12},
+            {wch:12}, {wch:10}, {wch:12},
+            {wch:16}, {wch:16},
+            {wch:10}, {wch:14},
+            {wch:10}, {wch:14},
+            {wch:10}, {wch:14},
+            {wch:10}, {wch:14},
+            {wch:14}, {wch:14},
+            {wch:16}, {wch:16},
+            {wch:14}, {wch:14},
+            {wch:16}, {wch:16},
+            {wch:16}, {wch:16}
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Produtos Entradas');
+
+        // Nome do arquivo com período
+        const selPeriodoIni = document.querySelector('[name="periodo_inicial"]');
+        const selPeriodoFim = document.querySelector('[name="periodo_final"]');
+        let nomeArquivo = 'produtos_entradas';
+        if (selPeriodoIni && selPeriodoIni.value && selPeriodoFim && selPeriodoFim.value) {
+            nomeArquivo += '_' + selPeriodoIni.value + '_a_' + selPeriodoFim.value;
+        }
+        nomeArquivo += '.xlsx';
+
+        XLSX.writeFile(wb, nomeArquivo);
+    }
+
     // Função para abrir tabs
     function openTab(evt, tabName) {
         const tabContents = document.getElementsByClassName('tab-content');

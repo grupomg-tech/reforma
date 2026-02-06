@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -81,7 +82,6 @@ def relatorio_fiscal(request):
                     'ncm': item.cod_ncm,
                 }
         
-# Agregar produtos de ENTRADA
         produtos_entradas_dict = {}
         for item in itens_entrada:
             cod = item.cod_item
@@ -99,6 +99,9 @@ def relatorio_fiscal(request):
                     'ipi': Decimal('0'),
                     'pis': Decimal('0'),
                     'cofins': Decimal('0'),
+                    'vl_bc_icms': Decimal('0'),
+                    'vl_bc_pis': Decimal('0'),
+                    'vl_bc_cofins': Decimal('0'),
                 }
             produtos_entradas_dict[cod]['quantidade'] += item.qtd or Decimal('0')
             produtos_entradas_dict[cod]['valor_total'] += item.vl_item or Decimal('0')
@@ -107,24 +110,52 @@ def relatorio_fiscal(request):
             produtos_entradas_dict[cod]['ipi'] += getattr(item, 'vl_ipi', Decimal('0')) or Decimal('0')
             produtos_entradas_dict[cod]['pis'] += item.vl_pis or Decimal('0')
             produtos_entradas_dict[cod]['cofins'] += item.vl_cofins or Decimal('0')
+            produtos_entradas_dict[cod]['vl_bc_icms'] += item.vl_bc_icms or Decimal('0')
+            produtos_entradas_dict[cod]['vl_bc_pis'] += item.vl_bc_pis or Decimal('0')
+            produtos_entradas_dict[cod]['vl_bc_cofins'] += item.vl_bc_cofins or Decimal('0')
+        
+# ========================================
+        # NCMs com redução de 60% (LC 214/2025 - Anexo XVII)
+        # Construção civil e materiais correlatos
+        # ========================================
+        NCM_REDUCAO_60 = {
+            '25222000',  # Gesso
+            '38244000',  # Impermeabilizantes / produtos químicos p/ construção
+        }
+        
+        from decimal import ROUND_HALF_UP
         
 # Calcular IBS/CBS e formatar campos para entradas
         for cod, prod in produtos_entradas_dict.items():
             # Valores calculados
             total_tributos = prod['icms'] + prod['icms_st'] + prod['ipi'] + prod['pis'] + prod['cofins']
             valor_liquido = prod['valor_total'] - total_tributos
+            
+            # Verificar se o NCM tem redução
+            ncm_prod = str(prod['ncm']).strip()
+            if ncm_prod in NCM_REDUCAO_60:
+                perc_reducao = Decimal('60')
+            else:
+                perc_reducao = Decimal('0')
+            
             aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
-            ibs_cbs = (valor_liquido * aliq_total / Decimal('100')).quantize(Decimal('0.01'))
+            aliq_efetiva = aliq_total * (Decimal('1') - perc_reducao / Decimal('100'))
+            ibs_cbs = (valor_liquido * aliq_efetiva / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             total_reforma = valor_liquido + ibs_cbs
             dif_total = ibs_cbs - total_tributos
             
+            # Alíquotas calculadas a partir das bases agregadas
+            aliq_icms_calc = (prod['icms'] / prod['vl_bc_icms'] * 100).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP) if prod['vl_bc_icms'] > 0 else Decimal('0')
+            aliq_pis_calc = (prod['pis'] / prod['vl_bc_pis'] * 100).quantize(Decimal('0.0001'), rounding=ROUND_HALF_UP) if prod['vl_bc_pis'] > 0 else Decimal('0')
+            aliq_cofins_calc = (prod['cofins'] / prod['vl_bc_cofins'] * 100).quantize(Decimal('0.0001'), rounding=ROUND_HALF_UP) if prod['vl_bc_cofins'] > 0 else Decimal('0')
+            
             # Valores unitários
             qtd = prod['quantidade'] if prod['quantidade'] > 0 else Decimal('1')
-            valor_bruto_unit = (prod['valor_total'] / qtd).quantize(Decimal('0.01'))
-            valor_liq_unit = (valor_liquido / qtd).quantize(Decimal('0.01'))
-            ibs_cbs_unit = (ibs_cbs / qtd).quantize(Decimal('0.01'))
-            total_reforma_unit = (total_reforma / qtd).quantize(Decimal('0.01'))
-            dif_unit = (dif_total / qtd).quantize(Decimal('0.01'))
+            valor_bruto_unit = (prod['valor_total'] / qtd).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            valor_liq_unit = (valor_liquido / qtd).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            ibs_cbs_unit = (ibs_cbs / qtd).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            total_reforma_unit = (total_reforma / qtd).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            dif_unit = (dif_total / qtd).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
             
             # Atualiza produto com valores calculados
             prod['ibs_cbs'] = ibs_cbs
@@ -137,13 +168,22 @@ def relatorio_fiscal(request):
             prod['ibs_cbs_unit'] = ibs_cbs_unit
             prod['total_reforma_unit'] = total_reforma_unit
             prod['dif_unit'] = dif_unit
-            prod['aliq_ibs_cbs'] = aliq_total
-            prod['perc_reducao'] = Decimal('0')
+            prod['aliq_ibs_cbs'] = aliq_efetiva
+            prod['perc_reducao'] = perc_reducao
+            prod['aliq_icms'] = aliq_icms_calc
+            prod['aliq_pis'] = aliq_pis_calc
+            prod['aliq_cofins'] = aliq_cofins_calc
+            prod['aliq_icms'] = aliq_icms_calc
+            prod['aliq_pis'] = aliq_pis_calc
+            prod['aliq_cofins'] = aliq_cofins_calc
             
-            # Formatar para exibição (padrão brasileiro)
+# Formatar para exibição (padrão brasileiro)
             prod['quantidade_fmt'] = f"{prod['quantidade']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-            prod['perc_reducao_fmt'] = f"{prod['perc_reducao']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-            prod['aliq_ibs_cbs_fmt'] = f"{aliq_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['perc_reducao_fmt'] = f"{perc_reducao:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['aliq_ibs_cbs_fmt'] = f"{aliq_efetiva:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['aliq_icms_fmt'] = f"{aliq_icms_calc:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['aliq_pis_fmt'] = f"{aliq_pis_calc:,.4f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            prod['aliq_cofins_fmt'] = f"{aliq_cofins_calc:,.4f}".replace(',', 'X').replace('.', ',').replace('X', '.')
             prod['valor_bruto_unit_fmt'] = f"{valor_bruto_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
             prod['valor_bruto_fmt'] = f"{prod['valor_total']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
             prod['icms_fmt'] = f"{prod['icms']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
@@ -161,7 +201,7 @@ def relatorio_fiscal(request):
             prod['dif_unit_fmt'] = f"{dif_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
             prod['dif_total_fmt'] = f"{dif_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         
-        produtos_entradas = sorted(produtos_entradas_dict.values(), key=lambda x: x['valor_total'], reverse=True)
+        produtos_entradas = sorted(produtos_entradas_dict.values(), key=lambda x: (-x['valor_total'], x['codigo']))
         
         # ========================================
         # AGREGAR FORNECEDORES DE ENTRADA
@@ -289,7 +329,7 @@ def relatorio_fiscal(request):
             prod['valor_liquido'] = valor_liquido
             prod['total_tributos'] = total_tributos
         
-        produtos_saidas = sorted(produtos_saidas_dict.values(), key=lambda x: x['valor_total'], reverse=True)
+        produtos_saidas = sorted(produtos_saidas_dict.values(), key=lambda x: (-x['valor_total'], x['codigo']))
         
         # ========================================
         # BUSCAR PRODUTOS SALVOS VIA API (se não houver do SPED)
@@ -382,7 +422,7 @@ def relatorio_fiscal(request):
                     prod['dif_unit_fmt'] = f"{dif_unit:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                     prod['dif_total_fmt'] = f"{dif_total:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
                 
-                produtos_saidas_api = sorted(produtos_api_dict.values(), key=lambda x: x['valor_total'], reverse=True)
+                produtos_saidas_api = sorted(produtos_api_dict.values(), key=lambda x: (-x['valor_total'], x['codigo']))
                 
                 # Usar produtos da API se não houver do SPED
                 produtos_saidas = produtos_saidas_api
@@ -398,16 +438,29 @@ def relatorio_fiscal(request):
                 carga_saidas = (debitos_saidas / total_valor_saidas * 100) if total_valor_saidas else Decimal('0')
                 carga_saidas_reforma = (total_ibs_cbs_saidas / venda_liquida * 100) if venda_liquida else Decimal('0')
         
-        # Totais ENTRADAS
+# Totais ENTRADAS
         total_valor_entradas = sum(p['valor_total'] for p in produtos_entradas)
         total_icms_entradas = sum(p['icms'] for p in produtos_entradas)
+        total_icms_st_entradas = sum(p['icms_st'] for p in produtos_entradas)
+        total_ipi_entradas = sum(p.get('ipi', Decimal('0')) for p in produtos_entradas)
         total_pis_entradas = sum(p['pis'] for p in produtos_entradas)
         total_cofins_entradas = sum(p['cofins'] for p in produtos_entradas)
         total_ibs_cbs_entradas = sum(p['ibs_cbs'] for p in produtos_entradas)
-        creditos_entradas = total_icms_entradas + total_pis_entradas + total_cofins_entradas
+        creditos_entradas = total_icms_entradas + total_icms_st_entradas + total_ipi_entradas + total_pis_entradas + total_cofins_entradas
         compra_liquida = total_valor_entradas - creditos_entradas
         carga_entradas = (creditos_entradas / total_valor_entradas * 100) if total_valor_entradas else Decimal('0')
         carga_entradas_reforma = (total_ibs_cbs_entradas / compra_liquida * 100) if compra_liquida else Decimal('0')
+        
+        # Totais detalhados para tfoot de Produtos Adquiridos
+        total_tributos_entradas = sum(p['total_tributos'] for p in produtos_entradas)
+        total_valor_liquido_entradas = sum(p['valor_liquido'] for p in produtos_entradas)
+        total_valor_bruto_unit_entradas = sum(p['valor_bruto_unit'] for p in produtos_entradas)
+        total_valor_liq_unit_entradas = sum(p['valor_liq_unit'] for p in produtos_entradas)
+        total_ibs_cbs_unit_entradas = sum(p['ibs_cbs_unit'] for p in produtos_entradas)
+        total_reforma_entradas = sum(p['total_reforma'] for p in produtos_entradas)
+        total_reforma_unit_entradas = sum(p['total_reforma_unit'] for p in produtos_entradas)
+        total_dif_total_entradas = sum(p['dif_total'] for p in produtos_entradas)
+        total_dif_unit_entradas = sum(p['dif_unit'] for p in produtos_entradas)
         
         # Totais SAÍDAS
         total_valor_saidas = sum(p['valor_total'] for p in produtos_saidas)
@@ -456,6 +509,19 @@ def relatorio_fiscal(request):
             'compra_total_reforma': compra_liquida + total_ibs_cbs_entradas,
             'compra_total_reforma_fmt': formatar_valor(compra_liquida + total_ibs_cbs_entradas),
             'carga_entradas_reforma': f"{carga_entradas_reforma:.2f}".replace('.', ','),
+            
+            # Totais tfoot Entradas
+            'total_icms_st_entradas': total_icms_st_entradas,
+            'total_ipi_entradas': total_ipi_entradas,
+            'total_tributos_entradas': total_tributos_entradas,
+            'total_valor_liquido_entradas': total_valor_liquido_entradas,
+            'total_valor_bruto_unit_entradas': total_valor_bruto_unit_entradas,
+            'total_valor_liq_unit_entradas': total_valor_liq_unit_entradas,
+            'total_ibs_cbs_unit_entradas': total_ibs_cbs_unit_entradas,
+            'total_reforma_entradas': total_reforma_entradas,
+            'total_reforma_unit_entradas': total_reforma_unit_entradas,
+            'total_dif_total_entradas': total_dif_total_entradas,
+            'total_dif_unit_entradas': total_dif_unit_entradas,
             
             # Totais Saídas
             'total_valor_saidas': total_valor_saidas,
