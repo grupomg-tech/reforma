@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579281025696264",
+  "num_nota": "57928",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579281025696264",
+      "num_item": "",
+      "codigo": "8543",
+      "ean": "7898667207015",
+      "descricao": "KOKAR TEXTURA TRADICIONAL BALDE 20KG BRANCO NATU*R",
+      "ncm": "32091010",
+      "cest": "2400100",
+      "cfop": "5405",
+      "unidade": "BD",
+      "quantidade": 2.0,
+      "valor_unitario": 100.0,
+      "valor_total": 200.0,
+      "icms_cst": "60",
+      "icms_aliq": 0.0,
+      "icms_valor": 0.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 1.3,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 6.0
+    }
+  ]
+}

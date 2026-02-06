@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580391025729641",
+  "num_nota": "58039",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580391025729641",
+      "num_item": "",
+      "codigo": "7098",
+      "ean": "7898570234368",
+      "descricao": "BAUTECH ADESIVO EP 1KG",
+      "ncm": "35069120",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "QT",
+      "quantidade": 4.0,
+      "valor_unitario": 60.0,
+      "valor_total": 240.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 48.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 1.25,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 5.76
+    }
+  ]
+}

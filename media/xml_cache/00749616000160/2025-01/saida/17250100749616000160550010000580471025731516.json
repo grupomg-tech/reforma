@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580471025731516",
+  "num_nota": "58047",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580471025731516",
+      "num_item": "",
+      "codigo": "1542",
+      "ean": "7891792133983",
+      "descricao": "LIXA MASSA A257 No220",
+      "ncm": "68052000",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "FL",
+      "quantidade": 30.0,
+      "valor_unitario": 1.55,
+      "valor_total": 46.5,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 9.3,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.24,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 1.12
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579861025712077",
+  "num_nota": "57986",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579861025712077",
+      "num_item": "",
+      "codigo": "10336",
+      "ean": "7892063320491",
+      "descricao": "NAUBER FILME MASC ISOPAINT AZ 300CMX20M FITA 48MM",
+      "ncm": "39201099",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "UN",
+      "quantidade": 1.0,
+      "valor_unitario": 109.0,
+      "valor_total": 109.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 21.8,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.57,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 2.62
+    }
+  ]
+}

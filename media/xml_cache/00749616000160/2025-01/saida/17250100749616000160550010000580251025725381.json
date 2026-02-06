@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580251025725381",
+  "num_nota": "58025",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580251025725381",
+      "num_item": "",
+      "codigo": "GD0000273687",
+      "ean": "7898667209293",
+      "descricao": "KOKAR 123 IMPERM. CINZA AL 00NN 62 000 9064 P16L",
+      "ncm": "32091020",
+      "cest": "2400100",
+      "cfop": "5405",
+      "unidade": "BD",
+      "quantidade": 1.0,
+      "valor_unitario": 320.0,
+      "valor_total": 320.0,
+      "icms_cst": "60",
+      "icms_aliq": 0.0,
+      "icms_valor": 0.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 2.08,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 9.6
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580591025733234",
+  "num_nota": "58059",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580591025733234",
+      "num_item": "",
+      "codigo": "7562",
+      "ean": "7898570236485",
+      "descricao": "BAUTECH PINTURA ASFALTICA 12LT",
+      "ncm": "27150000",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "BD",
+      "quantidade": 3.0,
+      "valor_unitario": 185.0,
+      "valor_total": 555.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 111.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 2.89,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 13.32
+    }
+  ]
+}

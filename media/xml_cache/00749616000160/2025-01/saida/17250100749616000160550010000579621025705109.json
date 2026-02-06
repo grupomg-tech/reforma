@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579621025705109",
+  "num_nota": "57962",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579621025705109",
+      "num_item": "",
+      "codigo": "5287",
+      "ean": "7898619760049",
+      "descricao": "KOKAR MASSA ACRILICA SC 15 KG",
+      "ncm": "32141020",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "SC",
+      "quantidade": 2.0,
+      "valor_unitario": 62.5,
+      "valor_total": 125.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 25.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.65,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 3.0
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580371025729345",
+  "num_nota": "58037",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580371025729345",
+      "num_item": "",
+      "codigo": "1136",
+      "ean": "7896380192519",
+      "descricao": "GARFO P/ROLO 400 23 SR 23CM ATLAS",
+      "ncm": "73269090",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "UN",
+      "quantidade": 2.0,
+      "valor_unitario": 12.0,
+      "valor_total": 24.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 4.8,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.12,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 0.58
+    }
+  ]
+}

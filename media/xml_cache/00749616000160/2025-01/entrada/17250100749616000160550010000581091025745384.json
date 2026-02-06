@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000581091025745384",
+  "num_nota": "58109",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000581091025745384",
+      "num_item": "",
+      "codigo": "10309",
+      "ean": "7898653256454",
+      "descricao": "NAUBER PAC DISCO LIXA G220 225MM 6 FUROS 5 PCS",
+      "ncm": "68052000",
+      "cest": "",
+      "cfop": "1202",
+      "unidade": "UN",
+      "quantidade": 1.0,
+      "valor_unitario": 30.05,
+      "valor_total": 30.05,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 6.01,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "99",
+      "pis_aliq": 0.0,
+      "pis_valor": 0.0,
+      "cofins_cst": "99",
+      "cofins_aliq": 0.0,
+      "cofins_valor": 0.0
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580231025725271",
+  "num_nota": "58023",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580231025725271",
+      "num_item": "",
+      "codigo": "4400",
+      "ean": "7896380100910",
+      "descricao": "MASCARA DE PROTECAO C/VALV.AT2400 ATLAS",
+      "ncm": "63079010",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "UN",
+      "quantidade": 3.0,
+      "valor_unitario": 8.5,
+      "valor_total": 25.5,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 5.1,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.13,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 0.61
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579501025701030",
+  "num_nota": "57950",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579501025701030",
+      "num_item": "",
+      "codigo": "11278",
+      "ean": "SEM GTIN",
+      "descricao": "GUARDA SOL VERMELHO",
+      "ncm": "66011000",
+      "cest": "",
+      "cfop": "5910",
+      "unidade": "UN",
+      "quantidade": 1.0,
+      "valor_unitario": 181.52,
+      "valor_total": 181.52,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 36.3,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "49",
+      "pis_aliq": 0.0,
+      "pis_valor": 0.0,
+      "cofins_cst": "49",
+      "cofins_aliq": 0.0,
+      "cofins_valor": 0.0
+    }
+  ]
+}

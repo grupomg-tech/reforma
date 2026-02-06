@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580611025733453",
+  "num_nota": "58061",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580611025733453",
+      "num_item": "",
+      "codigo": "GD0000044636",
+      "ean": "7891019170678",
+      "descricao": "REND MUIT PRATA FINA 30BB 62 004 9072 PM 16L",
+      "ncm": "32091010",
+      "cest": "2400100",
+      "cfop": "5405",
+      "unidade": "LT",
+      "quantidade": 1.0,
+      "valor_unitario": 300.0,
+      "valor_total": 300.0,
+      "icms_cst": "60",
+      "icms_aliq": 0.0,
+      "icms_valor": 0.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 1.95,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 9.0
+    }
+  ]
+}

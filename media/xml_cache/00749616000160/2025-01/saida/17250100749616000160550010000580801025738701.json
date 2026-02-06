@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580801025738701",
+  "num_nota": "58080",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580801025738701",
+      "num_item": "",
+      "codigo": "GD0000132318",
+      "ean": "7891019177073",
+      "descricao": "DC SE AC TIMIDO FLORESCER 10GY 54 238 6141 P 3,2L",
+      "ncm": "32091010",
+      "cest": "2400100",
+      "cfop": "5405",
+      "unidade": "GL",
+      "quantidade": 1.0,
+      "valor_unitario": 260.0,
+      "valor_total": 260.0,
+      "icms_cst": "60",
+      "icms_aliq": 0.0,
+      "icms_valor": 0.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 1.69,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 7.8
+    }
+  ]
+}

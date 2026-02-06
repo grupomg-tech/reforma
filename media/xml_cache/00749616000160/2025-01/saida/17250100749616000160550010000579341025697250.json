@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579341025697250",
+  "num_nota": "57934",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579341025697250",
+      "num_item": "",
+      "codigo": "11166",
+      "ean": "7898619768854",
+      "descricao": "KOKAR STD FS ULTRA REND 3,6LT CINZA PRATEADO",
+      "ncm": "32091010",
+      "cest": "2400100",
+      "cfop": "5405",
+      "unidade": "GL",
+      "quantidade": 1.0,
+      "valor_unitario": 110.0,
+      "valor_total": 110.0,
+      "icms_cst": "60",
+      "icms_aliq": 0.0,
+      "icms_valor": 0.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.72,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 3.3
+    }
+  ]
+}

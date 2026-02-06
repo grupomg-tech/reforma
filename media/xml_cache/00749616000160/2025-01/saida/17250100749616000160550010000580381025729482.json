@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580381025729482",
+  "num_nota": "58038",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580381025729482",
+      "num_item": "",
+      "codigo": "GD0000271377",
+      "ean": "7898667208753",
+      "descricao": "KOKAR BORRACHA LIQUIDA CAMURCA RM814 P 18L",
+      "ncm": "32091020",
+      "cest": "2400100",
+      "cfop": "5405",
+      "unidade": "LT",
+      "quantidade": 1.0,
+      "valor_unitario": 530.0,
+      "valor_total": 530.0,
+      "icms_cst": "60",
+      "icms_aliq": 0.0,
+      "icms_valor": 0.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 3.45,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 15.9
+    }
+  ]
+}

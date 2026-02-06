@@ -1110,6 +1110,24 @@ def relatorio_fiscal(request):
         composicao_entradas_list.sort(key=lambda x: (x['num_doc'], x['cfop'], x['codigo']))
         
         # ========================================
+        # ADICIONAR PRODUTOS DA API NA COMPOSIÇÃO DE ENTRADAS
+        # ========================================
+        if produtos_entrada_api.exists():
+            for prod in produtos_entrada_api:
+                # Extrair número da NF a partir da chave (posições 25-33)
+                num_doc_api = ''
+                if prod.chave_nfe and len(prod.chave_nfe) >= 34:
+                    num_doc_api = prod.chave_nfe[25:34].lstrip('0') or '0'
+                composicao_entradas_list.append({
+                    'num_doc': num_doc_api,
+                    'cfop': prod.cfop or '',
+                    'codigo': prod.codigo or '',
+                    'descricao': prod.descricao or '',
+                    'valor': float(prod.valor_total or 0),
+                })
+            composicao_entradas_list.sort(key=lambda x: (x['num_doc'], x['cfop'], x['codigo']))
+        
+        # ========================================
         # COMPOSIÇÃO DETALHADA POR NF (SAÍDAS)
         # ========================================
         composicao_saidas_list = []

@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580121025721744",
+  "num_nota": "58012",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580121025721744",
+      "num_item": "",
+      "codigo": "5268",
+      "ean": "7898619760414",
+      "descricao": "KOKAR FOSCO ECONOMICO 3,6LT BRANCO GELO",
+      "ncm": "32091010",
+      "cest": "2400100",
+      "cfop": "5405",
+      "unidade": "GL",
+      "quantidade": 1.0,
+      "valor_unitario": 67.0,
+      "valor_total": 67.0,
+      "icms_cst": "60",
+      "icms_aliq": 0.0,
+      "icms_valor": 0.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.44,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 2.01
+    }
+  ]
+}

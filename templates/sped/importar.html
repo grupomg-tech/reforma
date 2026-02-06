@@ -698,20 +698,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     else normal++;
                     
                     if (data.erro_brasilapi) {
-                        addLog(`⚠ BrasilAPI falhou: ${data.erro_brasilapi}`, 'error');
-                        addLog(`🔄 Fallback ReceitaWS → ${part.nome.substring(0, 30)} - ${regime}`, 'success');
+                        addLog(`✓ ${part.nome.substring(0, 30)} - ${regime} (ReceitaWS)`, 'success');
                     } else {
                         addLog(`✓ ${part.nome.substring(0, 30)} - ${regime} (BrasilAPI)`, 'success');
                     }
                 } else {
                     erros++;
-                    // Mostrar erro da BrasilAPI no log antes do erro final
-                    if (data.erro_brasilapi) {
-                        addLog(`⚠ BrasilAPI falhou: ${data.erro_brasilapi}`, 'error');
-                        addLog(`🔄 ReceitaWS também falhou: ${data.erro || 'Erro'}`, 'error');
-                    } else {
-                        addLog(`✗ ${part.nome.substring(0, 30)} - ${data.erro || 'Erro'}`, 'error');
-                    }
+                    addLog(`✗ ${part.nome.substring(0, 30)} - ${data.erro || 'Erro na consulta'}`, 'error');
                 }
             } catch (e) {
                 erros++;
@@ -845,19 +838,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                 normalGeral++;
                                 document.getElementById('csNormal').textContent = normalGeral;
                             }
-                            // Mostrar se houve fallback para ReceitaWS
+// Mostrar resultado sem expor detalhes internos de fallback
                             if (dataPart.erro_brasilapi) {
-                                addLogConsulta(`⚠ [${processadosGeral + 1}/${totalGeral}] BrasilAPI falhou: ${dataPart.erro_brasilapi}`, 'warn');
-                                addLogConsulta(`🔄 [${processadosGeral + 1}/${totalGeral}] Fallback ReceitaWS → ${part.nome.substring(0, 35)} - ${regime}`, 'success');
+                                addLogConsulta(`✓ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${regime} (ReceitaWS)`, 'success');
                             } else {
                                 addLogConsulta(`✓ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${regime} (BrasilAPI)`, 'success');
                             }
                         } else {
                             errosGeral++;
                             document.getElementById('csErros').textContent = errosGeral;
-                            // Mostrar erro da BrasilAPI no log antes do erro final
                             if (dataPart.erro_brasilapi) {
-                                addLogConsulta(`⚠ [${processadosGeral + 1}/${totalGeral}] BrasilAPI falhou: ${dataPart.erro_brasilapi}`, 'warn');
+                                addLogConsulta(`✗ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${dataPart.erro || 'Erro na consulta'}`, 'error');
                                 addLogConsulta(`🔄 [${processadosGeral + 1}/${totalGeral}] ReceitaWS também falhou: ${dataPart.erro || 'Erro'}`, 'error');
                             } else {
                                 addLogConsulta(`✗ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${dataPart.erro || 'Erro'}`, 'error');

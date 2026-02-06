@@ -168,6 +168,15 @@
         display: block;
     }
     
+    .sub-tab-panel {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .sub-tab-panel.active {
+        display: block;
+    }
+    
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -1228,7 +1237,7 @@
                                 🧹 Consumo ({{ produtos_consumo|length }})
                             </button>
                         </div>
-                        <div id="tabRevenda" class="sub-tab-panel">
+                        <div id="tabRevenda" class="sub-tab-panel active">
                         <div class="table-scroll">
                             {% if produtos_entradas %}
                             <table class="table-relatorio">
@@ -2511,8 +2520,15 @@
     function isCfopOperacaoEfetiva(cfop, tipo) {
         const cfopLimpo = (cfop || '').replace('.', '').trim();
         if (cfopLimpo.length < 4) return false;
+        const primeiroDigito = cfopLimpo[0];
         const sufixo = cfopLimpo.substring(1);
-        return tipo === 'entradas' ? SUFIXOS_COMPRA_EFETIVA.has(sufixo) : SUFIXOS_VENDA_EFETIVA.has(sufixo);
+        if (tipo === 'entradas') {
+            if (primeiroDigito !== '1' && primeiroDigito !== '2') return false;
+            return SUFIXOS_COMPRA_EFETIVA.has(sufixo);
+        } else {
+            if (primeiroDigito !== '5' && primeiroDigito !== '6') return false;
+            return SUFIXOS_VENDA_EFETIVA.has(sufixo);
+        }
     }
 
     function abrirComposicao(tipo) {
@@ -3050,6 +3066,27 @@
         } else {
             alert('Erro: ' + result.message);
         }
+    }
+
+// Função para abrir sub-abas Revenda/Consumo
+    function openSubTabProd(btn, tabId) {
+        // Esconder todos os painéis de sub-aba
+        document.querySelectorAll('.sub-tab-panel').forEach(panel => {
+            panel.classList.remove('active');
+        });
+        // Resetar estilo de todos os botões de sub-aba
+        document.querySelectorAll('.sub-tab-prod').forEach(b => {
+            b.style.background = '#e5e7eb';
+            b.style.color = '#4b5563';
+        });
+        // Mostrar painel selecionado
+        const painel = document.getElementById(tabId);
+        if (painel) {
+            painel.classList.add('active');
+        }
+        // Destacar botão ativo
+        btn.style.background = '#667eea';
+        btn.style.color = 'white';
     }
 
     // Função para abrir tabs

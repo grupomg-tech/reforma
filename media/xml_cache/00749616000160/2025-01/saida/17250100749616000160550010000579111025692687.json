@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579111025692687",
+  "num_nota": "57911",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579111025692687",
+      "num_item": "",
+      "codigo": "GD0000109192",
+      "ean": "7891019915194",
+      "descricao": "RN PRTT MANUSCRITO 40YY 60 103 5413 P 16L",
+      "ncm": "32091010",
+      "cest": "2400100",
+      "cfop": "5405",
+      "unidade": "LT",
+      "quantidade": 1.0,
+      "valor_unitario": 509.7,
+      "valor_total": 509.7,
+      "icms_cst": "60",
+      "icms_aliq": 0.0,
+      "icms_valor": 0.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 3.31,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 15.29
+    }
+  ]
+}

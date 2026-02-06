@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579381025698719",
+  "num_nota": "57938",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579381025698719",
+      "num_item": "",
+      "codigo": "3933",
+      "ean": "7899381661824",
+      "descricao": "FARBEN PRIMER UNIVERSAL CINZA 900ML",
+      "ncm": "32149000",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "QT",
+      "quantidade": 1.0,
+      "valor_unitario": 47.0,
+      "valor_total": 47.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 9.4,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.24,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 1.13
+    }
+  ]
+}

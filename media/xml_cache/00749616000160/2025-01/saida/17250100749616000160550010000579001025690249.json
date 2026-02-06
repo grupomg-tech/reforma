@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579001025690249",
+  "num_nota": "57900",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579001025690249",
+      "num_item": "",
+      "codigo": "6116",
+      "ean": "7896603804250",
+      "descricao": "FITA CREPE ADELBRAS AZUL 48X50M 722",
+      "ncm": "48114110",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "UN",
+      "quantidade": 5.0,
+      "valor_unitario": 32.5,
+      "valor_total": 162.5,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 32.5,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.85,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 3.9
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580701025735170",
+  "num_nota": "58070",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580701025735170",
+      "num_item": "",
+      "codigo": "10964",
+      "ean": "7896603806575",
+      "descricao": "FITA CREPE ADELBRAS 48MMX40M 711",
+      "ncm": "48114110",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "UN",
+      "quantidade": 4.0,
+      "valor_unitario": 13.0,
+      "valor_total": 52.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 10.4,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.27,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 1.25
+    }
+  ]
+}

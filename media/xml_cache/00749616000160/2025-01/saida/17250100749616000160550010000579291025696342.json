@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000579291025696342",
+  "num_nota": "57929",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000579291025696342",
+      "num_item": "",
+      "codigo": "10597",
+      "ean": "7898570238717",
+      "descricao": "BAUTECH SELANTE ACABA TRINCA 400ML-21682",
+      "ncm": "35069120",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "UN",
+      "quantidade": 1.0,
+      "valor_unitario": 23.0,
+      "valor_total": 23.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 4.6,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.12,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 0.55
+    }
+  ]
+}

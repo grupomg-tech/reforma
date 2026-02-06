@@ -1,0 +1,34 @@
+{
+  "chave": "17250100749616000160550010000580851025739712",
+  "num_nota": "58085",
+  "produtos": [
+    {
+      "chave_nfe": "17250100749616000160550010000580851025739712",
+      "num_item": "",
+      "codigo": "7057",
+      "ean": "7898570233484",
+      "descricao": "BAUTECH BLOQUEIO DE UMIDADE 1LT",
+      "ncm": "38244000",
+      "cest": "",
+      "cfop": "5102",
+      "unidade": "QT",
+      "quantidade": 3.0,
+      "valor_unitario": 50.0,
+      "valor_total": 150.0,
+      "icms_cst": "00",
+      "icms_aliq": 20.0,
+      "icms_valor": 30.0,
+      "icms_st_valor": 0.0,
+      "icms_st_bc": 0.0,
+      "ipi_cst": "",
+      "ipi_aliq": 0.0,
+      "ipi_valor": 0.0,
+      "pis_cst": "01",
+      "pis_aliq": 0.65,
+      "pis_valor": 0.78,
+      "cofins_cst": "01",
+      "cofins_aliq": 3.0,
+      "cofins_valor": 3.6
+    }
+  ]
+}
