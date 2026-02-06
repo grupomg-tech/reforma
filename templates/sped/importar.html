@@ -640,15 +640,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     else if (regime === 'Simples Nacional') simples++;
                     else normal++;
                     
-                    addLog(`✓ ${part.nome.substring(0, 30)} - ${regime}`, 'success');
+                    if (data.erro_brasilapi) {
+                        addLog(`⚠ BrasilAPI falhou: ${data.erro_brasilapi}`, 'error');
+                        addLog(`🔄 Fallback ReceitaWS → ${part.nome.substring(0, 30)} - ${regime}`, 'success');
+                    } else {
+                        addLog(`✓ ${part.nome.substring(0, 30)} - ${regime} (BrasilAPI)`, 'success');
+                    }
                 } else {
                     erros++;
-                    addLog(`✗ ${part.nome.substring(0, 30)} - ${data.erro || 'Erro'}`, 'error');
-                    
-                    // Se rate limit, aguarda 10s antes de continuar
-                    if (data.erro && data.erro.toLowerCase().includes('rate limit')) {
-                        addLog(`⏳ Rate limit detectado - aguardando 10s...`, 'info');
-                        await new Promise(resolve => setTimeout(resolve, 10000));
+                    // Mostrar erro da BrasilAPI no log antes do erro final
+                    if (data.erro_brasilapi) {
+                        addLog(`⚠ BrasilAPI falhou: ${data.erro_brasilapi}`, 'error');
+                        addLog(`🔄 ReceitaWS também falhou: ${data.erro || 'Erro'}`, 'error');
+                    } else {
+                        addLog(`✗ ${part.nome.substring(0, 30)} - ${data.erro || 'Erro'}`, 'error');
                     }
                 }
             } catch (e) {
@@ -661,9 +666,9 @@ document.addEventListener('DOMContentLoaded', function() {
             progressCnpj.style.width = `${percentual}%`;
             progressCnpj.textContent = `${percentual}%`;
             
-            // Delay de 2.5s para respeitar rate limit das APIs
+// Delay de 1s entre consultas (BrasilAPI prioridade, ReceitaWS 20s controlado no backend)
             if (processados < total) {
-                await new Promise(resolve => setTimeout(resolve, 2500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
         
@@ -783,16 +788,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                 normalGeral++;
                                 document.getElementById('csNormal').textContent = normalGeral;
                             }
-                            addLogConsulta(`✓ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${regime}`, 'success');
+                            // Mostrar se houve fallback para ReceitaWS
+                            if (dataPart.erro_brasilapi) {
+                                addLogConsulta(`⚠ [${processadosGeral + 1}/${totalGeral}] BrasilAPI falhou: ${dataPart.erro_brasilapi}`, 'warn');
+                                addLogConsulta(`🔄 [${processadosGeral + 1}/${totalGeral}] Fallback ReceitaWS → ${part.nome.substring(0, 35)} - ${regime}`, 'success');
+                            } else {
+                                addLogConsulta(`✓ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${regime} (BrasilAPI)`, 'success');
+                            }
                         } else {
                             errosGeral++;
                             document.getElementById('csErros').textContent = errosGeral;
-                            addLogConsulta(`✗ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${dataPart.erro || 'Erro'}`, 'error');
-                            
-                            // Se rate limit, aguardar mais tempo
-                            if (dataPart.erro && dataPart.erro.toLowerCase().includes('rate limit')) {
-                                addLogConsulta(`⏳ Rate limit detectado - aguardando 12s...`, 'warn');
-                                await new Promise(r => setTimeout(r, 12000));
+                            // Mostrar erro da BrasilAPI no log antes do erro final
+                            if (dataPart.erro_brasilapi) {
+                                addLogConsulta(`⚠ [${processadosGeral + 1}/${totalGeral}] BrasilAPI falhou: ${dataPart.erro_brasilapi}`, 'warn');
+                                addLogConsulta(`🔄 [${processadosGeral + 1}/${totalGeral}] ReceitaWS também falhou: ${dataPart.erro || 'Erro'}`, 'error');
+                            } else {
+                                addLogConsulta(`✗ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${dataPart.erro || 'Erro'}`, 'error');
                             }
                         }
                     } catch (e) {
@@ -806,9 +817,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('csBarraFill').style.width = `${pct}%`;
                     document.getElementById('csContador').textContent = `${processadosGeral}/${totalGeral}`;
                     
-                    // Delay de 2.5s entre consultas
                     if (i < participantes.length - 1 && consultaAutoAtiva) {
-                        await new Promise(r => setTimeout(r, 2500));
+                        await new Promise(r => setTimeout(r, 1000));
                     }
                 }
             } catch (e) {

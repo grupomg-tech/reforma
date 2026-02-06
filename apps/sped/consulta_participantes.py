@@ -15,9 +15,11 @@ logger = logging.getLogger('sped.processamento')
 BRASIL_API_URL = "https://brasilapi.com.br/api/cnpj/v1/{cnpj}"
 RECEITAWS_URL = "https://www.receitaws.com.br/v1/cnpj/{cnpj}"
 TIMEOUT = 30
-DELAY_ENTRE_CONSULTAS = 2  # segundos (respeitar rate limit)
+DELAY_ENTRE_CONSULTAS = 1  # segundos entre consultas BrasilAPI (mínimo seguro)
 MAX_RETRIES = 3  # tentativas em caso de rate limit
 DELAY_RATE_LIMIT = 10  # segundos de espera extra em caso de rate limit
+DELAY_RECEITAWS = 20  # segundos mínimo entre usos do ReceitaWS (fallback)
+_ultimo_uso_receitaws = 0  # timestamp do último uso do ReceitaWS
 
 
 def consultar_cnpj_brasilapi(cnpj):
@@ -149,25 +151,42 @@ def consultar_participante(participante, usar_receitaws=False):
         participante.save()
         return {'sucesso': False, 'erro': 'CNPJ inválido'}
     
-# Tenta BrasilAPI primeiro com retry em caso de rate limit
-    if usar_receitaws:
+# Sempre tenta BrasilAPI primeiro (prioridade)
+    global _ultimo_uso_receitaws
+    erro_brasilapi = ''
+    api_usada = 'BrasilAPI'
+    resultado = consultar_cnpj_brasilapi(participante.cnpj)
+    
+    # Se BrasilAPI falhou por rate limit, retenta com delay
+    if not resultado.get('sucesso') and 'Rate limit' in resultado.get('erro', ''):
+        for tentativa in range(1, MAX_RETRIES + 1):
+            logger.info(f"    ⏳ BrasilAPI rate limit - aguardando {DELAY_RATE_LIMIT}s (tentativa {tentativa}/{MAX_RETRIES})...")
+            time.sleep(DELAY_RATE_LIMIT)
+            resultado = consultar_cnpj_brasilapi(participante.cnpj)
+            if resultado.get('sucesso') or 'Rate limit' not in resultado.get('erro', ''):
+                break
+    
+    # Se BrasilAPI falhou (qualquer erro), registra e tenta ReceitaWS como fallback
+    if not resultado.get('sucesso'):
+        erro_brasilapi = resultado.get('erro', 'Erro desconhecido')
+        logger.warning(f"    ⚠ BrasilAPI falhou para {participante.cnpj}: {erro_brasilapi}")
+        logger.info(f"    🔄 Tentando ReceitaWS como fallback...")
+        
+        # Garantir delay mínimo de 20s entre usos do ReceitaWS
+        agora = time.time()
+        tempo_desde_ultimo = agora - _ultimo_uso_receitaws
+        if tempo_desde_ultimo < DELAY_RECEITAWS:
+            espera = DELAY_RECEITAWS - tempo_desde_ultimo
+            logger.info(f"    ⏳ Aguardando {espera:.0f}s para usar ReceitaWS...")
+            time.sleep(espera)
+        
+        api_usada = 'ReceitaWS'
         resultado = consultar_cnpj_receitaws(participante.cnpj)
-    else:
-        resultado = consultar_cnpj_brasilapi(participante.cnpj)
-        
-        # Se rate limit, espera e retenta
-        if not resultado.get('sucesso') and 'Rate limit' in resultado.get('erro', ''):
-            for tentativa in range(1, MAX_RETRIES + 1):
-                logger.info(f"    ⏳ Rate limit - aguardando {DELAY_RATE_LIMIT}s (tentativa {tentativa}/{MAX_RETRIES})...")
-                time.sleep(DELAY_RATE_LIMIT)
-                resultado = consultar_cnpj_brasilapi(participante.cnpj)
-                if resultado.get('sucesso') or 'Rate limit' not in resultado.get('erro', ''):
-                    break
-        
-        # Se BrasilAPI falhar (não rate limit), tenta ReceitaWS
-        if not resultado.get('sucesso') and 'Rate limit' not in resultado.get('erro', ''):
-            time.sleep(DELAY_ENTRE_CONSULTAS)
-            resultado = consultar_cnpj_receitaws(participante.cnpj)
+        _ultimo_uso_receitaws = time.time()
+    
+    # Adicionar metadados ao resultado
+    resultado['api_usada'] = api_usada
+    resultado['erro_brasilapi'] = erro_brasilapi
     
     if resultado.get('sucesso'):
         participante.situacao_cadastral = resultado.get('situacao_cadastral', '')

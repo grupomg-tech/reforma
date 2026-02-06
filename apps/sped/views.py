@@ -501,6 +501,8 @@ def consultar_participante_individual(request, registro_id, participante_id):
                 'erro': participante.erro_consulta,
             },
             'erro': resultado.get('erro', ''),
+            'api_usada': resultado.get('api_usada', 'BrasilAPI'),
+            'erro_brasilapi': resultado.get('erro_brasilapi', ''),
         })
     except Registro0150.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Participante não encontrado.'}, status=404)
