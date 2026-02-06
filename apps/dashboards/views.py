@@ -1152,6 +1152,12 @@ def relatorio_fiscal(request):
             })
         composicao_saidas_list.sort(key=lambda x: (x['num_doc'], x['cfop'], x['codigo']))
         
+        # LOG TEMPORÁRIO - verificar discrepância Revenda vs Composição
+        _soma_revenda = sum(float(p['valor_total']) for p in produtos_entradas)
+        _soma_composicao_prod = sum(item['valor'] for item in composicao_entradas_list if item.get('codigo') != '---')
+        _soma_composicao_outras = sum(item['valor'] for item in composicao_entradas_list if item.get('codigo') == '---')
+        logger.warning(f"📊 REVENDA total={_soma_revenda:.2f} | COMPOSIÇÃO produtos={_soma_composicao_prod:.2f} outras={_soma_composicao_outras:.2f} total={_soma_composicao_prod + _soma_composicao_outras:.2f} | DIFERENÇA={_soma_revenda - _soma_composicao_prod:.2f}")
+        
         # Atualizar contexto
         context.update({
 # Produtos
@@ -1180,7 +1186,7 @@ def relatorio_fiscal(request):
             'compra_total_reforma_fmt': formatar_valor(compra_liquida + total_ibs_cbs_entradas),
             'carga_entradas_reforma': f"{carga_entradas_reforma:.2f}".replace('.', ','),
             
-            # Totais tfoot Entradas
+# Totais tfoot Entradas
             'total_icms_st_entradas': total_icms_st_entradas,
             'total_ipi_entradas': total_ipi_entradas,
             'total_tributos_entradas': total_tributos_entradas,
@@ -1192,6 +1198,23 @@ def relatorio_fiscal(request):
             'total_reforma_unit_entradas': total_reforma_unit_entradas,
             'total_dif_total_entradas': total_dif_total_entradas,
             'total_dif_unit_entradas': total_dif_unit_entradas,
+            # Totais tfoot Entradas FORMATADOS
+            'total_valor_entradas_fmt': formatar_valor(total_valor_entradas),
+            'total_icms_entradas_fmt': formatar_valor(total_icms_entradas),
+            'total_icms_st_entradas_fmt': formatar_valor(total_icms_st_entradas),
+            'total_ipi_entradas_fmt': formatar_valor(total_ipi_entradas),
+            'total_pis_entradas_fmt': formatar_valor(total_pis_entradas),
+            'total_cofins_entradas_fmt': formatar_valor(total_cofins_entradas),
+            'total_tributos_entradas_fmt': formatar_valor(total_tributos_entradas),
+            'total_valor_liquido_entradas_fmt': formatar_valor(total_valor_liquido_entradas),
+            'total_valor_bruto_unit_entradas_fmt': formatar_valor(total_valor_bruto_unit_entradas),
+            'total_valor_liq_unit_entradas_fmt': formatar_valor(total_valor_liq_unit_entradas),
+            'total_ibs_cbs_entradas_fmt': formatar_valor(total_ibs_cbs_entradas),
+            'total_ibs_cbs_unit_entradas_fmt': formatar_valor(total_ibs_cbs_unit_entradas),
+            'total_reforma_entradas_fmt': formatar_valor(total_reforma_entradas),
+            'total_reforma_unit_entradas_fmt': formatar_valor(total_reforma_unit_entradas),
+            'total_dif_total_entradas_fmt': formatar_valor(total_dif_total_entradas),
+            'total_dif_unit_entradas_fmt': formatar_valor(total_dif_unit_entradas),
             
             # Totais Consumo
             'total_valor_consumo': total_valor_consumo,

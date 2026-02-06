@@ -1298,22 +1298,22 @@
                                 <tfoot>
                                     <tr>
                                         <td colspan="6"><strong>TOTAL</strong></td>
-                                        <td>R$ {{ total_valor_bruto_unit_entradas|floatformat:2 }}</td>
-                                        <td>R$ {{ total_valor_entradas|floatformat:2 }}</td>
-                                        <td>R$ {{ total_icms_entradas|floatformat:2 }}</td>
-                                        <td>R$ {{ total_icms_st_entradas|floatformat:2 }}</td>
-                                        <td>R$ {{ total_ipi_entradas|floatformat:2 }}</td>
-                                        <td>R$ {{ total_pis_entradas|floatformat:2 }}</td>
-                                        <td>R$ {{ total_cofins_entradas|floatformat:2 }}</td>
-                                        <td>R$ {{ total_tributos_entradas|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ total_valor_liq_unit_entradas|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ total_valor_liquido_entradas|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ total_ibs_cbs_unit_entradas|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ total_ibs_cbs_entradas|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ total_reforma_unit_entradas|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ total_reforma_entradas|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ total_dif_unit_entradas|floatformat:2 }}</td>
-                                        <td class="reforma">R$ {{ total_dif_total_entradas|floatformat:2 }}</td>
+                                        <td>R$ {{ total_valor_bruto_unit_entradas_fmt }}</td>
+                                        <td>R$ {{ total_valor_entradas_fmt }}</td>
+                                        <td>R$ {{ total_icms_entradas_fmt }}</td>
+                                        <td>R$ {{ total_icms_st_entradas_fmt }}</td>
+                                        <td>R$ {{ total_ipi_entradas_fmt }}</td>
+                                        <td>R$ {{ total_pis_entradas_fmt }}</td>
+                                        <td>R$ {{ total_cofins_entradas_fmt }}</td>
+                                        <td>R$ {{ total_tributos_entradas_fmt }}</td>
+                                        <td class="reforma">R$ {{ total_valor_liq_unit_entradas_fmt }}</td>
+                                        <td class="reforma">R$ {{ total_valor_liquido_entradas_fmt }}</td>
+                                        <td class="reforma">R$ {{ total_ibs_cbs_unit_entradas_fmt }}</td>
+                                        <td class="reforma">R$ {{ total_ibs_cbs_entradas_fmt }}</td>
+                                        <td class="reforma">R$ {{ total_reforma_unit_entradas_fmt }}</td>
+                                        <td class="reforma">R$ {{ total_reforma_entradas_fmt }}</td>
+                                        <td class="reforma">R$ {{ total_dif_unit_entradas_fmt }}</td>
+                                        <td class="reforma">R$ {{ total_dif_total_entradas_fmt }}</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -2460,6 +2460,14 @@
                     <tbody id="corpoComposicao">
                     </tbody>
                     <tfoot>
+                        <tr style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; font-weight: 600;">
+                            <td colspan="4"><strong>Subtotal Produtos</strong></td>
+                            <td style="text-align: right;" id="subtotalProdutos"></td>
+                        </tr>
+                        <tr style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; font-weight: 600;">
+                            <td colspan="4"><strong>Subtotal Outras Despesas (Frete/Seguro/Outros)</strong></td>
+                            <td style="text-align: right;" id="subtotalOutras"></td>
+                        </tr>
                         <tr style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; font-weight: 700;">
                             <td colspan="4"><strong>TOTAL GERAL</strong></td>
                             <td style="text-align: right;" id="totalComposicao"></td>
@@ -2604,9 +2612,16 @@
         const corpo = document.getElementById('corpoComposicao');
         let html = '';
         let total = 0;
+        let totalProdutos = 0;
+        let totalOutras = 0;
         dados.forEach(item => {
             const valor = parseFloat(item.valor) || 0;
             total += valor;
+            if (item.codigo === '---') {
+                totalOutras += valor;
+            } else {
+                totalProdutos += valor;
+            }
             html += `<tr>
                 <td style="cursor:pointer;" onclick="toggleFiltroRapido('nf','${item.num_doc}')">${item.num_doc}</td>
                 <td style="cursor:pointer;" onclick="toggleFiltroRapido('cfop','${item.cfop}')">${item.cfop}</td>
@@ -2616,6 +2631,8 @@
             </tr>`;
         });
         corpo.innerHTML = html;
+        document.getElementById('subtotalProdutos').textContent = 'R$ ' + totalProdutos.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('subtotalOutras').textContent = 'R$ ' + totalOutras.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('totalComposicao').textContent = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('totalRegistrosComposicao').textContent = dados.length + ' registros';
     }
