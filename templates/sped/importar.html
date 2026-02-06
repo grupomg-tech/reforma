@@ -804,8 +804,10 @@ document.addEventListener('DOMContentLoaded', function() {
         consultaAutoAtiva = false;
     }
     
-    // Expor função globalmente para ser chamada após importação AJAX
+// Expor funções globalmente para serem chamadas pelo onclick do HTML
     window.iniciarConsultaAutomatica = iniciarConsultaAutomatica;
+    window.fecharModalConsulta = fecharModalConsulta;
+    window.cancelarConsultaAuto = cancelarConsultaAuto;
 });
 </script>
                 <li class="nav-item">

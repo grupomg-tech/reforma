@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from apps.empresa.models import Empresa
-from apps.dashboards.models import ProdutoSaidaAPI, AjusteManualICMS
+from apps.dashboards.models import ProdutoSaidaAPI, ProdutoEntradaAPI, AjusteManualICMS
 
 
 @login_required
@@ -204,6 +204,78 @@ def relatorio_fiscal(request):
         produtos_entradas = sorted(produtos_entradas_dict.values(), key=lambda x: (-x['valor_total'], x['codigo']))
         
         # ========================================
+        # BUSCAR PRODUTOS ENTRADA SALVOS VIA API (docs sem C170)
+        # ========================================
+        produtos_entrada_api = ProdutoEntradaAPI.objects.filter(
+            empresa_id=empresa_id,
+            periodo_inicial=periodo_inicial,
+            periodo_final=periodo_final
+        )
+        if produtos_entrada_api.exists():
+            for prod in produtos_entrada_api:
+                cod = prod.codigo
+                if cod not in produtos_entradas_dict:
+                    produtos_entradas_dict[cod] = {
+                        'codigo': cod,
+                        'descricao': prod.descricao,
+                        'ncm': prod.ncm,
+                        'cfop': prod.cfop,
+                        'quantidade': Decimal('0'),
+                        'valor_total': Decimal('0'),
+                        'icms': Decimal('0'),
+                        'icms_st': Decimal('0'),
+                        'ipi': Decimal('0'),
+                        'pis': Decimal('0'),
+                        'cofins': Decimal('0'),
+                        'vl_bc_icms': Decimal('0'),
+                        'vl_bc_pis': Decimal('0'),
+                        'vl_bc_cofins': Decimal('0'),
+                    }
+                produtos_entradas_dict[cod]['quantidade'] += prod.quantidade or Decimal('0')
+                produtos_entradas_dict[cod]['valor_total'] += prod.valor_total or Decimal('0')
+                produtos_entradas_dict[cod]['icms'] += prod.icms_valor or Decimal('0')
+                produtos_entradas_dict[cod]['icms_st'] += prod.icms_st_valor or Decimal('0')
+                produtos_entradas_dict[cod]['ipi'] += prod.ipi_valor or Decimal('0')
+                produtos_entradas_dict[cod]['pis'] += prod.pis_valor or Decimal('0')
+                produtos_entradas_dict[cod]['cofins'] += prod.cofins_valor or Decimal('0')
+
+            # Recalcular campos derivados para todos os produtos
+            aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
+            for cod, prod in produtos_entradas_dict.items():
+                total_tributos = prod['icms'] + prod['icms_st'] + prod['ipi'] + prod['pis'] + prod['cofins']
+                valor_liquido = prod['valor_total'] - total_tributos
+                qtd = prod['quantidade'] if prod['quantidade'] else Decimal('1')
+                valor_bruto_unit = (prod['valor_total'] / qtd).quantize(Decimal('0.01')) if qtd else Decimal('0')
+                valor_liq_unit = (valor_liquido / qtd).quantize(Decimal('0.01')) if qtd else Decimal('0')
+                ibs_cbs = (valor_liquido * aliq_total / Decimal('100')).quantize(Decimal('0.01'))
+                ibs_cbs_unit = (ibs_cbs / qtd).quantize(Decimal('0.01')) if qtd else Decimal('0')
+                total_reforma = valor_liquido + ibs_cbs
+                total_reforma_unit = (total_reforma / qtd).quantize(Decimal('0.01')) if qtd else Decimal('0')
+                dif_unit = total_reforma_unit - valor_bruto_unit
+                dif_total = total_reforma - prod['valor_total']
+
+                prod['total_tributos'] = total_tributos
+                prod['valor_liquido'] = valor_liquido
+                prod['valor_bruto_unit'] = valor_bruto_unit
+                prod['valor_liq_unit'] = valor_liq_unit
+                prod['ibs_cbs'] = ibs_cbs
+                prod['ibs_cbs_unit'] = ibs_cbs_unit
+                prod['total_reforma'] = total_reforma
+                prod['total_reforma_unit'] = total_reforma_unit
+                prod['dif_unit'] = dif_unit
+                prod['dif_total'] = dif_total
+
+            produtos_entradas = sorted(produtos_entradas_dict.values(), key=lambda x: (-x['valor_total'], x['codigo']))
+
+        # Verificar se há docs de entrada sem C170 (para mostrar botão de busca API)
+        from apps.sped.models import RegistroC170 as C170Model
+        total_docs_entrada_sem_itens = 0
+        for doc in documentos_entrada:
+            if doc.chv_nfe and len(doc.chv_nfe) >= 44 and doc.cod_mod == '55':
+                if not C170Model.objects.filter(registro_c100=doc).exists():
+                    total_docs_entrada_sem_itens += 1
+
+        # ========================================
         # AGREGAR FORNECEDORES DE ENTRADA
         # ========================================
         from apps.sped.models import Registro0150
@@ -232,6 +304,7 @@ def relatorio_fiscal(request):
                         'nome': part.nome,
                         'regime': regime,
                         'uf': part.uf,
+                        'is_contribuinte': part.is_contribuinte,
                     }
         
         # Agregar valores por fornecedor (documentos de entrada)
@@ -249,6 +322,7 @@ def relatorio_fiscal(request):
                     'nome': info_part.get('nome', 'Não identificado'),
                     'regime': info_part.get('regime', '-'),
                     'uf': info_part.get('uf', '-'),
+                    'is_contribuinte': info_part.get('is_contribuinte', False),
                     'valor_bruto': Decimal('0'),
                     'icms': Decimal('0'),
                     'icms_st': Decimal('0'),
@@ -261,7 +335,9 @@ def relatorio_fiscal(request):
             fornecedores_dict[cod_part]['valor_bruto'] += doc.vl_doc or Decimal('0')
             # Pessoa Física não aproveita crédito de impostos em entradas
             if fornecedores_dict[cod_part]['regime'] != 'PESSOA FÍSICA':
-                fornecedores_dict[cod_part]['icms'] += doc.vl_icms or Decimal('0')
+                # ICMS só é creditado se o fornecedor for contribuinte de ICMS (possui IE válida)
+                if fornecedores_dict[cod_part].get('is_contribuinte', False):
+                    fornecedores_dict[cod_part]['icms'] += doc.vl_icms or Decimal('0')
                 fornecedores_dict[cod_part]['pis'] += doc.vl_pis or Decimal('0')
                 fornecedores_dict[cod_part]['cofins'] += doc.vl_cofins or Decimal('0')
         
@@ -270,8 +346,8 @@ def relatorio_fiscal(request):
             tributos = forn['icms'] + forn['icms_st'] + forn['ipi'] + forn['iss'] + forn['pis'] + forn['cofins']
             liquido = forn['valor_bruto'] - tributos
             
-            # Pessoa Física não gera crédito de IBS/CBS
-            if forn['regime'] == 'PESSOA FÍSICA':
+# Pessoa Física e não contribuinte de ICMS não geram crédito de IBS/CBS
+            if forn['regime'] == 'PESSOA FÍSICA' or not forn.get('is_contribuinte', False):
                 ibs_cbs_efetivo = Decimal('0')
             else:
                 aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
@@ -348,13 +424,19 @@ def relatorio_fiscal(request):
         # ========================================
         # AGREGAR UFs DE ENTRADA
         # ========================================
+        from apps.empresa.models import Empresa as EmpresaModel
+        try:
+            empresa_obj = EmpresaModel.objects.get(id=empresa_id)
+            uf_empresa = empresa_obj.uf.sigla if empresa_obj.uf else 'N/I'
+        except EmpresaModel.DoesNotExist:
+            uf_empresa = 'N/I'
         ufs_entrada_dict = {}
         for doc in documentos_entrada:
             cod_part = doc.cod_part
             info_part = participantes_dict.get(cod_part, {})
             uf_code = info_part.get('uf', '') or ''
             if not uf_code:
-                uf_code = 'N/I'
+                uf_code = uf_empresa
             
             if uf_code not in ufs_entrada_dict:
                 ufs_entrada_dict[uf_code] = {
@@ -724,6 +806,9 @@ def relatorio_fiscal(request):
             'carga_reforma_compras': float(carga_entradas_reforma),
             'carga_atual_vendas': float(carga_saidas),
             'carga_reforma_vendas': float(carga_saidas_reforma),
+            
+# Entradas sem itens (para botão busca API)
+            'total_docs_entrada_sem_itens': total_docs_entrada_sem_itens,
             
             # Fornecedores
             'fornecedores_entradas': fornecedores_entradas,
@@ -1245,6 +1330,148 @@ def api_salvar_produtos_api(request):
     except Exception as e:
         return JsonResponse({'success': False, 'message': f'Erro ao salvar: {str(e)}'})
 @csrf_exempt
+@login_required
+def api_listar_chaves_entrada_sem_itens(request):
+    """Retorna chaves de NF-e de entrada que não possuem itens C170"""
+    from apps.sped.models import Registro0000, RegistroC100, RegistroC170
+
+    empresa_id = request.GET.get('empresa')
+    periodo_inicial = request.GET.get('periodo_inicial')
+    periodo_final = request.GET.get('periodo_final')
+
+    if not empresa_id or not periodo_inicial or not periodo_final:
+        return JsonResponse({'success': False, 'message': 'Parâmetros incompletos', 'chaves': []})
+
+    registros_0000 = Registro0000.objects.filter(
+        empresa_id=empresa_id,
+        processado=True,
+        periodo__gte=periodo_inicial + '-01',
+        periodo__lte=periodo_final + '-28'
+    )
+
+    # Buscar documentos C100 de entrada (ind_oper='0') com chave válida
+    documentos_entrada = RegistroC100.objects.filter(
+        registro_0000__in=registros_0000,
+        ind_oper='0'
+    ).exclude(chv_nfe__isnull=True).exclude(chv_nfe='')
+
+    chaves_sem_itens = []
+    chaves_nfce = []
+
+    for doc in documentos_entrada:
+        if not doc.chv_nfe or len(doc.chv_nfe) < 44:
+            continue
+
+        modelo = doc.cod_mod or '55'
+
+        # Verificar se tem C170
+        tem_itens = RegistroC170.objects.filter(registro_c100=doc).exists()
+        if tem_itens:
+            continue
+
+        dados_doc = {
+            'chave_nfe': doc.chv_nfe,
+            'numero': doc.num_doc,
+            'modelo': modelo,
+            'modelo_desc': 'NF-e' if modelo == '55' else 'NFC-e',
+            'valor': float(doc.vl_doc) if doc.vl_doc else 0,
+            'data': doc.dt_doc.strftime('%d/%m/%Y') if doc.dt_doc else '',
+        }
+
+        if modelo == '55':
+            chaves_sem_itens.append(dados_doc)
+        else:
+            chaves_nfce.append(dados_doc)
+
+    return JsonResponse({
+        'success': True,
+        'total': len(chaves_sem_itens),
+        'total_nfe': len(chaves_sem_itens),
+        'total_nfce': len(chaves_nfce),
+        'chaves': chaves_sem_itens,
+        'nfce_ignoradas': chaves_nfce
+    })
+
+
+@login_required
+def api_chaves_entrada_processadas(request):
+    """Retorna lista de chaves de entrada já processadas via API"""
+    empresa_id = request.GET.get('empresa')
+    periodo_inicial = request.GET.get('periodo_inicial')
+    periodo_final = request.GET.get('periodo_final')
+
+    if not empresa_id or not periodo_inicial or not periodo_final:
+        return JsonResponse({'chaves_processadas': []})
+
+    chaves_salvas = ProdutoEntradaAPI.objects.filter(
+        empresa_id=empresa_id,
+        periodo_inicial=periodo_inicial,
+        periodo_final=periodo_final
+    ).values_list('chave_nfe', flat=True).distinct()
+
+    return JsonResponse({
+        'chaves_processadas': list(chaves_salvas),
+        'total_processadas': len(chaves_salvas)
+    })
+
+
+@csrf_exempt
+@login_required
+def api_salvar_produtos_entrada_api(request):
+    """Salva produtos de entrada buscados via API no banco"""
+    import json
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Método não permitido'}, status=405)
+
+    data = json.loads(request.body)
+    empresa_id = data.get('empresa_id')
+    periodo_inicial = data.get('periodo_inicial')
+    periodo_final = data.get('periodo_final')
+    produtos = data.get('produtos', [])
+
+    if not empresa_id or not periodo_inicial or not periodo_final:
+        return JsonResponse({'success': False, 'message': 'Parâmetros incompletos'})
+
+    salvos = 0
+    for prod in produtos:
+        chave = prod.get('chave_nfe', '')
+        if not chave:
+            continue
+        ProdutoEntradaAPI.objects.update_or_create(
+            empresa_id=empresa_id,
+            periodo_inicial=periodo_inicial,
+            periodo_final=periodo_final,
+            chave_nfe=chave,
+            codigo=prod.get('codigo', ''),
+            defaults={
+                'descricao': prod.get('descricao', ''),
+                'ncm': prod.get('ncm', ''),
+                'cfop': prod.get('cfop', ''),
+                'unidade': prod.get('unidade', ''),
+                'quantidade': prod.get('quantidade', 0),
+                'valor_unitario': prod.get('valor_unitario', 0),
+                'valor_total': prod.get('valor_total', 0),
+                'icms_cst': prod.get('icms_cst', ''),
+                'icms_aliq': prod.get('icms_aliq', 0),
+                'icms_valor': prod.get('icms_valor', 0),
+                'icms_st_valor': prod.get('icms_st_valor', 0),
+                'ipi_cst': prod.get('ipi_cst', ''),
+                'ipi_aliq': prod.get('ipi_aliq', 0),
+                'ipi_valor': prod.get('ipi_valor', 0),
+                'pis_cst': prod.get('pis_cst', ''),
+                'pis_aliq': prod.get('pis_aliq', 0),
+                'pis_valor': prod.get('pis_valor', 0),
+                'cofins_cst': prod.get('cofins_cst', ''),
+                'cofins_aliq': prod.get('cofins_aliq', 0),
+                'cofins_valor': prod.get('cofins_valor', 0),
+            }
+        )
+        salvos += 1
+
+    return JsonResponse({'success': True, 'salvos': salvos})
+
+
 @login_required
 def api_importar_ajustes_manuais_icms(request):
     """Importa ajustes manuais ICMS via planilha (JSON)"""
