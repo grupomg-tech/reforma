@@ -2518,7 +2518,7 @@
     ]);
 
     function isCfopOperacaoEfetiva(cfop, tipo) {
-        const cfopLimpo = (cfop || '').replace('.', '').trim();
+        const cfopLimpo = (cfop || '').replace(/[\.\s]/g, '').trim();
         if (cfopLimpo.length < 4) return false;
         const primeiroDigito = cfopLimpo[0];
         const sufixo = cfopLimpo.substring(1);
@@ -2605,7 +2605,7 @@
         let html = '';
         let total = 0;
         dados.forEach(item => {
-            const valor = item.valor || 0;
+            const valor = parseFloat(item.valor) || 0;
             total += valor;
             html += `<tr>
                 <td style="cursor:pointer;" onclick="toggleFiltroRapido('nf','${item.num_doc}')">${item.num_doc}</td>

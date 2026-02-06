@@ -608,7 +608,8 @@ def relatorio_fiscal(request):
                         cfops_entrada_dict[cfop_code]['ipi'] += c190.get('vl_ipi', Decimal('0'))
                         
                         # Armazenar VL_OPR por NF/CFOP para composição detalhada
-                        chave_nf_cfop = (num_doc, cfop_code)
+                        cfop_code_limpo = cfop_code.replace('.', '').strip()
+                        chave_nf_cfop = (num_doc, cfop_code_limpo)
                         _c190_entrada_por_nf_cfop[chave_nf_cfop] = _c190_entrada_por_nf_cfop.get(chave_nf_cfop, Decimal('0')) + c190.get('vl_opr', Decimal('0'))
             except Exception as e:
                 logger.error(f"Erro ao ler C190 do registro {reg.id}: {e}") if 'logger' in dir() else None
@@ -1068,31 +1069,38 @@ def relatorio_fiscal(request):
         # Somar VL_ITEM do C170 por (num_doc, cfop) para calcular diferença com C190
         _soma_c170_por_nf_cfop = {}
         
+        # Conjunto unificado de CFOPs válidos para composição (Revenda + Consumo)
+        SUFIXOS_COMPOSICAO = SUFIXOS_COMPRA_EFETIVA | SUFIXOS_CONSUMO
+        
         for item in itens_entrada:
             doc = item.registro_c100
             info_item = itens_0200.get(item.cod_item, {})
             num_doc = doc.num_doc or ''
             cfop = item.cfop or ''
+            cfop_limpo = cfop.replace('.', '').strip()
             
             composicao_entradas_list.append({
                 'num_doc': num_doc,
-                'cfop': cfop,
+                'cfop': cfop_limpo,
                 'codigo': item.cod_item or '',
                 'descricao': info_item.get('descricao', item.descr_compl or item.cod_item or ''),
                 'valor': float(item.vl_item or 0),
             })
             
-            chave = (num_doc, cfop)
+            chave = (num_doc, cfop_limpo)
             _soma_c170_por_nf_cfop[chave] = _soma_c170_por_nf_cfop.get(chave, Decimal('0')) + (item.vl_item or Decimal('0'))
         
-        # Adicionar linhas de "Outras Despesas" para diferença entre C190 VL_OPR e soma C170 VL_ITEM
+# Adicionar linhas de "Outras Despesas" para diferença entre C190 VL_OPR e soma C170 VL_ITEM
         for chave_nf_cfop, vl_opr_c190 in _c190_entrada_por_nf_cfop.items():
-            soma_c170 = _soma_c170_por_nf_cfop.get(chave_nf_cfop, Decimal('0'))
+            cfop_c190_limpo = chave_nf_cfop[1].replace('.', '').strip() if chave_nf_cfop[1] else ''
+            soma_c170 = _soma_c170_por_nf_cfop.get((chave_nf_cfop[0], cfop_c190_limpo), Decimal('0'))
+            if soma_c170 == Decimal('0'):
+                soma_c170 = _soma_c170_por_nf_cfop.get(chave_nf_cfop, Decimal('0'))
             diferenca = vl_opr_c190 - soma_c170
             if diferenca > Decimal('0.01'):
                 composicao_entradas_list.append({
                     'num_doc': chave_nf_cfop[0],
-                    'cfop': chave_nf_cfop[1],
+                    'cfop': cfop_c190_limpo,
                     'codigo': '---',
                     'descricao': 'Outras Despesas (Frete/Seguro/Outros)',
                     'valor': float(diferenca),
@@ -1101,7 +1109,7 @@ def relatorio_fiscal(request):
                 # Documento sem C170 (ex: devolução) - usar valor integral do C190
                 composicao_entradas_list.append({
                     'num_doc': chave_nf_cfop[0],
-                    'cfop': chave_nf_cfop[1],
+                    'cfop': cfop_c190_limpo,
                     'codigo': '---',
                     'descricao': 'Valor da Operação (sem itens C170)',
                     'valor': float(vl_opr_c190),
@@ -1109,7 +1117,7 @@ def relatorio_fiscal(request):
         
         composicao_entradas_list.sort(key=lambda x: (x['num_doc'], x['cfop'], x['codigo']))
         
-        # ========================================
+# ========================================
         # ADICIONAR PRODUTOS DA API NA COMPOSIÇÃO DE ENTRADAS
         # ========================================
         if produtos_entrada_api.exists():
@@ -1118,9 +1126,10 @@ def relatorio_fiscal(request):
                 num_doc_api = ''
                 if prod.chave_nfe and len(prod.chave_nfe) >= 34:
                     num_doc_api = prod.chave_nfe[25:34].lstrip('0') or '0'
+                cfop_api_limpo = (prod.cfop or '').replace('.', '').strip()
                 composicao_entradas_list.append({
                     'num_doc': num_doc_api,
-                    'cfop': prod.cfop or '',
+                    'cfop': cfop_api_limpo,
                     'codigo': prod.codigo or '',
                     'descricao': prod.descricao or '',
                     'valor': float(prod.valor_total or 0),
