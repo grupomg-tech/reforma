@@ -1,6 +1,7 @@
 import os
 import zipfile
 import logging
+import threading
 from io import BytesIO
 from datetime import datetime
 
@@ -121,6 +122,34 @@ def processar_importacao_sped(request):
             except Exception as e:
                 logger.error(f"Erro ao processar SPED {reg_id}: {e}")
         
+        # Inicia consulta de regime tributário dos participantes em background
+        if registros_ids:
+            logger.info("-" * 40)
+            logger.info("INICIANDO CONSULTA DE REGIME TRIBUTÁRIO (BACKGROUND)")
+            logger.info("-" * 40)
+            
+            def _consultar_background(ids_registros):
+                from django.db import connection
+                try:
+                    from apps.sped.consulta_participantes import consultar_participantes_lote
+                    for rid in ids_registros:
+                        try:
+                            logger.info(f"Consulta background - Registro {rid}")
+                            stats = consultar_participantes_lote(rid)
+                            logger.info(f"Consulta background concluída para registro {rid}: {stats}")
+                        except Exception as e:
+                            logger.error(f"Erro consulta background registro {rid}: {e}")
+                finally:
+                    connection.close()
+            
+            t = threading.Thread(
+                target=_consultar_background,
+                args=(list(registros_ids),),
+                daemon=True
+            )
+            t.start()
+            logger.info(f"Thread de consulta iniciada para {len(registros_ids)} registro(s)")
+        
         logger.info("=" * 60)
         logger.info("RESUMO DA IMPORTAÇÃO")
         logger.info("=" * 60)
@@ -134,12 +163,12 @@ def processar_importacao_sped(request):
         if is_ajax:
             return JsonResponse({
                 'success': True,
-                'message': f'Importação concluída! {relatorio["sucesso"]} arquivo(s) processado(s).',
+                'message': f'Importação concluída! {relatorio["sucesso"]} arquivo(s) processado(s). Consulta de regime tributário iniciada em background.',
                 'relatorio': relatorio,
                 'registros_0000_ids': registros_ids,
             })
         
-        messages.success(request, f'Importação concluída! {relatorio["sucesso"]} arquivo(s) processado(s).')
+        messages.success(request, f'Importação concluída! {relatorio["sucesso"]} arquivo(s) processado(s). Consulta de regime tributário iniciada em background.')
         
     except Exception as e:
         logger.error(f"ERRO CRÍTICO na importação: {str(e)}", exc_info=True)

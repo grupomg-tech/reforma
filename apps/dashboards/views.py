@@ -291,6 +291,151 @@ def relatorio_fiscal(request):
         total_fornecedores_ibs_cbs = sum(f['ibs_cbs_efetivo'] for f in fornecedores_entradas)
         total_fornecedores_reforma = sum(f['total_reforma'] for f in fornecedores_entradas)
         
+        # ========================================
+        # AGREGAR CFOPs DE ENTRADA
+        # ========================================
+        cfops_entrada_dict = {}
+        for item in itens_entrada:
+            cfop_code = item.cfop or ''
+            if not cfop_code:
+                continue
+            
+            if cfop_code not in cfops_entrada_dict:
+                cfops_entrada_dict[cfop_code] = {
+                    'cfop': cfop_code,
+                    'valor_bruto': Decimal('0'),
+                    'icms': Decimal('0'),
+                    'icms_st': Decimal('0'),
+                    'ipi': Decimal('0'),
+                    'pis': Decimal('0'),
+                    'cofins': Decimal('0'),
+                }
+            
+            cfops_entrada_dict[cfop_code]['valor_bruto'] += item.vl_item or Decimal('0')
+            cfops_entrada_dict[cfop_code]['icms'] += item.vl_icms or Decimal('0')
+            cfops_entrada_dict[cfop_code]['icms_st'] += getattr(item, 'vl_icms_st', Decimal('0')) or Decimal('0')
+            cfops_entrada_dict[cfop_code]['ipi'] += getattr(item, 'vl_ipi', Decimal('0')) or Decimal('0')
+            cfops_entrada_dict[cfop_code]['pis'] += item.vl_pis or Decimal('0')
+            cfops_entrada_dict[cfop_code]['cofins'] += item.vl_cofins or Decimal('0')
+        
+        # Calcular tributos e líquido para cada CFOP
+        for cfop_code, cfop_data in cfops_entrada_dict.items():
+            tributos = (cfop_data['icms'] + cfop_data['icms_st'] + cfop_data['ipi']
+                       + cfop_data['pis'] + cfop_data['cofins'])
+            cfop_data['tributos'] = tributos
+            cfop_data['liquido'] = cfop_data['valor_bruto'] - tributos
+        
+        cfops_entradas = sorted(cfops_entrada_dict.values(), key=lambda x: x['cfop'])
+        
+        # Totais CFOPs
+        total_cfops_valor_bruto = sum(c['valor_bruto'] for c in cfops_entradas)
+        total_cfops_icms = sum(c['icms'] for c in cfops_entradas)
+        total_cfops_icms_st = sum(c['icms_st'] for c in cfops_entradas)
+        total_cfops_ipi = sum(c['ipi'] for c in cfops_entradas)
+        total_cfops_pis = sum(c['pis'] for c in cfops_entradas)
+        total_cfops_cofins = sum(c['cofins'] for c in cfops_entradas)
+        total_cfops_tributos = sum(c['tributos'] for c in cfops_entradas)
+        total_cfops_liquido = sum(c['liquido'] for c in cfops_entradas)
+        
+        # ========================================
+        # AGREGAR UFs DE ENTRADA
+        # ========================================
+        ufs_entrada_dict = {}
+        for doc in documentos_entrada:
+            cod_part = doc.cod_part
+            info_part = participantes_dict.get(cod_part, {})
+            uf_code = info_part.get('uf', '') or ''
+            if not uf_code:
+                uf_code = 'N/I'
+            
+            if uf_code not in ufs_entrada_dict:
+                ufs_entrada_dict[uf_code] = {
+                    'uf': uf_code,
+                    'valor_bruto': Decimal('0'),
+                    'icms': Decimal('0'),
+                    'icms_st': Decimal('0'),
+                    'ipi': Decimal('0'),
+                    'iss': Decimal('0'),
+                    'pis': Decimal('0'),
+                    'cofins': Decimal('0'),
+                }
+            
+            ufs_entrada_dict[uf_code]['valor_bruto'] += doc.vl_doc or Decimal('0')
+            ufs_entrada_dict[uf_code]['icms'] += doc.vl_icms or Decimal('0')
+            ufs_entrada_dict[uf_code]['pis'] += doc.vl_pis or Decimal('0')
+            ufs_entrada_dict[uf_code]['cofins'] += doc.vl_cofins or Decimal('0')
+        
+        # Calcular tributos e líquido para cada UF
+        for uf_code, uf_data in ufs_entrada_dict.items():
+            tributos = (uf_data['icms'] + uf_data['icms_st'] + uf_data['ipi']
+                       + uf_data['iss'] + uf_data['pis'] + uf_data['cofins'])
+            uf_data['tributos'] = tributos
+            uf_data['liquido'] = uf_data['valor_bruto'] - tributos
+        
+        ufs_entradas = sorted(ufs_entrada_dict.values(), key=lambda x: x['uf'])
+        
+        # Totais UFs
+        total_ufs_valor_bruto = sum(u['valor_bruto'] for u in ufs_entradas)
+        total_ufs_icms = sum(u['icms'] for u in ufs_entradas)
+        total_ufs_icms_st = sum(u['icms_st'] for u in ufs_entradas)
+        total_ufs_ipi = sum(u['ipi'] for u in ufs_entradas)
+        total_ufs_iss = sum(u['iss'] for u in ufs_entradas)
+        total_ufs_pis = sum(u['pis'] for u in ufs_entradas)
+        total_ufs_cofins = sum(u['cofins'] for u in ufs_entradas)
+        total_ufs_tributos = sum(u['tributos'] for u in ufs_entradas)
+        total_ufs_liquido = sum(u['liquido'] for u in ufs_entradas)
+        
+        # ========================================
+        # AGREGAR AJUSTES APURAÇÃO ICMS (E111)
+        # ========================================
+        from apps.sped.parser import parse_sped_file as parse_sped
+        
+        TIPOS_AJUSTE = {
+            '0': '0 – Outros débitos',
+            '1': '1 – Estorno de créditos',
+            '2': '2 – Outros créditos',
+            '3': '3 – Estorno de débitos',
+            '4': '4 – Deduções do imposto apurado',
+            '5': '5 – Débito especial',
+        }
+        
+        ajustes_icms_list = []
+        for reg in registros_0000:
+            try:
+                arquivo = reg.arquivo_original
+                arquivo.open('rb')
+                conteudo_sped = arquivo.read()
+                arquivo.close()
+                dados_sped = parse_sped(conteudo_sped)
+                for aj in dados_sped.get('E111', []):
+                    cod = aj.get('cod_aj_apur', '')
+                    tipo_char = cod[2] if len(cod) > 2 else ''
+                    descricao = aj.get('descr_compl_aj', '') or TIPOS_AJUSTE.get(tipo_char, tipo_char)
+                    if not descricao.strip():
+                        descricao = TIPOS_AJUSTE.get(tipo_char, f'Tipo {tipo_char}')
+                    ajustes_icms_list.append({
+                        'codigo': cod,
+                        'descricao': descricao,
+                        'valor': aj.get('vl_aj_apur', Decimal('0')),
+                    })
+            except Exception as e:
+                logger.error(f"Erro ao ler ajustes E111 do registro {reg.id}: {e}") if 'logger' in dir() else None
+        
+        # Agrupar por código de ajuste
+        ajustes_icms_dict = {}
+        for aj in ajustes_icms_list:
+            cod = aj['codigo']
+            if cod not in ajustes_icms_dict:
+                ajustes_icms_dict[cod] = {
+                    'codigo': cod,
+                    'descricao': aj['descricao'],
+                    'valor': Decimal('0'),
+                }
+            ajustes_icms_dict[cod]['valor'] += aj['valor']
+        
+        ajustes_icms = sorted(ajustes_icms_dict.values(), key=lambda x: x['codigo'])
+        total_ajustes_icms = sum(a['valor'] for a in ajustes_icms)
+        
 # Agregar produtos de SAÍDA
         produtos_saidas_dict = {}
         for item in itens_saida:
@@ -575,6 +720,33 @@ def relatorio_fiscal(request):
             'total_fornecedores_liquido': total_fornecedores_liquido,
             'total_fornecedores_ibs_cbs': total_fornecedores_ibs_cbs,
             'total_fornecedores_reforma': total_fornecedores_reforma,
+            
+            # CFOPs de Entrada
+            'cfops_entradas': cfops_entradas,
+            'total_cfops_valor_bruto': total_cfops_valor_bruto,
+            'total_cfops_icms': total_cfops_icms,
+            'total_cfops_icms_st': total_cfops_icms_st,
+            'total_cfops_ipi': total_cfops_ipi,
+            'total_cfops_pis': total_cfops_pis,
+            'total_cfops_cofins': total_cfops_cofins,
+            'total_cfops_tributos': total_cfops_tributos,
+            'total_cfops_liquido': total_cfops_liquido,
+            
+            # UFs de Entrada
+            'ufs_entradas': ufs_entradas,
+            'total_ufs_valor_bruto': total_ufs_valor_bruto,
+            'total_ufs_icms': total_ufs_icms,
+            'total_ufs_icms_st': total_ufs_icms_st,
+            'total_ufs_ipi': total_ufs_ipi,
+            'total_ufs_iss': total_ufs_iss,
+            'total_ufs_pis': total_ufs_pis,
+            'total_ufs_cofins': total_ufs_cofins,
+            'total_ufs_tributos': total_ufs_tributos,
+            'total_ufs_liquido': total_ufs_liquido,
+            
+            # Ajustes Apuração ICMS
+            'ajustes_icms': ajustes_icms,
+            'total_ajustes_icms': total_ajustes_icms,
         })
     
     return render(request, 'dashboards/relatorio_fiscal.html', context)

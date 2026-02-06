@@ -52,6 +52,7 @@ def parse_sped_file(file_content, encoding='latin-1'):
         'C100': [],  # Documentos
         'C170': [],  # Itens dos documentos
         'C190': [],  # Analítico do documento
+        'E111': [],  # Ajustes de Apuração ICMS
     }
     
     if isinstance(file_content, bytes):
@@ -191,5 +192,12 @@ def parse_sped_file(file_content, encoding='latin-1'):
             }
             current_c100['itens'].append(item)
             registros['C170'].append(item)
+        
+        elif registro == 'E111':
+            registros['E111'].append({
+                'cod_aj_apur': campos[1] if len(campos) > 1 else '',
+                'descr_compl_aj': campos[2] if len(campos) > 2 else '',
+                'vl_aj_apur': parse_decimal(campos[3]) if len(campos) > 3 else Decimal(0),
+            })
     
     return registros
