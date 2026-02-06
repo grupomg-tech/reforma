@@ -432,10 +432,12 @@ def relatorio_fiscal(request):
         total_fornecedores_ibs_cbs = sum(f['ibs_cbs_efetivo'] for f in fornecedores_entradas)
         total_fornecedores_reforma = sum(f['total_reforma'] for f in fornecedores_entradas)
         
-        # ========================================
-        # AGREGAR CFOPs DE ENTRADA
+# ========================================
+        # AGREGAR CFOPs DE ENTRADA (usando C190 VL_OPR para bater com apuração SPED)
         # ========================================
         cfops_entrada_dict = {}
+        
+        # PIS e COFINS vêm do C170 (C190 não possui esses campos)
         for item in itens_entrada:
             cfop_code = item.cfop or ''
             if not cfop_code:
@@ -452,63 +454,58 @@ def relatorio_fiscal(request):
                     'cofins': Decimal('0'),
                 }
             
-            cfops_entrada_dict[cfop_code]['valor_bruto'] += item.vl_item or Decimal('0')
-            cfops_entrada_dict[cfop_code]['icms'] += item.vl_icms or Decimal('0')
-            cfops_entrada_dict[cfop_code]['icms_st'] += getattr(item, 'vl_icms_st', Decimal('0')) or Decimal('0')
-            cfops_entrada_dict[cfop_code]['ipi'] += getattr(item, 'vl_ipi', Decimal('0')) or Decimal('0')
             cfops_entrada_dict[cfop_code]['pis'] += item.vl_pis or Decimal('0')
             cfops_entrada_dict[cfop_code]['cofins'] += item.vl_cofins or Decimal('0')
         
-        # Adicionar CFOPs de documentos sem C170 (devoluções) usando dados C190 do SPED
+        # Valor bruto (VL_OPR), ICMS, ICMS_ST e IPI vêm do C190 (fonte autoritativa do SPED)
         from apps.sped.parser import parse_sped_file as parse_sped_c190
-        from apps.sped.models import RegistroC170 as C170Check
         
-        docs_entrada_sem_c170 = set()
-        for doc in documentos_entrada:
-            if not C170Check.objects.filter(registro_c100=doc).exists():
-                docs_entrada_sem_c170.add(doc.num_doc)
+        nums_doc_entrada = set(doc.num_doc for doc in documentos_entrada if doc.num_doc)
         
-        if docs_entrada_sem_c170:
-            for reg in registros_0000:
-                try:
-                    arquivo = reg.arquivo_original
-                    arquivo.open('rb')
-                    conteudo_sped = arquivo.read()
-                    arquivo.close()
-                    dados_c190 = parse_sped_c190(conteudo_sped)
+        # Guardar dados C190 para reusar na composição detalhada
+        _c190_entrada_por_nf_cfop = {}
+        
+        for reg in registros_0000:
+            try:
+                arquivo = reg.arquivo_original
+                arquivo.open('rb')
+                conteudo_sped = arquivo.read()
+                arquivo.close()
+                dados_c190 = parse_sped_c190(conteudo_sped)
+                
+                for doc_sped in dados_c190.get('C100', []):
+                    if doc_sped['ind_oper'] != '0':
+                        continue
+                    num_doc = doc_sped.get('num_doc', '')
+                    if num_doc not in nums_doc_entrada:
+                        continue
                     
-                    for doc_sped in dados_c190.get('C100', []):
-                        # Apenas entradas sem itens C170 que estão no nosso conjunto
-                        if doc_sped['ind_oper'] != '0':
-                            continue
-                        if doc_sped.get('num_doc', '') not in docs_entrada_sem_c170:
-                            continue
-                        if doc_sped.get('itens', []):
+                    for c190 in doc_sped.get('analiticos', []):
+                        cfop_code = c190.get('cfop', '')
+                        if not cfop_code:
                             continue
                         
-                        # Usar registros C190 (analíticos) para obter CFOP e valores
-                        for c190 in doc_sped.get('analiticos', []):
-                            cfop_code = c190.get('cfop', '')
-                            if not cfop_code:
-                                continue
-                            
-                            if cfop_code not in cfops_entrada_dict:
-                                cfops_entrada_dict[cfop_code] = {
-                                    'cfop': cfop_code,
-                                    'valor_bruto': Decimal('0'),
-                                    'icms': Decimal('0'),
-                                    'icms_st': Decimal('0'),
-                                    'ipi': Decimal('0'),
-                                    'pis': Decimal('0'),
-                                    'cofins': Decimal('0'),
-                                }
-                            
-                            cfops_entrada_dict[cfop_code]['valor_bruto'] += c190.get('vl_opr', Decimal('0'))
-                            cfops_entrada_dict[cfop_code]['icms'] += c190.get('vl_icms', Decimal('0'))
-                            cfops_entrada_dict[cfop_code]['icms_st'] += c190.get('vl_icms_st', Decimal('0'))
-                            cfops_entrada_dict[cfop_code]['ipi'] += c190.get('vl_ipi', Decimal('0'))
-                except Exception as e:
-                    logger.error(f"Erro ao ler C190 do registro {reg.id}: {e}") if 'logger' in dir() else None
+                        if cfop_code not in cfops_entrada_dict:
+                            cfops_entrada_dict[cfop_code] = {
+                                'cfop': cfop_code,
+                                'valor_bruto': Decimal('0'),
+                                'icms': Decimal('0'),
+                                'icms_st': Decimal('0'),
+                                'ipi': Decimal('0'),
+                                'pis': Decimal('0'),
+                                'cofins': Decimal('0'),
+                            }
+                        
+                        cfops_entrada_dict[cfop_code]['valor_bruto'] += c190.get('vl_opr', Decimal('0'))
+                        cfops_entrada_dict[cfop_code]['icms'] += c190.get('vl_icms', Decimal('0'))
+                        cfops_entrada_dict[cfop_code]['icms_st'] += c190.get('vl_icms_st', Decimal('0'))
+                        cfops_entrada_dict[cfop_code]['ipi'] += c190.get('vl_ipi', Decimal('0'))
+                        
+                        # Armazenar VL_OPR por NF/CFOP para composição detalhada
+                        chave_nf_cfop = (num_doc, cfop_code)
+                        _c190_entrada_por_nf_cfop[chave_nf_cfop] = _c190_entrada_por_nf_cfop.get(chave_nf_cfop, Decimal('0')) + c190.get('vl_opr', Decimal('0'))
+            except Exception as e:
+                logger.error(f"Erro ao ler C190 do registro {reg.id}: {e}") if 'logger' in dir() else None
         
         # Calcular tributos e líquido para cada CFOP
         for cfop_code, cfop_data in cfops_entrada_dict.items():
@@ -854,20 +851,53 @@ def relatorio_fiscal(request):
         def formatar_valor(valor):
             return f"{valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         
-        # ========================================
+# ========================================
         # COMPOSIÇÃO DETALHADA POR NF (ENTRADAS)
         # ========================================
         composicao_entradas_list = []
+        
+        # Somar VL_ITEM do C170 por (num_doc, cfop) para calcular diferença com C190
+        _soma_c170_por_nf_cfop = {}
+        
         for item in itens_entrada:
             doc = item.registro_c100
             info_item = itens_0200.get(item.cod_item, {})
+            num_doc = doc.num_doc or ''
+            cfop = item.cfop or ''
+            
             composicao_entradas_list.append({
-                'num_doc': doc.num_doc or '',
-                'cfop': item.cfop or '',
+                'num_doc': num_doc,
+                'cfop': cfop,
                 'codigo': item.cod_item or '',
                 'descricao': info_item.get('descricao', item.descr_compl or item.cod_item or ''),
                 'valor': float(item.vl_item or 0),
             })
+            
+            chave = (num_doc, cfop)
+            _soma_c170_por_nf_cfop[chave] = _soma_c170_por_nf_cfop.get(chave, Decimal('0')) + (item.vl_item or Decimal('0'))
+        
+        # Adicionar linhas de "Outras Despesas" para diferença entre C190 VL_OPR e soma C170 VL_ITEM
+        for chave_nf_cfop, vl_opr_c190 in _c190_entrada_por_nf_cfop.items():
+            soma_c170 = _soma_c170_por_nf_cfop.get(chave_nf_cfop, Decimal('0'))
+            diferenca = vl_opr_c190 - soma_c170
+            if diferenca > Decimal('0.01'):
+                composicao_entradas_list.append({
+                    'num_doc': chave_nf_cfop[0],
+                    'cfop': chave_nf_cfop[1],
+                    'codigo': '---',
+                    'descricao': 'Outras Despesas (Frete/Seguro/Outros)',
+                    'valor': float(diferenca),
+                })
+            elif diferenca < Decimal('-0.01') and soma_c170 == Decimal('0'):
+                # Documento sem C170 (ex: devolução) - usar valor integral do C190
+                composicao_entradas_list.append({
+                    'num_doc': chave_nf_cfop[0],
+                    'cfop': chave_nf_cfop[1],
+                    'codigo': '---',
+                    'descricao': 'Valor da Operação (sem itens C170)',
+                    'valor': float(vl_opr_c190),
+                })
+        
         composicao_entradas_list.sort(key=lambda x: (x['num_doc'], x['cfop'], x['codigo']))
         
         # ========================================
