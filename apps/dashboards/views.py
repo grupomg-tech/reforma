@@ -1,3 +1,5 @@
+import os
+import json
 from decimal import Decimal
 from pydoc import doc
 from django.shortcuts import render
@@ -336,21 +338,44 @@ def relatorio_fiscal(request):
             fornecedores_dict[cod_part]['valor_bruto'] += doc.vl_doc or Decimal('0')
             # Pessoa Física não aproveita crédito de impostos em entradas
             if fornecedores_dict[cod_part]['regime'] != 'PESSOA FÍSICA':
-                # Verificar se é devolução de venda (possui C113 - nota referenciada)
-                from apps.sped.models import RegistroC113
-                is_devolucao = RegistroC113.objects.filter(registro_c100=doc).exists()
+                # Verificar se é devolução de venda via CFOP e/ou C113
+                from apps.sped.models import RegistroC113, RegistroC170 as C170DevCheck
+                from apps.sped.validador_devolucao import classificar_cfop_devolucao, TIPO_DEVOLUCAO_VENDA, TIPO_DEVOLUCAO_COMPRA
+                is_devolucao = False
+                # Verifica por C113 (nota referenciada)
+                if RegistroC113.objects.filter(registro_c100=doc).exists():
+                    is_devolucao = True
+                # Verifica por CFOP dos itens C170
+                if not is_devolucao:
+                    cfops_doc = C170DevCheck.objects.filter(registro_c100=doc).values_list('cfop', flat=True)
+                    for cfop_item in cfops_doc:
+                        eh_dev, tipo_dev, _ = classificar_cfop_devolucao(cfop_item or '')
+                        if eh_dev and tipo_dev == TIPO_DEVOLUCAO_VENDA:
+                            is_devolucao = True
+                            break
                 # ICMS: creditado se contribuinte de ICMS OU se for devolução com crédito destacado
                 if fornecedores_dict[cod_part].get('is_contribuinte', False) or (is_devolucao and (doc.vl_icms or Decimal('0')) > Decimal('0')):
                     fornecedores_dict[cod_part]['icms'] += doc.vl_icms or Decimal('0')
                 fornecedores_dict[cod_part]['pis'] += doc.vl_pis or Decimal('0')
                 fornecedores_dict[cod_part]['cofins'] += doc.vl_cofins or Decimal('0')
         
-        # Identificar fornecedores que possuem devoluções com créditos
-        from apps.sped.models import RegistroC113
+# Identificar fornecedores que possuem devoluções com créditos
+        from apps.sped.models import RegistroC113, RegistroC170 as C170DevIdent
+        from apps.sped.validador_devolucao import classificar_cfop_devolucao as classif_dev
         fornecedores_com_devolucao = set()
         for doc in documentos_entrada:
             if doc.cod_part and (doc.vl_icms or Decimal('0')) > Decimal('0'):
+                is_dev = False
                 if RegistroC113.objects.filter(registro_c100=doc).exists():
+                    is_dev = True
+                if not is_dev:
+                    cfops_doc = C170DevIdent.objects.filter(registro_c100=doc).values_list('cfop', flat=True)
+                    for cfop_item in cfops_doc:
+                        eh_dev, _, _ = classif_dev(cfop_item or '')
+                        if eh_dev:
+                            is_dev = True
+                            break
+                if is_dev:
                     fornecedores_com_devolucao.add(doc.cod_part)
         
 # Calcular tributos totais e valores reforma para fornecedores
@@ -1020,6 +1045,69 @@ from django.views.decorators.csrf import csrf_exempt
 import logging
 logger = logging.getLogger('dashboards.api')
 
+
+def _buscar_cache_xml(chave_acesso):
+    """Busca cache de produtos XML em qualquer pasta (entrada/saida/outros)"""
+    import re
+    from django.conf import settings
+
+    if len(chave_acesso) < 20:
+        return None
+
+    cnpj_chave = chave_acesso[6:20]
+    aamm = chave_acesso[2:6]
+    periodo = f"20{aamm[:2]}-{aamm[2:]}"
+
+    try:
+        empresa = Empresa.objects.filter(cnpj_cpf__startswith=cnpj_chave[:8]).first()
+        nome_pasta = re.sub(r'[<>:"/\\|?*\n\r]', '_', (empresa.razao_social[:80] if empresa else cnpj_chave)).strip('. ')
+    except Exception:
+        nome_pasta = cnpj_chave
+
+    base_dir = os.path.join(settings.MEDIA_ROOT, 'xml_cache', nome_pasta, periodo)
+
+    for tipo in ('entrada', 'saida', 'outros'):
+        path = os.path.join(base_dir, tipo, f"{chave_acesso}.json")
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def _salvar_cache_xml(chave_acesso, ind_oper, produtos, num_nota=''):
+    """Salva produtos em cache: media/xml_cache/{empresa}/{YYYY-MM}/{entrada|saida}/"""
+    import re
+    from django.conf import settings
+
+    if len(chave_acesso) < 20:
+        return
+
+    cnpj_chave = chave_acesso[6:20]
+    aamm = chave_acesso[2:6]
+    periodo = f"20{aamm[:2]}-{aamm[2:]}"
+
+    try:
+        empresa = Empresa.objects.filter(cnpj_cpf__startswith=cnpj_chave[:8]).first()
+        nome_pasta = re.sub(r'[<>:"/\\|?*\n\r]', '_', (empresa.razao_social[:80] if empresa else cnpj_chave)).strip('. ')
+    except Exception:
+        nome_pasta = cnpj_chave
+
+    tipo = 'entrada' if ind_oper == '0' else 'saida' if ind_oper == '1' else 'outros'
+    cache_dir = os.path.join(settings.MEDIA_ROOT, 'xml_cache', nome_pasta, periodo, tipo)
+    os.makedirs(cache_dir, exist_ok=True)
+
+    cache_path = os.path.join(cache_dir, f"{chave_acesso}.json")
+    try:
+        with open(cache_path, 'w', encoding='utf-8') as f:
+            json.dump({
+                'chave': chave_acesso,
+                'num_nota': num_nota,
+                'produtos': produtos,
+            }, f, ensure_ascii=False, indent=2)
+        logger.info(f"[API-XML] NF {num_nota} - 💾 Cache salvo em {tipo}/")
+    except Exception as e:
+        logger.warning(f"[API-XML] NF {num_nota} - Erro ao salvar cache: {e}")
+
+
 @csrf_exempt
 @login_required
 def api_buscar_xml_produto(request):
@@ -1046,7 +1134,26 @@ def api_buscar_xml_produto(request):
     if len(chave_acesso) != 44:
         logger.warning(f"[API-XML] NF {num_nota} - Chave inválida: {len(chave_acesso)} dígitos")
         return JsonResponse({'success': False, 'message': f'Chave inválida: {len(chave_acesso)} dígitos'})
-    
+
+    # Verificar cache local antes de chamar API
+    ind_oper = data.get('ind_oper', '')
+    cache_local = _buscar_cache_xml(chave_acesso)
+    if cache_local:
+        try:
+            with open(cache_local, 'r', encoding='utf-8') as f:
+                cached = json.load(f)
+            qtd = len(cached.get('produtos', []))
+            logger.info(f"[API-XML] NF {num_nota} - 💾 CACHE LOCAL ({qtd} produtos)")
+            return JsonResponse({
+                'success': True,
+                'chave': chave_acesso,
+                'produtos': cached.get('produtos', []),
+                'qtd_produtos': qtd,
+                'from_cache': True
+            })
+        except Exception as e:
+            logger.warning(f"[API-XML] NF {num_nota} - Cache corrompido, rebuscando: {e}")
+
     logger.info(f"[API-XML] Buscando NF {num_nota} - Chave: {chave_acesso[:20]}...")
     
     # API Key do MeuDanfe
@@ -1097,11 +1204,16 @@ def api_buscar_xml_produto(request):
                         # Extrair dados dos produtos
                         produtos = extrair_produtos_xml(xml_content, chave_acesso)
                         logger.info(f"[API-XML] NF {num_nota} - ✅ SUCESSO! {len(produtos)} produtos extraídos")
+
+                        # Salvar no cache local
+                        _salvar_cache_xml(chave_acesso, ind_oper, produtos, num_nota)
+
                         return JsonResponse({
                             'success': True,
                             'chave': chave_acesso,
                             'produtos': produtos,
-                            'qtd_produtos': len(produtos)
+                            'qtd_produtos': len(produtos),
+                            'from_cache': False
                         })
 
                     else:

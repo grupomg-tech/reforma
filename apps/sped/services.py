@@ -5,6 +5,7 @@ import logging
 from django.db import transaction
 from apps.sped.models import Registro0000, Registro0200, RegistroC100, RegistroC170
 from apps.sped.parser import parse_sped_file
+from apps.sped.validador_devolucao import validar_documentos_sped
 from apps.documentos_fiscais.models import NFe
 from apps.reforma_tributaria.models import ItemNCM
 from apps.empresa.models import Empresa
@@ -73,7 +74,7 @@ def processar_sped_completo(registro_0000_id):
         resultado['nfes_criadas'] = popular_documentos_fiscais(registro_0000, dados.get('C100', []))
         logger.info(f"  → {resultado['nfes_criadas']} NF-es criadas/atualizadas")
         
-        # Popula NCM x cClassTrib
+# Popula NCM x cClassTrib
         logger.info("-" * 40)
         logger.info("Populando NCM x cClassTrib...")
         resultado['itens_ncm'] = popular_ncm_classtrib(registro_0000, dados)
@@ -83,6 +84,32 @@ def processar_sped_completo(registro_0000_id):
         registro_0000.processado = True
         registro_0000.save()
     
+    # ========================================
+    # VALIDAÇÃO DE DEVOLUÇÕES (R1 a R6)
+    # ========================================
+    logger.info("-" * 40)
+    logger.info("Validando operações de devolução...")
+    uf_empresa = None
+    empresa = registro_0000.empresa
+    if hasattr(empresa, 'uf') and empresa.uf:
+        uf_empresa = empresa.uf.sigla if hasattr(empresa.uf, 'sigla') else str(empresa.uf)
+    
+    validacao_devolucao = validar_documentos_sped(dados, uf_empresa=uf_empresa)
+    resultado['validacao_devolucao'] = {
+        'total_documentos': validacao_devolucao['total_documentos'],
+        'total_devolucoes': validacao_devolucao['total_devolucoes'],
+        'devolucoes_venda': validacao_devolucao['devolucoes_venda'],
+        'devolucoes_compra': validacao_devolucao['devolucoes_compra'],
+        'documentos_misto': validacao_devolucao['documentos_misto'],
+        'total_erros': validacao_devolucao['total_erros'],
+        'total_alertas': validacao_devolucao['total_alertas'],
+    }
+    logger.info(f"  → Devoluções: {validacao_devolucao['total_devolucoes']} "
+                f"(Venda: {validacao_devolucao['devolucoes_venda']}, "
+                f"Compra: {validacao_devolucao['devolucoes_compra']})")
+    logger.info(f"  → Erros: {validacao_devolucao['total_erros']} | "
+                f"Alertas: {validacao_devolucao['total_alertas']}")
+    
     logger.info("=" * 60)
     logger.info("RESUMO DO PROCESSAMENTO")
     logger.info("=" * 60)
@@ -90,6 +117,7 @@ def processar_sped_completo(registro_0000_id):
     logger.info(f"Documentos C100: {resultado['documentos']}")
     logger.info(f"NF-es: {resultado['nfes_criadas']}")
     logger.info(f"Itens NCM: {resultado['itens_ncm']}")
+    logger.info(f"Devoluções detectadas: {validacao_devolucao['total_devolucoes']}")
     logger.info(f"Status: PROCESSADO COM SUCESSO")
     logger.info("=" * 60)
     

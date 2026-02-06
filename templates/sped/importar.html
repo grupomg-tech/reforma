@@ -998,6 +998,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Passo 2: Buscar XML de cada nota via API
             let sucesso = 0;
             let erros = 0;
+            let pulados = 0;
             let totalProdutos = 0;
             document.getElementById('mpStatus').textContent = 'Buscando XMLs via API...';
             document.getElementById('progressoProdutosSubtitulo').textContent = 'Buscando produtos das notas fiscais...';
@@ -1008,18 +1009,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nota = todasChaves[i];
                 const tipoNota = nota.ind_oper === '0' ? 'Entrada' : 'Saída';
                 const numNota = nota.numero || nota.chave_nfe.substring(25, 34);
-                const chaveParaBuscar = nota.chave_referenciada || nota.chave_nfe;
-
                 document.getElementById('mpStatus').textContent = `Buscando NF ${numNota} (${tipoNota})...`;
                 document.getElementById('mpContador').textContent = `${i + 1}/${totalChaves}`;
 
                 try {
-                    const response = await fetch('/dashboards/api/buscar-xml-produto/', {
+                    // Tentar com a chave principal da nota
+                    let chaveParaBuscar = nota.chave_nfe;
+                    let response = await fetch('/dashboards/api/buscar-xml-produto/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chave_acesso: chaveParaBuscar })
+                        body: JSON.stringify({ chave_acesso: chaveParaBuscar, ind_oper: nota.ind_oper || '' })
                     });
-                    const result = await response.json();
+                    let result = await response.json();
+
+                    // Se 404 em entrada com chave referenciada, tentar fallback (devolução)
+                    const is404 = !result.success && result.message && (result.message.includes('404') || result.message.toLowerCase().includes('não encontrada'));
+                    if (is404 && nota.ind_oper === '0' && nota.chave_referenciada) {
+                        addLogProdutos(`🔄 [${i + 1}/${totalChaves}] NF ${numNota} - Tentando chave referenciada (devolução)...`, 'info');
+                        response = await fetch('/dashboards/api/buscar-xml-produto/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ chave_acesso: nota.chave_referenciada, ind_oper: nota.ind_oper || '' })
+                        });
+                        result = await response.json();
+                    }
 
                     // Verificar saldo insuficiente
                     if (!result.success && result.message && result.message.toLowerCase().includes('saldo insuficiente')) {
@@ -1064,10 +1077,19 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         });
 
-                        addLogProdutos(`✓ [${i + 1}/${totalChaves}] NF ${numNota} (${tipoNota}) - ${result.produtos.length} produto(s)`, 'success');
+                        const fonte = result.from_cache ? '💾cache' : '🌐API';
+                        addLogProdutos(`✓ [${i + 1}/${totalChaves}] NF ${numNota} (${tipoNota}) - ${result.produtos.length} produto(s) [${fonte}]`, 'success');
                     } else {
-                        erros++;
-                        addLogProdutos(`✗ [${i + 1}/${totalChaves}] NF ${numNota} (${tipoNota}) - ${result.message || 'Sem produtos'}`, 'error');
+                        // Verificar se é 404 final
+                        const isFinal404 = !result.success && result.message && (result.message.includes('404') || result.message.toLowerCase().includes('não encontrada'));
+
+                        if (isFinal404 && nota.ind_oper === '1') {
+                            // Saída 404 = cupom fiscal sem XML na API - pular silenciosamente
+                            pulados++;
+                        } else {
+                            erros++;
+                            addLogProdutos(`✗ [${i + 1}/${totalChaves}] NF ${numNota} (${tipoNota}) - ${result.message || 'Sem produtos'}`, 'error');
+                        }
                     }
                 } catch (e) {
                     erros++;
@@ -1143,11 +1165,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Finalizado
             document.getElementById('mpBarraFill').style.width = '100%';
             document.getElementById('mpStatus').textContent = 'Busca concluída!';
             document.getElementById('progressoProdutosSubtitulo').textContent = `✅ ${sucesso} notas processadas, ${totalProdutos} produtos encontrados!`;
-            addLogProdutos(`\n✅ Busca finalizada! Sucesso: ${sucesso} | Erros: ${erros} | Produtos: ${totalProdutos}`, 'success');
+            if (pulados > 0) {
+                addLogProdutos(`\nℹ️ ${pulados} nota(s) de saída ignoradas (sem XML disponível na API)`, 'info');
+            }
+            addLogProdutos(`\n✅ Busca finalizada! Sucesso: ${sucesso} | Erros: ${erros} | Pulados: ${pulados} | Produtos: ${totalProdutos}`, 'success');
 
         } catch (e) {
             addLogProdutos(`❌ Erro geral: ${e.message}`, 'error');
