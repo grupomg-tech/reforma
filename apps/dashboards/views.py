@@ -85,8 +85,21 @@ def relatorio_fiscal(request):
                     'ncm': item.cod_ncm,
                 }
         
+# CFOPs que representam compras efetivas de mercadorias
+        # Exclui: devoluções de venda, transferências, serviços, energia, remessas, retornos
+        SUFIXOS_COMPRA_EFETIVA = {
+            '101', '102', '111', '113', '116', '117', '118', '120', '121', '122',
+            '124', '125', '126', '128',
+            '401', '403', '407', '408', '411',
+        }
+
         produtos_entradas_dict = {}
         for item in itens_entrada:
+            # Filtrar apenas CFOPs de compra efetiva
+            cfop_item = (item.cfop or '').replace('.', '').strip()
+            sufixo_cfop = cfop_item[1:] if len(cfop_item) >= 4 else ''
+            if sufixo_cfop not in SUFIXOS_COMPRA_EFETIVA:
+                continue
             cod = item.cod_item
             if cod not in produtos_entradas_dict:
                 info_item = itens_0200.get(cod, {})
@@ -216,6 +229,11 @@ def relatorio_fiscal(request):
         )
         if produtos_entrada_api.exists():
             for prod in produtos_entrada_api:
+                # Filtrar apenas CFOPs de compra efetiva nos produtos da API
+                cfop_api = (prod.cfop or '').replace('.', '').strip()
+                sufixo_api = cfop_api[1:] if len(cfop_api) >= 4 else ''
+                if sufixo_api not in SUFIXOS_COMPRA_EFETIVA:
+                    continue
                 cod = prod.codigo
                 if cod not in produtos_entradas_dict:
                     produtos_entradas_dict[cod] = {
@@ -627,8 +645,21 @@ def relatorio_fiscal(request):
         total_ajustes_manuais_icms = sum(a.valor for a in ajustes_manuais_icms)
         
 # Agregar produtos de SAÍDA
+        # CFOPs que representam vendas efetivas de mercadorias
+        # Exclui: devoluções de compra, transferências, bonificações, remessas, lançamentos
+        SUFIXOS_VENDA_EFETIVA = {
+            '101', '102', '103', '104', '105', '106', '109', '110', '111', '112',
+            '113', '114', '115', '116', '117', '118', '119', '120', '122', '123',
+            '401', '402', '403', '404', '405',
+        }
+
         produtos_saidas_dict = {}
         for item in itens_saida:
+            # Filtrar apenas CFOPs de venda efetiva
+            cfop_item = (item.cfop or '').replace('.', '').strip()
+            sufixo_cfop = cfop_item[1:] if len(cfop_item) >= 4 else ''
+            if sufixo_cfop not in SUFIXOS_VENDA_EFETIVA:
+                continue
             cod = item.cod_item
             if cod not in produtos_saidas_dict:
                 info_item = itens_0200.get(cod, {})
@@ -682,6 +713,11 @@ def relatorio_fiscal(request):
                 # Agrupar produtos por código + NCM
                 produtos_api_dict = {}
                 for prod in produtos_api_db:
+                    # Filtrar apenas CFOPs de venda efetiva nos produtos da API
+                    cfop_api_s = (prod.cfop or '').replace('.', '').strip()
+                    sufixo_api_s = cfop_api_s[1:] if len(cfop_api_s) >= 4 else ''
+                    if sufixo_api_s not in SUFIXOS_VENDA_EFETIVA:
+                        continue
                     chave = f"{prod.codigo}_{prod.ncm}"
                     if chave not in produtos_api_dict:
                         produtos_api_dict[chave] = {
@@ -818,6 +854,38 @@ def relatorio_fiscal(request):
         def formatar_valor(valor):
             return f"{valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
         
+        # ========================================
+        # COMPOSIÇÃO DETALHADA POR NF (ENTRADAS)
+        # ========================================
+        composicao_entradas_list = []
+        for item in itens_entrada:
+            doc = item.registro_c100
+            info_item = itens_0200.get(item.cod_item, {})
+            composicao_entradas_list.append({
+                'num_doc': doc.num_doc or '',
+                'cfop': item.cfop or '',
+                'codigo': item.cod_item or '',
+                'descricao': info_item.get('descricao', item.descr_compl or item.cod_item or ''),
+                'valor': float(item.vl_item or 0),
+            })
+        composicao_entradas_list.sort(key=lambda x: (x['num_doc'], x['cfop'], x['codigo']))
+        
+        # ========================================
+        # COMPOSIÇÃO DETALHADA POR NF (SAÍDAS)
+        # ========================================
+        composicao_saidas_list = []
+        for item in itens_saida:
+            doc = item.registro_c100
+            info_item = itens_0200.get(item.cod_item, {})
+            composicao_saidas_list.append({
+                'num_doc': doc.num_doc or '',
+                'cfop': item.cfop or '',
+                'codigo': item.cod_item or '',
+                'descricao': info_item.get('descricao', item.descr_compl or item.cod_item or ''),
+                'valor': float(item.vl_item or 0),
+            })
+        composicao_saidas_list.sort(key=lambda x: (x['num_doc'], x['cfop'], x['codigo']))
+        
         # Atualizar contexto
         context.update({
             # Produtos
@@ -941,9 +1009,13 @@ def relatorio_fiscal(request):
             'ajustes_icms': ajustes_icms,
             'total_ajustes_icms': total_ajustes_icms,
             
-            # Ajustes Manuais ICMS
+# Ajustes Manuais ICMS
             'ajustes_manuais_icms': ajustes_manuais_icms,
             'total_ajustes_manuais_icms': total_ajustes_manuais_icms,
+            
+            # Composição detalhada por NF
+            'composicao_entradas_json': json.dumps(composicao_entradas_list, ensure_ascii=False),
+            'composicao_saidas_json': json.dumps(composicao_saidas_list, ensure_ascii=False),
         })
     
     return render(request, 'dashboards/relatorio_fiscal.html', context)

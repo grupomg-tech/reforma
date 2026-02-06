@@ -1204,12 +1204,20 @@
                     <div class="table-container full-width">
                         <div class="table-header-container">
                             <h2>🛒 Produtos Adquiridos</h2>
-                            <a href="#" class="btn-export" onclick="exportarProdutosEntradas(); return false;">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Exportar Excel
-                            </a>
+                            <div style="display: flex; gap: 10px;">
+                                <a href="#" class="btn-export" onclick="abrirComposicao('entradas'); return false;" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Composição
+                                </a>
+                                <a href="#" class="btn-export" onclick="exportarProdutosEntradas(); return false;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Exportar Excel
+                                </a>
+                            </div>
                         </div>
                         <div class="table-scroll">
                             {% if produtos_entradas %}
@@ -1735,7 +1743,14 @@
 <!-- Produtos Vendidos -->
                     <div class="table-container full-width">
                         <div class="table-header-container">
-                            <h2>📦 Produtos Vendidos {% if produtos_fonte_api %}<span class="badge bg-info ms-2" style="font-size: 0.6em; vertical-align: middle;">Dados da API</span>{% endif %}</h2>
+                            <h2>📦 Produtos Vendidos {% if produtos_fonte_api %}<span class="badge bg-info ms-2" style="font-size: 0.6em; vertical-align: middle;">via API</span>{% endif %}</h2>
+                            <div style="display: flex; gap: 10px;">
+                                <a href="#" class="btn-export" onclick="abrirComposicao('saidas'); return false;" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Composição
+                                </a>
                             <div class="d-flex gap-2">
                                 <button type="button" class="btn-buscar-api" onclick="iniciarBuscaProdutosAPI()" id="btnBuscarAPI">
                                     <i class="bi bi-cloud-download me-1"></i>
@@ -2364,12 +2379,422 @@
     </div>
 </div>
 
+<!-- Modal Composição Detalhada -->
+<div class="modal-pendencias" id="modalComposicao" style="display:none;">
+    <div class="modal-pendencias-content" style="max-width: 1200px; max-height: 90vh;">
+        <div class="modal-pendencias-header">
+            <h3><i class="bi bi-list-columns-reverse me-2"></i><span id="tituloComposicao">Composição Detalhada</span></h3>
+            <button type="button" class="btn-fechar-modal-x" onclick="fecharModalComposicao()" title="Fechar">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+        <div style="padding: 15px;">
+            <!-- Barra de ações -->
+            <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="filtroComposicao" placeholder="🔍 Busca livre..." 
+                           style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; width: 200px; font-size: 13px;"
+                           oninput="aplicarFiltrosComposicao()">
+                    <button id="btnFiltroCfopEfetivo" onclick="toggleFiltroCfopEfetivo()" class="btn-export" 
+                            style="padding: 8px 12px; font-size: 12px; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); white-space: nowrap;">
+                        🔽 Apenas Compras
+                    </button>
+                    <button onclick="limparTodosFiltrosComposicao()" class="btn-export" 
+                            style="padding: 8px 12px; font-size: 12px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); white-space: nowrap;">
+                        ✖ Limpar Filtros
+                    </button>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <span id="totalRegistrosComposicao" style="font-size: 13px; color: #666;"></span>
+                    <button onclick="exportarComposicaoExcel()" class="btn-export" style="padding: 8px 12px; font-size: 12px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Exportar Excel
+                    </button>
+                </div>
+            </div>
+            <!-- Chips de seleção ativa -->
+            <div id="chipsFiltroCfop" style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 6px;"></div>
+            <div id="chipsFiltroCodigo" style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 6px;"></div>
+            <div id="chipsFiltroNF" style="margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 6px;"></div>
+            <!-- Subtotais por CFOP -->
+            <div id="subtotaisCfop" style="margin-bottom: 10px;"></div>
+            <!-- Tabela -->
+            <div style="overflow-y: auto; max-height: 55vh;">
+                <table class="table-relatorio" id="tabelaComposicao">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 80px; cursor: pointer;" onclick="abrirDropdownFiltro('nf')">
+                                Nº NF <i class="bi bi-funnel" id="iconeFiltroNF" style="font-size: 10px; opacity: 0.5;"></i>
+                            </th>
+                            <th style="min-width: 60px; cursor: pointer;" onclick="abrirDropdownFiltro('cfop')">
+                                CFOP <i class="bi bi-funnel" id="iconeFiltroGeral" style="font-size: 10px; opacity: 0.5;"></i>
+                            </th>
+                            <th style="min-width: 80px; cursor: pointer;" onclick="abrirDropdownFiltro('codigo')">
+                                Código <i class="bi bi-funnel" id="iconeFiltroCode" style="font-size: 10px; opacity: 0.5;"></i>
+                            </th>
+                            <th style="min-width: 250px;">Descrição</th>
+                            <th style="min-width: 120px; text-align: right;">Valor Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoComposicao">
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; font-weight: 700;">
+                            <td colspan="4"><strong>TOTAL GERAL</strong></td>
+                            <td style="text-align: right;" id="totalComposicao"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Dropdown de filtro de colunas -->
+<div id="dropdownFiltroColuna" style="display:none; position:fixed; z-index:10001; background:white; border:1px solid #ddd; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.18); padding:12px; min-width:220px; max-height:350px;">
+    <input type="text" id="buscaDropdownFiltro" placeholder="🔍 Buscar..." 
+           style="width:100%; padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:12px; margin-bottom:8px;"
+           oninput="filtrarDropdownColuna()">
+    <div style="display:flex; gap:6px; margin-bottom:8px;">
+        <button onclick="selecionarTodosDropdown()" style="flex:1; padding:4px; font-size:11px; border:1px solid #ddd; border-radius:5px; background:#f0fdf4; cursor:pointer;">✅ Todos</button>
+        <button onclick="desmarcarTodosDropdown()" style="flex:1; padding:4px; font-size:11px; border:1px solid #ddd; border-radius:5px; background:#fef2f2; cursor:pointer;">✖ Nenhum</button>
+    </div>
+    <div id="listaDropdownFiltro" style="max-height:230px; overflow-y:auto; font-size:12px;"></div>
+    <div style="margin-top:8px; display:flex; gap:6px;">
+        <button onclick="aplicarDropdownFiltro()" class="btn-export" style="flex:1; padding:6px; font-size:12px;">Aplicar</button>
+        <button onclick="fecharDropdownFiltro()" style="flex:1; padding:6px; font-size:12px; border:1px solid #ddd; border-radius:8px; background:#f3f4f6; cursor:pointer;">Cancelar</button>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
+// Dados de composição injetados pelo Django
+    const composicaoEntradas = JSON.parse('{{ composicao_entradas_json|escapejs }}' || '[]');
+    const composicaoSaidas = JSON.parse('{{ composicao_saidas_json|escapejs }}' || '[]');
+    let composicaoAtual = [];
+    let tipoComposicaoAtual = '';
+    let filtroApenasComprasVendas = false;
+
+    // Filtros multi-seleção por coluna
+    let filtrosColunas = { cfop: new Set(), nf: new Set(), codigo: new Set() };
+    let dropdownColunaAtiva = '';
+    let dropdownValoresDisponiveis = [];
+
+    const SUFIXOS_COMPRA_EFETIVA = new Set([
+        '101','102','111','113','116','117','118','120','121','122',
+        '124','125','126','128','401','403','407','408','411',
+    ]);
+    const SUFIXOS_VENDA_EFETIVA = new Set([
+        '101','102','103','104','105','106','109','110','111','112',
+        '113','114','115','116','117','118','119','120','122','123',
+        '401','402','403','404','405',
+    ]);
+
+    function isCfopOperacaoEfetiva(cfop, tipo) {
+        const cfopLimpo = (cfop || '').replace('.', '').trim();
+        if (cfopLimpo.length < 4) return false;
+        const sufixo = cfopLimpo.substring(1);
+        return tipo === 'entradas' ? SUFIXOS_COMPRA_EFETIVA.has(sufixo) : SUFIXOS_VENDA_EFETIVA.has(sufixo);
+    }
+
+    function abrirComposicao(tipo) {
+        tipoComposicaoAtual = tipo;
+        filtroApenasComprasVendas = false;
+        filtrosColunas = { cfop: new Set(), nf: new Set(), codigo: new Set() };
+        const titulo = document.getElementById('tituloComposicao');
+        const btnFiltro = document.getElementById('btnFiltroCfopEfetivo');
+        if (tipo === 'entradas') {
+            composicaoAtual = composicaoEntradas;
+            titulo.textContent = 'Composição Detalhada - Entradas (Compras)';
+            btnFiltro.textContent = '🔽 Apenas Compras';
+        } else {
+            composicaoAtual = composicaoSaidas;
+            titulo.textContent = 'Composição Detalhada - Saídas (Vendas)';
+            btnFiltro.textContent = '🔽 Apenas Vendas';
+        }
+        btnFiltro.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+        document.getElementById('filtroComposicao').value = '';
+        fecharDropdownFiltro();
+        aplicarFiltrosComposicao();
+        document.getElementById('modalComposicao').style.display = 'flex';
+    }
+
+    function toggleFiltroCfopEfetivo() {
+        filtroApenasComprasVendas = !filtroApenasComprasVendas;
+        const btn = document.getElementById('btnFiltroCfopEfetivo');
+        if (filtroApenasComprasVendas) {
+            btn.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+            btn.textContent = tipoComposicaoAtual === 'entradas' ? '✅ Apenas Compras' : '✅ Apenas Vendas';
+        } else {
+            btn.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+            btn.textContent = tipoComposicaoAtual === 'entradas' ? '🔽 Apenas Compras' : '🔽 Apenas Vendas';
+        }
+        aplicarFiltrosComposicao();
+    }
+
+    function obterDadosFiltrados() {
+        let dados = composicaoAtual;
+        if (filtroApenasComprasVendas) {
+            dados = dados.filter(item => isCfopOperacaoEfetiva(item.cfop, tipoComposicaoAtual));
+        }
+        if (filtrosColunas.cfop.size > 0) {
+            dados = dados.filter(item => filtrosColunas.cfop.has(item.cfop || ''));
+        }
+        if (filtrosColunas.nf.size > 0) {
+            dados = dados.filter(item => filtrosColunas.nf.has(item.num_doc || ''));
+        }
+        if (filtrosColunas.codigo.size > 0) {
+            dados = dados.filter(item => filtrosColunas.codigo.has(item.codigo || ''));
+        }
+        const filtroTexto = (document.getElementById('filtroComposicao').value || '').toLowerCase();
+        if (filtroTexto) {
+            dados = dados.filter(item =>
+                (item.num_doc || '').toLowerCase().includes(filtroTexto) ||
+                (item.cfop || '').toLowerCase().includes(filtroTexto) ||
+                (item.codigo || '').toLowerCase().includes(filtroTexto) ||
+                (item.descricao || '').toLowerCase().includes(filtroTexto)
+            );
+        }
+        return dados;
+    }
+
+    function aplicarFiltrosComposicao() {
+        const dados = obterDadosFiltrados();
+        renderizarComposicao(dados);
+        renderizarChips();
+        renderizarSubtotais(dados);
+        atualizarIconesFiltro();
+    }
+
+    function renderizarComposicao(dados) {
+        const corpo = document.getElementById('corpoComposicao');
+        let html = '';
+        let total = 0;
+        dados.forEach(item => {
+            const valor = item.valor || 0;
+            total += valor;
+            html += `<tr>
+                <td style="cursor:pointer;" onclick="toggleFiltroRapido('nf','${item.num_doc}')">${item.num_doc}</td>
+                <td style="cursor:pointer;" onclick="toggleFiltroRapido('cfop','${item.cfop}')">${item.cfop}</td>
+                <td style="cursor:pointer;" onclick="toggleFiltroRapido('codigo','${item.codigo}')">${item.codigo}</td>
+                <td>${item.descricao}</td>
+                <td style="text-align: right;">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            </tr>`;
+        });
+        corpo.innerHTML = html;
+        document.getElementById('totalComposicao').textContent = 'R$ ' + total.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('totalRegistrosComposicao').textContent = dados.length + ' registros';
+    }
+
+    function renderizarSubtotais(dados) {
+        const container = document.getElementById('subtotaisCfop');
+        const temFiltroCfop = filtrosColunas.cfop.size > 0;
+        const temFiltroNF = filtrosColunas.nf.size > 0;
+        const temFiltroCodigo = filtrosColunas.codigo.size > 0;
+        if (!temFiltroCfop && !temFiltroNF && !temFiltroCodigo) {
+            container.innerHTML = '';
+            return;
+        }
+        // Agrupar por CFOP
+        const totaisPorCfop = {};
+        dados.forEach(item => {
+            const cfop = item.cfop || 'N/I';
+            if (!totaisPorCfop[cfop]) totaisPorCfop[cfop] = { qtd: 0, valor: 0 };
+            totaisPorCfop[cfop].qtd++;
+            totaisPorCfop[cfop].valor += item.valor || 0;
+        });
+        const cfops = Object.keys(totaisPorCfop).sort();
+        let html = '<div style="display:flex; flex-wrap:wrap; gap:8px;">';
+        cfops.forEach(cfop => {
+            const info = totaisPorCfop[cfop];
+            html += `<div style="background:linear-gradient(135deg,#eef2ff,#e0e7ff); border:1px solid #c7d2fe; border-radius:8px; padding:8px 14px; font-size:12px;">
+                <strong>CFOP ${cfop}</strong><br>
+                <span style="color:#4f46e5;">${info.qtd} itens</span> · 
+                <span style="color:#059669; font-weight:600;">R$ ${info.valor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+            </div>`;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function renderizarChips() {
+        ['cfop', 'nf', 'codigo'].forEach(col => {
+            const containerId = col === 'cfop' ? 'chipsFiltroCfop' : col === 'codigo' ? 'chipsFiltroCodigo' : 'chipsFiltroNF';
+            const container = document.getElementById(containerId);
+            const label = col === 'cfop' ? 'CFOP' : col === 'nf' ? 'NF' : 'Código';
+            if (filtrosColunas[col].size === 0) { container.innerHTML = ''; return; }
+            let html = `<span style="font-size:11px; color:#6b7280; font-weight:600;">${label}:</span> `;
+            filtrosColunas[col].forEach(val => {
+                html += `<span style="display:inline-flex; align-items:center; gap:4px; background:#dbeafe; color:#1e40af; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:500;">
+                    ${val}
+                    <span style="cursor:pointer; font-weight:700; margin-left:2px;" onclick="removerFiltroColuna('${col}','${val}')">×</span>
+                </span> `;
+            });
+            container.innerHTML = html;
+        });
+    }
+
+    function atualizarIconesFiltro() {
+        const icCfop = document.getElementById('iconeFiltroGeral');
+        const icNF = document.getElementById('iconeFiltroNF');
+        const icCode = document.getElementById('iconeFiltroCode');
+        if (icCfop) { icCfop.style.opacity = filtrosColunas.cfop.size > 0 ? '1' : '0.5'; icCfop.style.color = filtrosColunas.cfop.size > 0 ? '#f59e0b' : ''; }
+        if (icNF) { icNF.style.opacity = filtrosColunas.nf.size > 0 ? '1' : '0.5'; icNF.style.color = filtrosColunas.nf.size > 0 ? '#f59e0b' : ''; }
+        if (icCode) { icCode.style.opacity = filtrosColunas.codigo.size > 0 ? '1' : '0.5'; icCode.style.color = filtrosColunas.codigo.size > 0 ? '#f59e0b' : ''; }
+    }
+
+    function toggleFiltroRapido(coluna, valor) {
+        if (filtrosColunas[coluna].has(valor)) {
+            filtrosColunas[coluna].delete(valor);
+        } else {
+            filtrosColunas[coluna].add(valor);
+        }
+        aplicarFiltrosComposicao();
+    }
+
+    function removerFiltroColuna(coluna, valor) {
+        filtrosColunas[coluna].delete(valor);
+        aplicarFiltrosComposicao();
+    }
+
+    function limparTodosFiltrosComposicao() {
+        filtrosColunas = { cfop: new Set(), nf: new Set(), codigo: new Set() };
+        filtroApenasComprasVendas = false;
+        document.getElementById('filtroComposicao').value = '';
+        const btn = document.getElementById('btnFiltroCfopEfetivo');
+        btn.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+        btn.textContent = tipoComposicaoAtual === 'entradas' ? '🔽 Apenas Compras' : '🔽 Apenas Vendas';
+        aplicarFiltrosComposicao();
+    }
+
+    // Dropdown de filtro por coluna (clicando no cabeçalho)
+    function abrirDropdownFiltro(coluna) {
+        dropdownColunaAtiva = coluna;
+        const campo = coluna === 'cfop' ? 'cfop' : coluna === 'nf' ? 'num_doc' : 'codigo';
+        // Valores únicos dos dados atuais (sem filtro dessa coluna)
+        let dadosBase = composicaoAtual;
+        if (filtroApenasComprasVendas) dadosBase = dadosBase.filter(item => isCfopOperacaoEfetiva(item.cfop, tipoComposicaoAtual));
+        // Aplica filtros das OUTRAS colunas
+        Object.keys(filtrosColunas).forEach(col => {
+            if (col !== coluna && filtrosColunas[col].size > 0) {
+                const campoCol = col === 'cfop' ? 'cfop' : col === 'nf' ? 'num_doc' : 'codigo';
+                dadosBase = dadosBase.filter(item => filtrosColunas[col].has(item[campoCol] || ''));
+            }
+        });
+        // Contar e agrupar valores
+        const contagem = {};
+        dadosBase.forEach(item => {
+            const val = item[campo] || '';
+            if (!contagem[val]) contagem[val] = { qtd: 0, valor: 0 };
+            contagem[val].qtd++;
+            contagem[val].valor += item.valor || 0;
+        });
+        dropdownValoresDisponiveis = Object.keys(contagem).sort().map(val => ({
+            valor: val,
+            qtd: contagem[val].qtd,
+            total: contagem[val].valor,
+            selecionado: filtrosColunas[coluna].has(val)
+        }));
+
+        const dropdown = document.getElementById('dropdownFiltroColuna');
+        document.getElementById('buscaDropdownFiltro').value = '';
+        renderizarListaDropdown();
+
+        // Posicionar perto do cabeçalho
+        const th = event.target.closest('th');
+        const rect = th.getBoundingClientRect();
+        dropdown.style.left = Math.min(rect.left, window.innerWidth - 280) + 'px';
+        dropdown.style.top = (rect.bottom + 4) + 'px';
+        dropdown.style.display = 'block';
+    }
+
+    function renderizarListaDropdown() {
+        const busca = (document.getElementById('buscaDropdownFiltro').value || '').toLowerCase();
+        const container = document.getElementById('listaDropdownFiltro');
+        let html = '';
+        dropdownValoresDisponiveis.forEach((item, idx) => {
+            if (busca && !item.valor.toLowerCase().includes(busca)) return;
+            const checked = item.selecionado ? 'checked' : '';
+            html += `<label style="display:flex; align-items:center; gap:6px; padding:4px 2px; cursor:pointer; border-bottom:1px solid #f3f4f6;">
+                <input type="checkbox" ${checked} onchange="dropdownValoresDisponiveis[${idx}].selecionado=this.checked" style="accent-color:#4f46e5;">
+                <span style="flex:1;">${item.valor}</span>
+                <span style="color:#9ca3af; font-size:11px;">${item.qtd}x</span>
+                <span style="color:#059669; font-size:11px; font-weight:500;">R$ ${item.total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+            </label>`;
+        });
+        if (!html) html = '<div style="padding:10px; color:#9ca3af; text-align:center;">Nenhum resultado</div>';
+        container.innerHTML = html;
+    }
+
+    function filtrarDropdownColuna() { renderizarListaDropdown(); }
+
+    function selecionarTodosDropdown() {
+        dropdownValoresDisponiveis.forEach(item => item.selecionado = true);
+        renderizarListaDropdown();
+    }
+
+    function desmarcarTodosDropdown() {
+        dropdownValoresDisponiveis.forEach(item => item.selecionado = false);
+        renderizarListaDropdown();
+    }
+
+    function aplicarDropdownFiltro() {
+        const selecionados = dropdownValoresDisponiveis.filter(i => i.selecionado).map(i => i.valor);
+        filtrosColunas[dropdownColunaAtiva] = new Set(selecionados);
+        fecharDropdownFiltro();
+        aplicarFiltrosComposicao();
+    }
+
+    function fecharDropdownFiltro() {
+        document.getElementById('dropdownFiltroColuna').style.display = 'none';
+    }
+
+    function fecharModalComposicao() {
+        document.getElementById('modalComposicao').style.display = 'none';
+        fecharDropdownFiltro();
+    }
+
+    function exportarComposicaoExcel() {
+        const dados = obterDadosFiltrados();
+        const linhas = [['Nº NF', 'CFOP', 'Código', 'Descrição', 'Valor Total']];
+        let total = 0;
+        // Subtotais por CFOP
+        const totaisCfop = {};
+        dados.forEach(item => {
+            total += item.valor || 0;
+            linhas.push([item.num_doc, item.cfop, item.codigo, item.descricao, item.valor || 0]);
+            const cfop = item.cfop || 'N/I';
+            if (!totaisCfop[cfop]) totaisCfop[cfop] = 0;
+            totaisCfop[cfop] += item.valor || 0;
+        });
+        linhas.push([]);
+        Object.keys(totaisCfop).sort().forEach(cfop => {
+            linhas.push(['', '', '', 'Subtotal CFOP ' + cfop, totaisCfop[cfop]]);
+        });
+        linhas.push(['', '', '', 'TOTAL GERAL', total]);
+
+        const ws = XLSX.utils.aoa_to_sheet(linhas);
+        ws['!cols'] = [{wch:12}, {wch:8}, {wch:15}, {wch:45}, {wch:18}];
+        const wb = XLSX.utils.book_new();
+        const nomeAba = tipoComposicaoAtual === 'entradas' ? 'Composição Entradas' : 'Composição Saídas';
+        XLSX.utils.book_append_sheet(wb, ws, nomeAba);
+        const nomeArquivo = tipoComposicaoAtual === 'entradas' ? 'composicao_entradas.xlsx' : 'composicao_saidas.xlsx';
+        XLSX.writeFile(wb, nomeArquivo);
+    }
+
+    // Fechar dropdown ao clicar fora
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('dropdownFiltroColuna');
+        if (dropdown.style.display === 'block' && !dropdown.contains(e.target) && !e.target.closest('th[onclick*="abrirDropdownFiltro"]')) {
+            fecharDropdownFiltro();
+        }
+    });
+
 // Função para exportar Produtos Entradas para Excel (formato referência 26 colunas)
     function exportarProdutosEntradas() {
         const tabEntradas = document.getElementById('entradas');
