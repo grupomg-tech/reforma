@@ -259,16 +259,24 @@ def relatorio_fiscal(request):
                 }
             
             fornecedores_dict[cod_part]['valor_bruto'] += doc.vl_doc or Decimal('0')
-            fornecedores_dict[cod_part]['icms'] += doc.vl_icms or Decimal('0')
-            fornecedores_dict[cod_part]['pis'] += doc.vl_pis or Decimal('0')
-            fornecedores_dict[cod_part]['cofins'] += doc.vl_cofins or Decimal('0')
+            # Pessoa Física não aproveita crédito de impostos em entradas
+            if fornecedores_dict[cod_part]['regime'] != 'PESSOA FÍSICA':
+                fornecedores_dict[cod_part]['icms'] += doc.vl_icms or Decimal('0')
+                fornecedores_dict[cod_part]['pis'] += doc.vl_pis or Decimal('0')
+                fornecedores_dict[cod_part]['cofins'] += doc.vl_cofins or Decimal('0')
         
-        # Calcular tributos totais e valores reforma para fornecedores
+# Calcular tributos totais e valores reforma para fornecedores
         for cod, forn in fornecedores_dict.items():
             tributos = forn['icms'] + forn['icms_st'] + forn['ipi'] + forn['iss'] + forn['pis'] + forn['cofins']
             liquido = forn['valor_bruto'] - tributos
-            aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
-            ibs_cbs_efetivo = (liquido * aliq_total / Decimal('100')).quantize(Decimal('0.01'))
+            
+            # Pessoa Física não gera crédito de IBS/CBS
+            if forn['regime'] == 'PESSOA FÍSICA':
+                ibs_cbs_efetivo = Decimal('0')
+            else:
+                aliq_total = aliquota_ibs + aliquota_cbs + aliquota_is
+                ibs_cbs_efetivo = (liquido * aliq_total / Decimal('100')).quantize(Decimal('0.01'))
+            
             total_reforma = liquido + ibs_cbs_efetivo
             
             forn['tributos'] = tributos

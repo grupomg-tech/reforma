@@ -142,13 +142,18 @@ def processar_importacao_sped(request):
                 finally:
                     connection.close()
             
-            t = threading.Thread(
-                target=_consultar_background,
-                args=(list(registros_ids),),
-                daemon=True
-            )
-            t.start()
-            logger.info(f"Thread de consulta iniciada para {len(registros_ids)} registro(s)")
+            if not is_ajax:
+                # Apenas inicia background se NÃO for AJAX
+                # (no AJAX o frontend faz a consulta com progresso visual)
+                t = threading.Thread(
+                    target=_consultar_background,
+                    args=(list(registros_ids),),
+                    daemon=True
+                )
+                t.start()
+                logger.info(f"Thread de consulta iniciada para {len(registros_ids)} registro(s)")
+            else:
+                logger.info(f"Consulta será feita pelo frontend para {len(registros_ids)} registro(s)")
         
         logger.info("=" * 60)
         logger.info("RESUMO DA IMPORTAÇÃO")

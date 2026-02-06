@@ -350,8 +350,208 @@
     </div>
 </div>
 
+<!-- Modal de Progresso Automático da Consulta de Fornecedores -->
+<div class="modal-progresso-consulta" id="modalProgressoConsulta">
+    <div class="modal-progresso-consulta-content">
+        <button type="button" class="btn-fechar-modal-consulta" onclick="fecharModalConsulta()" title="Fechar">✕</button>
+        <div class="progresso-consulta-header">
+            <h3><i class="bi bi-search me-2"></i>Consultando Regime Tributário</h3>
+            <p id="progressoConsultaSubtitulo">Identificando fornecedores via API...</p>
+        </div>
+        
+        <div class="progresso-consulta-stats">
+            <div class="stat-box-consulta">
+                <div class="stat-number-consulta" id="csTotal">0</div>
+                <div class="stat-label-consulta">Total</div>
+            </div>
+            <div class="stat-box-consulta" style="background:#d1fae5;">
+                <div class="stat-number-consulta" id="csSimples">0</div>
+                <div class="stat-label-consulta">Simples</div>
+            </div>
+            <div class="stat-box-consulta" style="background:#dbeafe;">
+                <div class="stat-number-consulta" id="csNormal">0</div>
+                <div class="stat-label-consulta">Regime Normal</div>
+            </div>
+            <div class="stat-box-consulta" style="background:#fef3c7;">
+                <div class="stat-number-consulta" id="csMei">0</div>
+                <div class="stat-label-consulta">MEI</div>
+            </div>
+            <div class="stat-box-consulta" style="background:#fee2e2;">
+                <div class="stat-number-consulta" id="csErros">0</div>
+                <div class="stat-label-consulta">Erros</div>
+            </div>
+        </div>
+        
+        <div class="progresso-consulta-barra-container">
+            <div class="progresso-consulta-info">
+                <span id="csStatus">Preparando...</span>
+                <span id="csContador">0/0</span>
+            </div>
+            <div class="progresso-consulta-barra">
+                <div class="progresso-consulta-barra-fill" id="csBarraFill"></div>
+            </div>
+        </div>
+        
+        <div class="progresso-consulta-log" id="csLog">
+            <!-- Log em tempo real -->
+        </div>
+        
+        <div class="progresso-consulta-acoes">
+            <button type="button" class="btn-cancelar-consulta" id="csBtnCancelar" onclick="cancelarConsultaAuto()">
+                Cancelar
+            </button>
+            <button type="button" class="btn-fechar-consulta" id="csBtnFechar" style="display:none;" onclick="fecharModalConsulta()">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-progresso-consulta {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-progresso-consulta.active { display: flex; }
+    .modal-progresso-consulta-content {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        width: 90%;
+        max-width: 650px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        position: relative;
+    }
+    .btn-fechar-modal-consulta {
+        position: absolute; top: 12px; right: 15px;
+        background: #6b7280; color: white; border: none;
+        width: 30px; height: 30px; border-radius: 50%;
+        cursor: pointer; font-size: 16px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .btn-fechar-modal-consulta:hover { background: #4b5563; }
+    .progresso-consulta-header { text-align: center; margin-bottom: 20px; }
+    .progresso-consulta-header h3 { color: #1f2937; margin: 0; font-size: 1.4rem; }
+    .progresso-consulta-header p { color: #6b7280; margin: 8px 0 0; }
+    .progresso-consulta-stats {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .stat-box-consulta {
+        background: #f3f4f6; padding: 12px;
+        border-radius: 10px; text-align: center;
+    }
+    .stat-number-consulta { font-size: 1.5rem; font-weight: bold; color: #1f2937; }
+    .stat-label-consulta { font-size: 0.75rem; color: #6b7280; margin-top: 3px; }
+    .progresso-consulta-barra-container { margin-bottom: 15px; }
+    .progresso-consulta-info {
+        display: flex; justify-content: space-between;
+        margin-bottom: 6px; font-size: 0.85rem; color: #4b5563;
+    }
+    .progresso-consulta-barra {
+        height: 12px; background: #e5e7eb;
+        border-radius: 6px; overflow: hidden;
+    }
+    .progresso-consulta-barra-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #059669, #10b981);
+        border-radius: 6px; transition: width 0.3s ease; width: 0%;
+    }
+    .progresso-consulta-log {
+        background: #f9fafb; border: 1px solid #e5e7eb;
+        border-radius: 8px; padding: 12px;
+        max-height: 200px; overflow-y: auto;
+        font-family: monospace; font-size: 11px;
+        margin-bottom: 15px;
+    }
+    .progresso-consulta-acoes {
+        display: flex; justify-content: center; gap: 15px;
+    }
+    .btn-cancelar-consulta {
+        background: #ef4444; color: white; border: none;
+        padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: 500;
+    }
+    .btn-fechar-consulta {
+        background: #3b82f6; color: white; border: none;
+        padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: 500;
+    }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ========================================
+    // IMPORTAÇÃO VIA AJAX COM PROGRESSO
+    // ========================================
+    const formImportar = document.getElementById('importarSpedForm');
+    if (formImportar) {
+        formImportar.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btnImportar = document.getElementById('btnImportar');
+            const textoOriginal = btnImportar.innerHTML;
+            btnImportar.disabled = true;
+            btnImportar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Importando...';
+            
+            // Abrir modal na aba "Consulta Ativa" e mostrar estado processando
+            const modalConsultas = new bootstrap.Modal(document.getElementById('modalConsultas'));
+            modalConsultas.show();
+            document.getElementById('estado-vazio').style.display = 'none';
+            document.getElementById('estado-processando').style.display = 'block';
+            document.getElementById('estado-concluido').style.display = 'none';
+            
+            try {
+                const formData = new FormData(formImportar);
+                const response = await fetch(formImportar.action || window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Mostrar estado concluído na aba ativa
+                    document.getElementById('estado-processando').style.display = 'none';
+                    document.getElementById('estado-concluido').style.display = 'block';
+                    
+                    // Iniciar consulta automática de fornecedores com progresso visual
+                    if (data.registros_0000_ids && data.registros_0000_ids.length > 0) {
+                        // Fechar modal bootstrap e abrir modal de progresso customizado
+                        setTimeout(() => {
+                            modalConsultas.hide();
+                            window.iniciarConsultaAutomatica(data.registros_0000_ids);
+                        }, 1500);
+                    } else {
+                        setTimeout(() => location.reload(), 3000);
+                    }
+                } else {
+                    document.getElementById('estado-processando').style.display = 'none';
+                    document.getElementById('estado-vazio').style.display = 'block';
+                    alert('Erro: ' + (data.message || 'Falha na importação'));
+                }
+            } catch (err) {
+                document.getElementById('estado-processando').style.display = 'none';
+                document.getElementById('estado-vazio').style.display = 'block';
+                alert('Erro de conexão: ' + err.message);
+            } finally {
+                btnImportar.disabled = false;
+                btnImportar.innerHTML = textoOriginal;
+            }
+        });
+    }
+    
     const selectRegistro = document.getElementById('selectRegistroConsulta');
     const infoParticipantes = document.getElementById('info-participantes');
     const infoPendentes = document.getElementById('info-pendentes');
@@ -465,6 +665,147 @@ document.addEventListener('DOMContentLoaded', function() {
         logConsulta.innerHTML += `<div style="color: ${color};">${message}</div>`;
         logConsulta.scrollTop = logConsulta.scrollHeight;
     }
+    
+    // ========================================
+    // CONSULTA AUTOMÁTICA APÓS IMPORTAÇÃO
+    // ========================================
+    let consultaAutoAtiva = false;
+    
+    function addLogConsulta(msg, type) {
+        const csLog = document.getElementById('csLog');
+        const color = type === 'success' ? '#059669' : type === 'error' ? '#dc2626' : type === 'warn' ? '#d97706' : '#374151';
+        csLog.innerHTML += `<div style="color: ${color};">${msg}</div>`;
+        csLog.scrollTop = csLog.scrollHeight;
+    }
+    
+    function fecharModalConsulta() {
+        consultaAutoAtiva = false;
+        document.getElementById('modalProgressoConsulta').classList.remove('active');
+        location.reload();
+    }
+    
+    function cancelarConsultaAuto() {
+        consultaAutoAtiva = false;
+        addLogConsulta('⛔ Consulta cancelada pelo usuário.', 'warn');
+        document.getElementById('csStatus').textContent = 'Cancelada';
+        document.getElementById('csBtnCancelar').style.display = 'none';
+        document.getElementById('csBtnFechar').style.display = 'inline-block';
+    }
+    
+    async function iniciarConsultaAutomatica(registrosIds) {
+        consultaAutoAtiva = true;
+        const modal = document.getElementById('modalProgressoConsulta');
+        modal.classList.add('active');
+        
+        document.getElementById('csLog').innerHTML = '';
+        document.getElementById('csTotal').textContent = '0';
+        document.getElementById('csSimples').textContent = '0';
+        document.getElementById('csNormal').textContent = '0';
+        document.getElementById('csMei').textContent = '0';
+        document.getElementById('csErros').textContent = '0';
+        document.getElementById('csBarraFill').style.width = '0%';
+        document.getElementById('csBtnCancelar').style.display = 'inline-block';
+        document.getElementById('csBtnFechar').style.display = 'none';
+        
+        let totalGeral = 0;
+        let simplesGeral = 0;
+        let normalGeral = 0;
+        let meiGeral = 0;
+        let errosGeral = 0;
+        let processadosGeral = 0;
+        
+        for (const registroId of registrosIds) {
+            if (!consultaAutoAtiva) break;
+            
+            addLogConsulta(`📂 Carregando participantes do SPED #${registroId}...`, 'info');
+            document.getElementById('csStatus').textContent = `Carregando SPED #${registroId}...`;
+            
+            try {
+                const resp = await fetch(`/importar-sped/listar-participantes-pendentes/${registroId}/`);
+                const data = await resp.json();
+                
+                if (!data.success || data.total === 0) {
+                    addLogConsulta(`ℹ️ SPED #${registroId}: nenhum participante pendente.`, 'info');
+                    continue;
+                }
+                
+                const participantes = data.participantes;
+                totalGeral += participantes.length;
+                document.getElementById('csTotal').textContent = totalGeral;
+                addLogConsulta(`🔍 ${participantes.length} fornecedor(es) para consultar`, 'info');
+                
+                for (let i = 0; i < participantes.length; i++) {
+                    if (!consultaAutoAtiva) break;
+                    
+                    const part = participantes[i];
+                    const cnpjFmt = part.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+                    
+                    document.getElementById('csStatus').textContent = `Consultando ${cnpjFmt}...`;
+                    document.getElementById('csContador').textContent = `${processadosGeral + 1}/${totalGeral}`;
+                    
+                    try {
+                        const respPart = await fetch(`/importar-sped/consultar-participante-individual/${registroId}/${part.id}/`);
+                        const dataPart = await respPart.json();
+                        
+                        if (dataPart.success) {
+                            const regime = dataPart.participante.regime;
+                            if (regime === 'MEI') {
+                                meiGeral++;
+                                document.getElementById('csMei').textContent = meiGeral;
+                            } else if (regime === 'Simples Nacional') {
+                                simplesGeral++;
+                                document.getElementById('csSimples').textContent = simplesGeral;
+                            } else {
+                                normalGeral++;
+                                document.getElementById('csNormal').textContent = normalGeral;
+                            }
+                            addLogConsulta(`✓ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${regime}`, 'success');
+                        } else {
+                            errosGeral++;
+                            document.getElementById('csErros').textContent = errosGeral;
+                            addLogConsulta(`✗ [${processadosGeral + 1}/${totalGeral}] ${part.nome.substring(0, 35)} - ${dataPart.erro || 'Erro'}`, 'error');
+                            
+                            // Se rate limit, aguardar mais tempo
+                            if (dataPart.erro && dataPart.erro.toLowerCase().includes('rate limit')) {
+                                addLogConsulta(`⏳ Rate limit detectado - aguardando 12s...`, 'warn');
+                                await new Promise(r => setTimeout(r, 12000));
+                            }
+                        }
+                    } catch (e) {
+                        errosGeral++;
+                        document.getElementById('csErros').textContent = errosGeral;
+                        addLogConsulta(`✗ [${processadosGeral + 1}/${totalGeral}] Erro de rede: ${cnpjFmt}`, 'error');
+                    }
+                    
+                    processadosGeral++;
+                    const pct = Math.round((processadosGeral / totalGeral) * 100);
+                    document.getElementById('csBarraFill').style.width = `${pct}%`;
+                    document.getElementById('csContador').textContent = `${processadosGeral}/${totalGeral}`;
+                    
+                    // Delay de 2.5s entre consultas
+                    if (i < participantes.length - 1 && consultaAutoAtiva) {
+                        await new Promise(r => setTimeout(r, 2500));
+                    }
+                }
+            } catch (e) {
+                addLogConsulta(`❌ Erro ao carregar SPED #${registroId}: ${e.message}`, 'error');
+            }
+        }
+        
+        // Finalizado
+        document.getElementById('csBarraFill').style.width = '100%';
+        if (consultaAutoAtiva) {
+            document.getElementById('csStatus').textContent = 'Consulta concluída!';
+            document.getElementById('progressoConsultaSubtitulo').textContent = '✅ Todos os fornecedores foram processados!';
+            addLogConsulta(`\n✅ Consulta finalizada! Simples: ${simplesGeral} | Normal: ${normalGeral} | MEI: ${meiGeral} | Erros: ${errosGeral}`, 'success');
+        }
+        document.getElementById('csBtnCancelar').style.display = 'none';
+        document.getElementById('csBtnFechar').style.display = 'inline-block';
+        consultaAutoAtiva = false;
+    }
+    
+    // Expor função globalmente para ser chamada após importação AJAX
+    window.iniciarConsultaAutomatica = iniciarConsultaAutomatica;
 });
 </script>
                 <li class="nav-item">
